@@ -1,1 +1,151 @@
 @import "tailwindcss";
+
+.font-body-18 {
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 18px;
+}
+
+.text-ink-black-100 {
+  color: #f1eeec;
+}
+
+.text-ink-black-200 {
+  color: #c1bdba;
+}
+
+.text-ink-black-300 {
+  color: #8e8986;
+}
+
+.text-ink-black-400 {
+  color: #544e4a;
+}
+
+.text-ink-black-500 {
+  color: #2c2724;
+}
+
+.text-ink-black-600 {
+  color: #1e1813;
+}
+
+.text-ink-black-700 {
+  color: #19110c;
+}
+
+.text-ink-black-800 {
+  color: #130a04;
+}
+
+.text-ink-black-900 {
+  color: #0c0501;
+}
+
+.color-sage-olive-100 {
+  color: #e5e9de;
+}
+
+.color-sage-olive-200 {
+  color: #d0d6c4;
+}
+
+.color-sage-olive-300 {
+  color: #b6baab;
+}
+
+.color-sage-olive-400 {
+  color: #959b86;
+}
+
+.color-sage-olive-500 {
+  /* color: #788164; */
+  background-color: #788164;
+}
+
+.color-sage-olive-600 {
+  color: #535e3a;
+}
+
+.color-sage-olive-700 {
+  color: #37421d;
+}
+
+.color-sage-olive-800 {
+  color: #202a09;
+}
+
+.color-sage-olive-900 {
+  color: #111802;
+}
+
+.color-antique-parchment-100 {
+  color: #f8f4ed;
+}
+
+.color-antique-parchment-200 {
+  color: #f2eada;
+}
+
+.color-antique-parchment-300 {
+  color: #f8f1e3;
+}
+
+.color-antique-parchment-400 {
+  color: #f3e8d1;
+}
+
+.color-antique-parchment-500 {
+  color: #f0e4cc;
+}
+
+.color-antique-parchment-600 {
+  color: #d1bc92;
+}
+
+.color-antique-parchment-700 {
+  color: #91702d;
+}
+
+.color-antique-parchment-800 {
+  color: #38290b;
+}
+
+.color-antique-parchment-900 {
+  color: #1f1604;
+}
+
+.color-rosewood-100 {
+  color: #f3e6e5;
+}
+
+.color-rosewood-200 {
+  color: #d7b8b3;
+}
+
+.color-rosewood-300 {
+  color: #bb958f;
+}
+
+.color-rosewood-400 {
+  color: #a9766f;
+}
+
+.color-rosewood-500 {
+  color: #96574e;
+}
+
+.color-rosewood-600 {
+  color: #74372e;
+}
+
+.color-rosewood-700 {
+  color: #62271f;
+}
+
+.color-rosewood-800 {
+  color: #330f0a;
+}
+
+.color-rosewood-900 {
+  color: #1c0502;
+}
