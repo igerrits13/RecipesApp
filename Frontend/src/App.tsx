@@ -1,9 +1,33 @@
-import SearchBar from "./components/SearchBar";
+import { Routes, Route } from "react-router-dom";
+
+import HomeView from "./pages/HomeView";
+import RecipeView from "./pages/RecipeView";
+import CreateRecipeView from "./pages/CreateRecipeView";
+import UserProfileView from "./pages/UserProfileView";
+import OtherProfileView from "./pages/OtherProfileView";
+import RegisterView from "./pages/RegisterView";
+import LoginView from "./pages/LoginView";
+import IndexView from "./pages/IndexView";
+import SearchView from "./pages/SearchView";
+import AdminView from "./pages/AdminView";
+import NotFoundView from "./pages/NotFoundView";
 
 function App() {
   return (
     <div className="py-8 sm:px-6 lg:px-16 mx-auto">
-      <SearchBar />
+      <Routes>
+        <Route path="/" element={<HomeView />} />
+        <Route path="/recipe" element={<RecipeView />} />
+        <Route path="/create-recipe" element={<CreateRecipeView />} />
+        <Route path="/user-profile" element={<UserProfileView />} />
+        <Route path="/other-profile" element={<OtherProfileView />} />
+        <Route path="/register" element={<RegisterView />} />
+        <Route path="/login" element={<LoginView />} />
+        <Route path="/index" element={<IndexView />} />
+        <Route path="/search" element={<SearchView />} />
+        <Route path="/admin" element={<AdminView />} />
+        <Route path="*" element={<NotFoundView />} />
+      </Routes>
     </div>
   );
 }

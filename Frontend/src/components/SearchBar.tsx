@@ -14,7 +14,10 @@ export default function SearchBar() {
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
-      <button onClick={() => console.log("Search query:", searchQuery)}>
+      <button
+        className="cursor-pointer"
+        onClick={() => console.log("Search query:", searchQuery)}
+      >
         <Search className="h-7 w-7 text-white " />
       </button>
     </div>
