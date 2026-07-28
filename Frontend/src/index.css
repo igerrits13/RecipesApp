@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
-.font-body-18 {
+.font-body {
   font-family: "Source Sans 3", sans-serif;
-  font-size: 18px;
 }
 
 .text-ink-black-100 {
