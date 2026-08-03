@@ -19,7 +19,7 @@ export default function SearchBar() {
   });
 
   return (
-    <div className="flex items-center gap-1 rounded-full color-sage-olive-500 py-1 px-2 sm:py-2 sm:px-4 font-body text-xs md:text-sm lg:text-base xl:text-lg">
+    <div className="flex items-center gap-1 rounded-full color-sage-olive-500 py-1 px-3 sm:py-2 sm:px-5 font-body text-xs md:text-sm lg:text-base xl:text-lg">
       <input
         className="grow text-white focus:outline-none"
         type="text"

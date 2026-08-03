@@ -1,10 +1,9 @@
-import SearchBar from "../components/SearchBar";
+import SecondaryNavBar from "../components/SecondaryNavBar";
 
 export default function RegisterView() {
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-4xl font-bold mb-4">Register for an Account</h1>
-      <SearchBar />
+    <div className="flex flex-col">
+      <SecondaryNavBar />
     </div>
   );
 }

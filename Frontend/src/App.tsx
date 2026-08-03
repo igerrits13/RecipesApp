@@ -14,7 +14,7 @@ import NotFoundView from "./pages/NotFoundView";
 
 function App() {
   return (
-    <div className="py-2 px-4 md:py-4 md:px-8 lg:py-6 lg:px-12 mx-auto">
+    <div className="p-4 sm:px-6 sm:py-4 lg:py-6 lg:px-12 mx-auto">
       <Routes>
         <Route path="/" element={<HomeView />} />
         <Route path="/recipe" element={<RecipeView />} />
@@ -33,3 +33,9 @@ function App() {
 }
 
 export default App;
+
+// sm	40rem (640px)	@media (width >= 40rem) { ... }
+// md	48rem (768px)	@media (width >= 48rem) { ... }
+// lg	64rem (1024px)	@media (width >= 64rem) { ... }
+// xl	80rem (1280px)	@media (width >= 80rem) { ... }
+// 2xl	96rem (1536px)	@media (width >= 96rem) { ... }
