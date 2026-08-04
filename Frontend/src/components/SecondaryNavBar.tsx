@@ -22,20 +22,20 @@ export default function SecondaryNavBar() {
       </div>
       <div className="flex gap-2 items-center justify-end w-1/2">
         {width > 640 ? (
-          <div className="w-full lg:w-3/4 xl:w-2/3 2xl:w-1/2">
+          <div className="w-full md:w-3/4 xl:w-2/3 2xl:w-1/2">
             <SearchBar />
           </div>
         ) : (
-          <Search className="h-6 w-6 text-sage-olive-500" />
+          <Search className="size-6 text-sage-olive-500" />
         )}{" "}
         {width > 640 ? (
           <img
-            className="rounded-full"
+            className="rounded-full size-12 md:size-14 lg:size-16 xl:size-18 2xl:size-20"
             src="https://api.dicebear.com/9.x/fun-emoji/svg?seed=admin1&size=64"
             alt="Profile Image"
           />
         ) : (
-          <Menu className="h-6 w-6 text-sage-olive-500" />
+          <Menu className="size-6 text-sage-olive-500" />
         )}
       </div>
     </nav>

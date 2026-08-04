@@ -14,7 +14,7 @@ import NotFoundView from "./pages/NotFoundView";
 
 function App() {
   return (
-    <div className="p-4 sm:px-6 sm:py-4 lg:py-6 lg:px-12 mx-auto">
+    <div className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12  mx-auto">
       <Routes>
         <Route path="/" element={<HomeView />} />
         <Route path="/recipe" element={<RecipeView />} />
