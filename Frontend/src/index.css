@@ -4,6 +4,10 @@
   font-family: "Source Sans 3", sans-serif;
 }
 
+.font-subtitle {
+  font-family: "Merriweather", serif;
+}
+
 .text-sage-olive-500 {
   color: #788164;
 }
@@ -60,8 +64,7 @@
   color: #959b86;
 }
 
-.color-sage-olive-500 {
-  /* color: #788164; */
+.bg-sage-olive-500 {
   background-color: #788164;
 }
 
@@ -98,7 +101,7 @@
 }
 
 .color-antique-parchment-500 {
-  color: #f0e4cc;
+  background-color: #f0e4cc;
 }
 
 .color-antique-parchment-600 {
@@ -133,8 +136,8 @@
   color: #a9766f;
 }
 
-.color-rosewood-500 {
-  color: #96574e;
+.bg-rosewood-500 {
+  background-color: #96574e;
 }
 
 .color-rosewood-600 {

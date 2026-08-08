@@ -19,9 +19,9 @@ export default function SearchBar() {
   });
 
   return (
-    <div className="flex items-center gap-1 rounded-full color-sage-olive-500 py-1 px-3 sm:py-2 sm:px-5 font-body text-xs md:text-sm lg:text-base xl:text-lg">
+    <div className="flex items-center gap-1 rounded-full bg-sage-olive-500 py-1 px-3 sm:py-2 sm:px-5 font-body text-white">
       <input
-        className="grow text-white focus:outline-none"
+        className="grow focus:outline-none"
         type="text"
         placeholder={
           width > 480 ? "Search a recipe or ingredient..." : "Search..."
@@ -33,7 +33,7 @@ export default function SearchBar() {
         className="cursor-pointer"
         onClick={() => console.log("Search query:", searchQuery)}
       >
-        <Search className="h-4 w-4 lg:h-6 lg:w-6 text-white " />
+        <Search className="h-4 w-4 lg:h-6 lg:w-6" />
       </button>
     </div>
   );
