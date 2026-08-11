@@ -1,5 +1,6 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import ValidationError from "./ValidationError";
 
 // Registration form with input fields for username, display name, email, password, and confirm password, along with a register button
 export default function RegistrationForm() {
@@ -10,9 +11,137 @@ export default function RegistrationForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({
+    username: "",
+    displayName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    passwordMatch: "",
+  });
+
+  // Regex for username and email, matching with backend logic
+  const usernameRegex = /^[a-z0-9_]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Handle username validation on blur event
+  const handleUsernameBlur = () => {
+    if (username) {
+      // Ensure the username is in a valid format
+      if (!usernameRegex.test(username)) {
+        setValidationErrors((prevErrors) => ({
+          ...prevErrors,
+          username:
+            "Username can only contain letters, numbers, and underscores",
+        }));
+        return;
+      } else if (username.length < 3 || username.length > 32) {
+        setValidationErrors((prevErrors) => ({
+          ...prevErrors,
+          username: "Username must be between 3 and 32 characters",
+        }));
+        return;
+      }
+    }
+    // Otherwise, clear the validation error
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      username: "",
+    }));
+  };
+
+  // Handle display name validation on blur event
+  const handleDisplayNameBlur = () => {
+    if (displayName) {
+      // Ensure the display name is in a valid format
+      if (displayName.length < 3 || displayName.length > 32) {
+        setValidationErrors((prevErrors) => ({
+          ...prevErrors,
+          displayName: "Display name must be between 3 and 32 characters",
+        }));
+        return;
+      }
+    }
+    // Otherwise, clear the validation error
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      displayName: "",
+    }));
+  };
+
+  // Handle email validation on blur event
+  const handleEmailBlur = () => {
+    if (email) {
+      // Ensure the email is in a valid format
+      if (!emailRegex.test(email)) {
+        setValidationErrors((prevErrors) => ({
+          ...prevErrors,
+          email: "Please enter a valid email address",
+        }));
+        return;
+      }
+    }
+    // Otherwise, clear the validation error
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      email: "",
+    }));
+  };
+
+  // Handle password validation on blur event
+  const handlePasswordBlur = () => {
+    if (password) {
+      // If the confirm password field is not empty, check if the passwords match
+      if (confirmPassword) {
+        if (password !== confirmPassword) {
+          setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            confirmPassword: "Passwords do not match",
+          }));
+        } else {
+          setValidationErrors((prevErrors) => ({
+            ...prevErrors,
+            confirmPassword: "",
+          }));
+        }
+      }
+      // Ensure the password is in a valid format
+      if (password.length < 6 || password.length > 128) {
+        setValidationErrors((prevErrors) => ({
+          ...prevErrors,
+          password: "Password must be between 6 and 128 characters",
+        }));
+        return;
+      }
+    }
+    // Otherwise, clear the validation error
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      password: "",
+    }));
+  };
+
+  // Handle confirm password validation on blur event
+  const handleConfirmPasswordBlur = () => {
+    if (confirmPassword) {
+      // Ensure the passwords match
+      if (password !== confirmPassword) {
+        setValidationErrors((prevErrors) => ({
+          ...prevErrors,
+          confirmPassword: "Passwords do not match",
+        }));
+        return;
+      }
+    }
+    // Otherwise, clear the validation error
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      confirmPassword: "",
+    }));
+  };
 
   // Handle user registration logic when the register button is clicked
-  const handleRegisterUser = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegisterUser = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Handle user registration logic here
     if (
@@ -53,8 +182,12 @@ export default function RegistrationForm() {
           placeholder={"Username*"}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          onBlur={handleUsernameBlur}
         />
       </div>
+      {validationErrors.username && (
+        <ValidationError message={validationErrors.username} />
+      )}
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
           className="grow text-white focus:outline-none"
@@ -62,8 +195,12 @@ export default function RegistrationForm() {
           placeholder={"Displayname*"}
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
+          onBlur={handleDisplayNameBlur}
         />
       </div>
+      {validationErrors.displayName && (
+        <ValidationError message={validationErrors.displayName} />
+      )}
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
           className="grow text-white focus:outline-none"
@@ -71,8 +208,12 @@ export default function RegistrationForm() {
           placeholder={"Email*"}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onBlur={handleEmailBlur}
         />
       </div>
+      {validationErrors.email && (
+        <ValidationError message={validationErrors.email} />
+      )}
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
         <input
           className="grow text-white focus:outline-none"
@@ -80,6 +221,7 @@ export default function RegistrationForm() {
           placeholder={"Password*"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onBlur={handlePasswordBlur}
         />
         <button
           type="button"
@@ -94,6 +236,9 @@ export default function RegistrationForm() {
           )}
         </button>
       </div>
+      {validationErrors.password && (
+        <ValidationError message={validationErrors.password} />
+      )}
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
         <input
           className="grow text-white focus:outline-none"
@@ -101,6 +246,7 @@ export default function RegistrationForm() {
           placeholder={"Confirm Password*"}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          onBlur={handleConfirmPasswordBlur}
         />
         <button
           type="button"
@@ -117,8 +263,11 @@ export default function RegistrationForm() {
           )}
         </button>
       </div>
+      {validationErrors.confirmPassword && (
+        <ValidationError message={validationErrors.confirmPassword} />
+      )}
       <button
-        className="w-1/2 mt-4 text-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5"
+        className="w-1/2 mt-4 text-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer"
         type="submit"
       >
         Register

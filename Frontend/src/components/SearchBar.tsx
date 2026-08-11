@@ -33,7 +33,7 @@ export default function SearchBar() {
         className="cursor-pointer"
         onClick={() => console.log("Search query:", searchQuery)}
       >
-        <Search className="h-4 w-4 lg:h-6 lg:w-6" />
+        <Search className="size-4 lg:size-6" />
       </button>
     </div>
   );
