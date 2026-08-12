@@ -1,6 +1,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import ValidationError from "./ValidationError";
+import { Link } from "react-router-dom";
 
 // Registration form with input fields for username, display name, email, password, and confirm password, along with a register button
 export default function RegistrationForm() {
@@ -169,10 +170,10 @@ export default function RegistrationForm() {
 
   return (
     <form
-      className="flex flex-col gap-2 sm:gap-4 items-center z-10 w-3/4 sm:w-1/2 lg:w-1/3 2xl:w-1/4 font-body rounded-4xl p-6 color-antique-parchment-500"
+      className="flex flex-col gap-2 sm:gap-4 items-center z-10 w-3/4 sm:w-1/2 lg:w-1/3 2xl:w-1/4 font-body rounded-4xl p-6 bg-antique-parchment-500"
       onSubmit={handleRegisterUser}
     >
-      <div className="mb-4 font-subtitle font-bold text-center text-xl md:text-2xl">
+      <div className="mb-4 font-subtitle font-bold text-center text-ink-black-500 text-xl md:text-2xl">
         Join the Family!
       </div>
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
@@ -267,11 +268,20 @@ export default function RegistrationForm() {
         <ValidationError message={validationErrors.confirmPassword} />
       )}
       <button
-        className="w-1/2 mt-4 text-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer"
+        className="w-1/2 mt-4 text-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300"
         type="submit"
       >
         Register
       </button>
+      <div className="text-center text-xs text-ink-black-300">
+        Already a member?{" "}
+        <Link
+          to="/login"
+          className="text-sage-olive-500 underline hover:text-sage-olive-300"
+        >
+          Sign in
+        </Link>
+      </div>
     </form>
   );
 }

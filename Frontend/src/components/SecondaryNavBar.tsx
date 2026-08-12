@@ -17,8 +17,8 @@ export default function SecondaryNavBar() {
 
   return (
     <nav className="w-full flex items-center justify-between">
-      <div className="font-subtitle font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl">
-        Logo here
+      <div className="font-title text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl">
+        Recipe Website
       </div>
       <div className="flex gap-2 items-center justify-end w-1/2">
         {width > 640 ? (
