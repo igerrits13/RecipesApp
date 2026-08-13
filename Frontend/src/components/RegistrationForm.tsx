@@ -2,6 +2,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import ValidationError from "./ValidationError";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../store/AuthUser";
 
 // Registration form with input fields for username, display name, email, password, and confirm password, along with a register button
 export default function RegistrationForm() {
@@ -20,6 +21,9 @@ export default function RegistrationForm() {
     confirmPassword: "",
     passwordMatch: "",
   });
+
+  // Access the register function from the auth store
+  const { register } = useAuthStore();
 
   // Regex for username and email, matching with backend logic
   const usernameRegex = /^[a-z0-9_]+$/;
@@ -144,7 +148,6 @@ export default function RegistrationForm() {
   // Handle user registration logic when the register button is clicked
   const handleRegisterUser = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle user registration logic here
     if (
       username === "" ||
       displayName === "" ||
@@ -154,17 +157,11 @@ export default function RegistrationForm() {
     ) {
       console.error("All fields are required");
       return;
-    }
-
-    if (password !== confirmPassword) {
+    } else if (password !== confirmPassword) {
       console.error("Passwords do not match");
       return;
     } else {
-      console.log("Registering user with the following details:");
-      console.log("Username:", username);
-      console.log("Display Name:", displayName);
-      console.log("Email:", email);
-      console.log("Password:", password);
+      register({ username, displayName, email, password });
     }
   };
 

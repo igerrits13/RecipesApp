@@ -11,8 +11,12 @@ import IndexView from "./pages/IndexView";
 import SearchView from "./pages/SearchView";
 import AdminView from "./pages/AdminView";
 import NotFoundView from "./pages/NotFoundView";
+import { useAuthStore } from "./store/AuthUser";
 
 function App() {
+  const { user, isCheckingAuth } = useAuthStore();
+  console.log(user, isCheckingAuth);
+
   return (
     <div className="min-h-screen">
       <Routes>
