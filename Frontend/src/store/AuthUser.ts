@@ -18,7 +18,7 @@ interface RegistrationCredentials {
 
 // Interface for login credentials
 interface LoginCredentials {
-  username: string;
+  loginString: string;
   password: string;
 }
 

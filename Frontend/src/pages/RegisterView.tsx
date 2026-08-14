@@ -1,8 +1,9 @@
 import SecondaryNavBar from "../components/SecondaryNavBar";
 import Hero from "../components/Hero";
-import HeroImage from "../assets/images/heroImg.jpg";
 import RegistrationForm from "../components/RegistrationForm";
 import Footer from "../components/Footer";
+
+import HeroImage from "../assets/images/heroImg.jpg";
 
 // RegisterView component that allows users to register an account by providing their username, display name, email, password, and confirming their password
 export default function RegisterView() {

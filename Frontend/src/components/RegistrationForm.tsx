@@ -1,7 +1,7 @@
-import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import ValidationError from "./ValidationError";
+import { Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
+import ValidationError from "./ValidationError";
 import { useAuthStore } from "../store/AuthUser";
 
 // Registration form with input fields for username, display name, email, password, and confirm password, along with a register button
@@ -175,7 +175,7 @@ export default function RegistrationForm() {
       </div>
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
-          className="grow text-white focus:outline-none"
+          className="w-full grow text-white focus:outline-none"
           type={"text"}
           placeholder={"Username*"}
           value={username}
@@ -188,7 +188,7 @@ export default function RegistrationForm() {
       )}
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
-          className="grow text-white focus:outline-none"
+          className="w-full grow text-white focus:outline-none"
           type={"text"}
           placeholder={"Displayname*"}
           value={displayName}
@@ -201,7 +201,7 @@ export default function RegistrationForm() {
       )}
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
-          className="grow text-white focus:outline-none"
+          className="w-full grow text-white focus:outline-none"
           type={"email"}
           placeholder={"Email*"}
           value={email}
@@ -214,7 +214,7 @@ export default function RegistrationForm() {
       )}
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
         <input
-          className="grow text-white focus:outline-none"
+          className="w-full grow text-white focus:outline-none"
           type={passwordVisible ? "text" : "password"}
           placeholder={"Password*"}
           value={password}
@@ -239,7 +239,7 @@ export default function RegistrationForm() {
       )}
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
         <input
-          className="grow text-white focus:outline-none"
+          className="w-full grow text-white focus:outline-none"
           type={confirmPasswordVisible ? "text" : "password"}
           placeholder={"Confirm Password*"}
           value={confirmPassword}
@@ -251,7 +251,7 @@ export default function RegistrationForm() {
           aria-label={
             confirmPasswordVisible ? "Hide password" : "Show password"
           }
-          className="cursor-pointer"
+          className="cursor-pointer shrink-0"
           onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
         >
           {confirmPasswordVisible ? (
