@@ -8,17 +8,28 @@ export default function LoginForm() {
   const [loginString, setLoginString] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   // Access the login function from the auth store
-  const { login, authError } = useAuthStore();
+  const { login, authError, clearAuthError } = useAuthStore();
 
   // Allow navigation
   const navigate = useNavigate();
+
+  // Clear all errors when focusing on an input field
+  const handleInputFocus = () => {
+    setLoginError("");
+    clearAuthError();
+  };
 
   // Handle user login logic when the login button is clicked
   const handleLoginUser = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      if (loginString === "" || password === "") {
+        setLoginError("Login information required");
+        return;
+      }
       await login({ login: loginString, password });
       navigate("/");
     } catch {
@@ -41,6 +52,7 @@ export default function LoginForm() {
           placeholder={"Username or Email"}
           value={loginString}
           onChange={(e) => setLoginString(e.target.value)}
+          onFocus={handleInputFocus}
         />
       </div>
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
@@ -50,6 +62,7 @@ export default function LoginForm() {
           placeholder={"Password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onFocus={handleInputFocus}
         />
         <button
           type="button"
@@ -65,6 +78,7 @@ export default function LoginForm() {
         </button>
       </div>
       {authError && <ValidationError message={authError} />}
+      {loginError && <ValidationError message={loginError} />}
       <button
         className="w-1/2 mt-4 text-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300"
         type="submit"

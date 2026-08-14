@@ -37,6 +37,7 @@ interface UserActions {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
   authCheck: () => Promise<void>;
+  clearAuthError: () => void;
 }
 
 // Combine user state and actions
@@ -58,13 +59,24 @@ export const useAuthStore = create<UserStore>((set) => ({
 
   // Register user
   register: async (credentials) => {
-    set({ isRegistering: true });
+    set({ authError: null, isRegistering: true });
     try {
       const response = await axios.post("/api/v1/auth/register", credentials);
-      set({ user: response.data.user, isRegistering: false });
+      set({ user: response.data.user, authError: null, isRegistering: false });
     } catch (error) {
-      console.log(error);
-      set({ isRegistering: false });
+      if (axios.isAxiosError(error)) {
+        set({
+          authError: error.response?.data?.message || "Registration failed",
+          isRegistering: false,
+        });
+        throw error;
+      } else {
+        set({
+          authError: "An unexpected error occurred",
+          isRegistering: false,
+        });
+        throw error;
+      }
     }
   },
 
@@ -101,4 +113,7 @@ export const useAuthStore = create<UserStore>((set) => ({
       set({ user: null, isCheckingAuth: false });
     }
   },
+
+  // Clear authentication error
+  clearAuthError: () => set({ authError: null }),
 }));

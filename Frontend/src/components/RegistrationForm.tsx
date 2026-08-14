@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ValidationError from "./ValidationError";
 import { useAuthStore } from "../store/AuthUser";
 
@@ -20,10 +20,14 @@ export default function RegistrationForm() {
     password: "",
     confirmPassword: "",
     passwordMatch: "",
+    general: "",
   });
 
   // Access the register function from the auth store
-  const { register } = useAuthStore();
+  const { register, authError, clearAuthError } = useAuthStore();
+
+  // Allow navigation
+  const navigate = useNavigate();
 
   // Regex for username and email, matching with backend logic
   const usernameRegex = /^[a-z0-9_]+$/;
@@ -145,23 +149,43 @@ export default function RegistrationForm() {
     }));
   };
 
+  // Clear all validation errors when focusing on an input field
+  const handleInputFocus = () => {
+    setValidationErrors((prevErrors) => ({
+      ...prevErrors,
+      general: "",
+    }));
+    clearAuthError();
+  };
+
   // Handle user registration logic when the register button is clicked
-  const handleRegisterUser = (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleRegisterUser = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (
-      username === "" ||
-      displayName === "" ||
-      email === "" ||
-      password === "" ||
-      confirmPassword === ""
-    ) {
-      console.error("All fields are required");
-      return;
-    } else if (password !== confirmPassword) {
-      console.error("Passwords do not match");
-      return;
-    } else {
-      register({ username, displayName, email, password });
+    try {
+      if (
+        username === "" ||
+        displayName === "" ||
+        email === "" ||
+        password === "" ||
+        confirmPassword === ""
+      ) {
+        setValidationErrors((prevErrors) => ({
+          ...prevErrors,
+          general: "All fields are required",
+        }));
+        return;
+      } else if (password !== confirmPassword) {
+        setValidationErrors((prevErrors) => ({
+          ...prevErrors,
+          passwordMatch: "Passwords do not match",
+        }));
+        return;
+      } else {
+        await register({ username, displayName, email, password });
+        navigate("/");
+      }
+    } catch {
+      // Error is handled in the auth store and displayed to the user
     }
   };
 
@@ -180,6 +204,7 @@ export default function RegistrationForm() {
           placeholder={"Username*"}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          onFocus={handleInputFocus}
           onBlur={handleUsernameBlur}
         />
       </div>
@@ -193,6 +218,7 @@ export default function RegistrationForm() {
           placeholder={"Displayname*"}
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
+          onFocus={handleInputFocus}
           onBlur={handleDisplayNameBlur}
         />
       </div>
@@ -206,6 +232,7 @@ export default function RegistrationForm() {
           placeholder={"Email*"}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onFocus={handleInputFocus}
           onBlur={handleEmailBlur}
         />
       </div>
@@ -219,6 +246,7 @@ export default function RegistrationForm() {
           placeholder={"Password*"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onFocus={handleInputFocus}
           onBlur={handlePasswordBlur}
         />
         <button
@@ -244,6 +272,7 @@ export default function RegistrationForm() {
           placeholder={"Confirm Password*"}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          onFocus={handleInputFocus}
           onBlur={handleConfirmPasswordBlur}
         />
         <button
@@ -263,6 +292,10 @@ export default function RegistrationForm() {
       </div>
       {validationErrors.confirmPassword && (
         <ValidationError message={validationErrors.confirmPassword} />
+      )}
+      {authError && <ValidationError message={authError} />}
+      {validationErrors.general && (
+        <ValidationError message={validationErrors.general} />
       )}
       <button
         className="w-1/2 mt-4 text-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300"
