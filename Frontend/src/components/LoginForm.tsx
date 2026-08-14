@@ -1,16 +1,29 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/AuthUser";
+import ValidationError from "./ValidationError";
 
 export default function LoginForm() {
   const [loginString, setLoginString] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
 
+  // Access the login function from the auth store
+  const { login, authError } = useAuthStore();
+
+  // Allow navigation
+  const navigate = useNavigate();
+
   // Handle user login logic when the login button is clicked
-  const handleLoginUser = (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleLoginUser = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Logging in: ", loginString, " Password: ", password);
+    try {
+      await login({ login: loginString, password });
+      navigate("/");
+    } catch {
+      // Error is handled in the auth store and displayed to the user
+    }
   };
 
   return (
@@ -34,7 +47,7 @@ export default function LoginForm() {
         <input
           className="w-full grow text-white focus:outline-none"
           type={passwordVisible ? "text" : "password"}
-          placeholder={"Password*"}
+          placeholder={"Password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
@@ -51,6 +64,7 @@ export default function LoginForm() {
           )}
         </button>
       </div>
+      {authError && <ValidationError message={authError} />}
       <button
         className="w-1/2 mt-4 text-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300"
         type="submit"
