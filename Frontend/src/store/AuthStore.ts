@@ -1,26 +1,7 @@
 import axios from "axios";
 import { create } from "zustand";
-
-// Interface for user
-interface User {
-  username: string;
-  displayName: string;
-  email: string;
-}
-
-// Interface for registration credentials
-interface RegistrationCredentials {
-  username: string;
-  displayName: string;
-  email: string;
-  password: string;
-}
-
-// Interface for login credentials
-interface LoginCredentials {
-  login: string;
-  password: string;
-}
+import type { User } from "../types/User";
+import type { LoginCredentials, RegistrationCredentials } from "../types/Auth";
 
 // Types for user data
 interface UserState {

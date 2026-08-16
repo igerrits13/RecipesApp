@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuthStore } from "../store/AuthUser";
+import { useAuthStore } from "../store/AuthStore";
 import ValidationError from "./ValidationError";
 
 export default function LoginForm() {

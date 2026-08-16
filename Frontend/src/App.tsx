@@ -11,7 +11,7 @@ import IndexView from "./pages/IndexView";
 import SearchView from "./pages/SearchView";
 import AdminView from "./pages/AdminView";
 import NotFoundView from "./pages/NotFoundView";
-import { useAuthStore } from "./store/AuthUser";
+import { useAuthStore } from "./store/AuthStore";
 
 function App() {
   const { user, isCheckingAuth } = useAuthStore();

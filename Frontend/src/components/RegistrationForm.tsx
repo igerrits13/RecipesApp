@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ValidationError from "./ValidationError";
-import { useAuthStore } from "../store/AuthUser";
+import { useAuthStore } from "../store/AuthStore";
 
 // Registration form with input fields for username, display name, email, password, and confirm password, along with a register button
 export default function RegistrationForm() {
