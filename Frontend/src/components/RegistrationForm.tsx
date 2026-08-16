@@ -30,21 +30,25 @@ export default function RegistrationForm() {
   const navigate = useNavigate();
 
   // Regex for username and email, matching with backend logic
-  const usernameRegex = /^[a-z0-9_]+$/;
+  const usernameRegex = /^[a-zA-Z0-9_]+$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   // Handle username validation on blur event
   const handleUsernameBlur = () => {
-    if (username) {
+    // Trim any whitespace added to the username
+    const trimmedUsername = username.trim();
+    setUsername(trimmedUsername);
+
+    if (trimmedUsername) {
       // Ensure the username is in a valid format
-      if (!usernameRegex.test(username)) {
+      if (!usernameRegex.test(trimmedUsername)) {
         setValidationErrors((prevErrors) => ({
           ...prevErrors,
           username:
             "Username can only contain letters, numbers, and underscores",
         }));
         return;
-      } else if (username.length < 3 || username.length > 32) {
+      } else if (trimmedUsername.length < 3 || trimmedUsername.length > 32) {
         setValidationErrors((prevErrors) => ({
           ...prevErrors,
           username: "Username must be between 3 and 32 characters",
@@ -52,7 +56,8 @@ export default function RegistrationForm() {
         return;
       }
     }
-    // Otherwise, clear the validation error
+
+    // Otherwise clear the validation error
     setValidationErrors((prevErrors) => ({
       ...prevErrors,
       username: "",
@@ -61,9 +66,13 @@ export default function RegistrationForm() {
 
   // Handle display name validation on blur event
   const handleDisplayNameBlur = () => {
-    if (displayName) {
+    // Trim any whitespace added to the display name
+    const trimmedDisplayName = displayName.trim();
+    setDisplayName(trimmedDisplayName);
+
+    if (trimmedDisplayName) {
       // Ensure the display name is in a valid format
-      if (displayName.length < 3 || displayName.length > 32) {
+      if (trimmedDisplayName.length < 3 || trimmedDisplayName.length > 32) {
         setValidationErrors((prevErrors) => ({
           ...prevErrors,
           displayName: "Display name must be between 3 and 32 characters",
@@ -80,9 +89,15 @@ export default function RegistrationForm() {
 
   // Handle email validation on blur event
   const handleEmailBlur = () => {
-    if (email) {
+    // Trim any whitespace added to the email
+    const trimmedEmail = email.trim();
+    setEmail(trimmedEmail);
+
+    console.log(trimmedEmail);
+
+    if (trimmedEmail) {
       // Ensure the email is in a valid format
-      if (!emailRegex.test(email)) {
+      if (!emailRegex.test(trimmedEmail)) {
         setValidationErrors((prevErrors) => ({
           ...prevErrors,
           email: "Please enter a valid email address",

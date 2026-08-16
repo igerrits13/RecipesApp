@@ -53,6 +53,7 @@ export default function LoginForm() {
           value={loginString}
           onChange={(e) => setLoginString(e.target.value)}
           onFocus={handleInputFocus}
+          onBlur={() => setLoginString(loginString.trim())}
         />
       </div>
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
