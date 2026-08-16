@@ -137,7 +137,7 @@ describe("registerUser", () => {
         username: "  ab  ",
         displayName: "New User",
         email: "test@example.com",
-        password: "Password123",
+        password: "Password123!",
       }),
     ).rejects.toThrow("Username must be between 3 and 32 characters");
   });
@@ -148,7 +148,7 @@ describe("registerUser", () => {
         username: "a".repeat(33),
         displayName: "New User",
         email: "test@example.com",
-        password: "Password123",
+        password: "Password123!",
       }),
     ).rejects.toThrow("Username must be between 3 and 32 characters");
   });
@@ -159,7 +159,7 @@ describe("registerUser", () => {
         username: "newuser",
         displayName: "  a  ",
         email: "newuser@example.com",
-        password: "Password123",
+        password: "Password123!",
       }),
     ).rejects.toThrow("Display name must be between 3 and 32 characters");
   });
@@ -170,9 +170,84 @@ describe("registerUser", () => {
         username: "newuser",
         displayName: "a".repeat(33),
         email: "newuser@example.com",
-        password: "Password123",
+        password: "Password123!",
       }),
     ).rejects.toThrow("Display name must be between 3 and 32 characters");
+  });
+
+  test("should not register a user with a password missing a capital letter", async () => {
+    await expect(
+      registerUser({
+        username: "testuser",
+        displayName: "Test User",
+        email: "test@example.com",
+        password: "password123!",
+      }),
+    ).rejects.toThrow(
+      "Password must contain at least one uppercase letter, one number, and one special character",
+    );
+  });
+
+  test("should not register a user with a password missing a number", async () => {
+    await expect(
+      registerUser({
+        username: "testuser",
+        displayName: "Test User",
+        email: "test@example.com",
+        password: "Password!@#",
+      }),
+    ).rejects.toThrow(
+      "Password must contain at least one uppercase letter, one number, and one special character",
+    );
+  });
+
+  test("should register a user with a password that contains a space", async () => {
+    const user = await registerUser({
+      username: "testuser",
+      displayName: "Test User",
+      email: "test@example.com",
+      password: "Password 123!",
+    });
+
+    expect(user).toEqual(
+      expect.objectContaining({
+        username: "testuser",
+        displayName: "Test User",
+        email: "test@example.com",
+        password: expect.any(String),
+      }),
+    );
+  });
+
+  test("should register a user with a password that contains mostly spaces and only the required characters", async () => {
+    const user = await registerUser({
+      username: "testuser",
+      displayName: "Test User",
+      email: "test@example.com",
+      password: "      A1%",
+    });
+
+    expect(user).toEqual(
+      expect.objectContaining({
+        username: "testuser",
+        displayName: "Test User",
+        email: "test@example.com",
+        password: expect.any(String),
+      }),
+    );
+  });
+
+  test("should not register a user with a password missing a special character", async () => {
+    await expect(
+      registerUser({
+        username: "testuser",
+        displayName: "Test User",
+        email: "test@example.com",
+        password: "Password123",
+      }),
+    ).rejects.toThrow(
+      "Password must contain at least one uppercase letter, one number, and one special character",
+    );
   });
 
   test("should not register a user with a password that is too short", async () => {
@@ -181,7 +256,7 @@ describe("registerUser", () => {
         username: "testuser",
         displayName: "Test User",
         email: "test@example.com",
-        password: "Short",
+        password: "Sho1!",
       }),
     ).rejects.toThrow("Password must be between 6 and 128 characters");
   });
@@ -192,7 +267,7 @@ describe("registerUser", () => {
         username: "testuser",
         displayName: "Test User",
         email: "test@example.com",
-        password: "a".repeat(129),
+        password: "a".repeat(129) + "A1!",
       }),
     ).rejects.toThrow("Password must be between 6 and 128 characters");
   });
@@ -205,7 +280,7 @@ describe("registerUser", () => {
         username: "newuser",
         displayName: "New User",
         email: testUserData.email,
-        password: "Password123",
+        password: "Password123!",
       }),
     ).rejects.toThrow("An account with this email already exists");
   });
@@ -218,7 +293,7 @@ describe("registerUser", () => {
         username: testUserData.username,
         displayName: "New User",
         email: "newuser@example.com",
-        password: "Password123",
+        password: "Password123!",
       }),
     ).rejects.toThrow("An account with this username already exists");
   });
@@ -231,7 +306,7 @@ describe("registerUser", () => {
         username: `  ${testUserData.username.toUpperCase()}  `,
         displayName: "New User",
         email: "newuser@example.com",
-        password: "Password123",
+        password: "Password123!",
       }),
     ).rejects.toThrow("An account with this username already exists");
   });
@@ -244,7 +319,7 @@ describe("registerUser", () => {
         username: "newuser",
         displayName: testUserData.displayName,
         email: "newuser@example.com",
-        password: "Password123",
+        password: "Password123!",
       }),
     ).rejects.toThrow("An account with this display name already exists");
   });

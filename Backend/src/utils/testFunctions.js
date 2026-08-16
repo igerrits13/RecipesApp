@@ -48,14 +48,14 @@ export const testUserData = {
   email: `${crypto.randomUUID()}@example.com`,
   username: "TestUser",
   displayName: "TestUser",
-  password: await hashPassword("Password123"),
+  password: await hashPassword("Password123!"),
 };
 
 const moderatorTestUserData = {
   email: `${crypto.randomUUID()}@example.com`,
   username: "ModeratorUser",
   displayName: "ModeratorUser",
-  password: await hashPassword("Password123"),
+  password: await hashPassword("Password123!"),
   role: "moderator",
 };
 
@@ -63,7 +63,7 @@ const adminTestUserData = {
   email: `${crypto.randomUUID()}@example.com`,
   username: "AdminUser",
   displayName: "AdminUser",
-  password: await hashPassword("Password123"),
+  password: await hashPassword("Password123!"),
   role: "admin",
 };
 
@@ -71,10 +71,10 @@ export const testUserData2 = {
   email: `${crypto.randomUUID()}@example.com`,
   username: "testuser2",
   displayName: "TestUser2",
-  password: await hashPassword("Password123"),
+  password: await hashPassword("Password123!"),
 };
 
-export const unhashedPassword = "Password123";
+export const unhashedPassword = "Password123!";
 
 export async function createTestUser(overrides = {}) {
   const user = await User.create({ ...testUserData, ...overrides });

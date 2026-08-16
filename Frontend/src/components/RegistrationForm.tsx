@@ -29,9 +29,10 @@ export default function RegistrationForm() {
   // Allow navigation
   const navigate = useNavigate();
 
-  // Regex for username and email, matching with backend logic
+  // Regex for username, email and password, matching with backend logic
   const usernameRegex = /^[a-zA-Z0-9_]+$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/;
 
   // Handle username validation on blur event
   const handleUsernameBlur = () => {
@@ -115,8 +116,21 @@ export default function RegistrationForm() {
   // Handle password validation on blur event
   const handlePasswordBlur = () => {
     if (password) {
+      // Ensure the password is in a valid format
+      if (
+        password.length < 6 ||
+        password.length > 128 ||
+        !passwordRegex.test(password)
+      ) {
+        setValidationErrors((prevErrors) => ({
+          ...prevErrors,
+          password:
+            "Password must be between 6 and 128 characters and contain at least one uppercase letter, one number, and one special character",
+        }));
+        return;
+      }
       // If the confirm password field is not empty, check if the passwords match
-      if (confirmPassword) {
+      else if (confirmPassword) {
         if (password !== confirmPassword) {
           setValidationErrors((prevErrors) => ({
             ...prevErrors,
@@ -128,14 +142,6 @@ export default function RegistrationForm() {
             confirmPassword: "",
           }));
         }
-      }
-      // Ensure the password is in a valid format
-      if (password.length < 6 || password.length > 128) {
-        setValidationErrors((prevErrors) => ({
-          ...prevErrors,
-          password: "Password must be between 6 and 128 characters",
-        }));
-        return;
       }
     }
     // Otherwise, clear the validation error

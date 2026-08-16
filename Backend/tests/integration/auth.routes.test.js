@@ -98,7 +98,7 @@ describe("checkBannedWord middleware on register route", () => {
       .post("/api/v1/auth/register")
       .send({
         email: "testuser@email.com",
-        password: "testpassword123",
+        password: "Testpassword123!",
         username: "testuser2",
         displayName: `${testBannedWord.word}test`,
       });
@@ -117,7 +117,7 @@ describe("checkBannedWord middleware on register route", () => {
 
     const res = await request(app).post("/api/v1/auth/register").send({
       email: "testuser@email.com",
-      password: "testpassword123",
+      password: "Testpassword123!",
       username: "testuser2",
       displayName: testBannedWord.word,
     });
@@ -145,7 +145,7 @@ describe("registerLimiter middleware on register route", () => {
           username: `testuser${i}`,
           displayName: `TestUser${i}`,
           email: `testuser${i}@example.com`,
-          password: "TestPassword123",
+          password: "TestPassword123!",
         });
     }
 
@@ -153,7 +153,7 @@ describe("registerLimiter middleware on register route", () => {
       username: "testuser4",
       displayName: "TestUser4",
       email: "testuser4@example.com",
-      password: "TestPassword123",
+      password: "TestPassword123!",
     });
 
     expect(res.statusCode).toEqual(429);
@@ -173,7 +173,7 @@ describe("registerLimiter middleware on register route", () => {
           username: `testuser${i}`,
           displayName: `TestUser${i}`,
           email: `testuser${i}@example.com`,
-          password: "TestPassword123",
+          password: "TestPassword123!",
         });
     }
 
@@ -184,7 +184,7 @@ describe("registerLimiter middleware on register route", () => {
       username: "testuser4",
       displayName: "TestUser4",
       email: "testuser4@example.com",
-      password: "TestPassword123",
+      password: "TestPassword123!",
     });
 
     expect(res.statusCode).toEqual(201);
@@ -285,6 +285,8 @@ describe("loginLimiter middleware on login route", () => {
       login: testUserData.email,
       password: "WrongPassword123",
     });
+
+    console.log(res.body.message);
 
     expect(res.statusCode).toEqual(429);
     expect(res.body.message).toBe(

@@ -36,6 +36,17 @@ export async function registerUser({ email, username, displayName, password }) {
     throw error;
   }
 
+  // Ensure password is in a valid format
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/;
+
+  if (!passwordRegex.test(password)) {
+    const error = new Error(
+      "Password must contain at least one uppercase letter, one number, and one special character",
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
   // Validate username, displayName and password length
   if (normalizedUsername.length < 3 || normalizedUsername.length > 32) {
     const error = new Error("Username must be between 3 and 32 characters");
