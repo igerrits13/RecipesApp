@@ -57,7 +57,7 @@ export const useAuthStore = create<UserStore>((set) => ({
         throw error;
       } else {
         set({
-          authError: "An unexpected error occurred",
+          authError: "Unable to register. Please try again",
           isRegistering: false,
         });
         throw error;
@@ -79,7 +79,11 @@ export const useAuthStore = create<UserStore>((set) => ({
         });
         throw error;
       } else {
-        set({ authError: "An unexpected error occurred", isLoggingIn: false });
+        set({
+          user: null,
+          authError: "Unable to log in. Please try again",
+          isLoggingIn: false,
+        });
         throw error;
       }
     }
