@@ -94,8 +94,6 @@ export default function RegistrationForm() {
     const trimmedEmail = email.trim();
     setEmail(trimmedEmail);
 
-    console.log(trimmedEmail);
-
     if (trimmedEmail) {
       // Ensure the email is in a valid format
       if (!emailRegex.test(trimmedEmail)) {
@@ -179,7 +177,7 @@ export default function RegistrationForm() {
     clearAuthError();
   };
 
-  // Handle user registration logic when the register button is clicked
+  // Handle user registration logic and navigation when the register button is clicked
   const handleRegisterUser = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {

@@ -286,8 +286,6 @@ describe("loginLimiter middleware on login route", () => {
       password: "WrongPassword123",
     });
 
-    console.log(res.body.message);
-
     expect(res.statusCode).toEqual(429);
     expect(res.body.message).toBe(
       "Too many login attempts. Please try again later",

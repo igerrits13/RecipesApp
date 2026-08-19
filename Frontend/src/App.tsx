@@ -12,10 +12,15 @@ import SearchView from "./pages/SearchView";
 import AdminView from "./pages/AdminView";
 import NotFoundView from "./pages/NotFoundView";
 import { useAuthStore } from "./store/AuthStore";
+import { useEffect } from "react";
 
 function App() {
-  const { user, isCheckingAuth } = useAuthStore();
-  console.log(user, isCheckingAuth);
+  // Check if there is an authenticated user
+  const { authCheck } = useAuthStore();
+
+  useEffect(() => {
+    authCheck();
+  }, []);
 
   return (
     <div className="min-h-screen">

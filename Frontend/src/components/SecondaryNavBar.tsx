@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import SearchBar from "./SearchBar";
-import { Menu, Search } from "lucide-react";
+import { Search } from "lucide-react";
+import UserDropdown from "./UserDropdown";
 
 export default function SecondaryNavBar() {
   const [width, setWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0,
   );
+
   // Add an evenet listener to update the width state when the window is resized
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -27,16 +29,8 @@ export default function SecondaryNavBar() {
           </div>
         ) : (
           <Search className="size-6 text-sage-olive-500" />
-        )}{" "}
-        {width > 640 ? (
-          <img
-            className="rounded-full size-12 md:size-14 lg:size-16 xl:size-18 2xl:size-20"
-            src="https://api.dicebear.com/9.x/fun-emoji/svg?seed=admin1&size=64"
-            alt="Profile Image"
-          />
-        ) : (
-          <Menu className="size-6 text-sage-olive-500" />
         )}
+        <UserDropdown />
       </div>
     </nav>
   );

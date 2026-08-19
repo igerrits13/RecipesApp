@@ -8,8 +8,10 @@ interface UserState {
   user: User | null;
   isRegistering: boolean;
   isLoggingIn: boolean;
+  isLoggingOut: boolean;
   isCheckingAuth: boolean;
   authError: string | null;
+  logoutError: string | null;
 }
 
 // Types of user actions
@@ -29,8 +31,10 @@ const initialAuthState: UserState = {
   user: null,
   isRegistering: false,
   isLoggingIn: false,
+  isLoggingOut: false,
   isCheckingAuth: true,
   authError: null,
+  logoutError: null,
 };
 
 // Create the user store
@@ -81,7 +85,19 @@ export const useAuthStore = create<UserStore>((set) => ({
     }
   },
 
-  logout: async () => {},
+  // Logout user
+  logout: async () => {
+    set({ logoutError: null, isLoggingOut: true });
+    try {
+      await axios.post("/api/v1/auth/logout");
+      set({ user: null, isLoggingOut: false });
+    } catch {
+      set({
+        logoutError: "Unable to log out. Please try again",
+        isLoggingOut: false,
+      });
+    }
+  },
 
   // Check authentication
   authCheck: async () => {
@@ -89,8 +105,7 @@ export const useAuthStore = create<UserStore>((set) => ({
     try {
       const response = await axios.get("/api/v1/auth/authCheck");
       set({ user: response.data.user, isCheckingAuth: false });
-    } catch (error) {
-      console.log(error);
+    } catch {
       set({ user: null, isCheckingAuth: false });
     }
   },
