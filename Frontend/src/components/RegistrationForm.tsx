@@ -218,6 +218,9 @@ export default function RegistrationForm() {
       </div>
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
+          id="username"
+          name="username"
+          autoComplete="username"
           className="w-full grow text-white focus:outline-none"
           type={"text"}
           placeholder={"Username*"}
@@ -232,6 +235,9 @@ export default function RegistrationForm() {
       )}
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
+          id="displayName"
+          name="displayName"
+          autoComplete="name"
           className="w-full grow text-white focus:outline-none"
           type={"text"}
           placeholder={"Displayname*"}
@@ -246,6 +252,9 @@ export default function RegistrationForm() {
       )}
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
+          id="email"
+          name="email"
+          autoComplete="email"
           className="w-full grow text-white focus:outline-none"
           type={"email"}
           placeholder={"Email*"}
@@ -260,6 +269,9 @@ export default function RegistrationForm() {
       )}
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
         <input
+          id="password"
+          name="password"
+          autoComplete="new-password"
           className="w-full grow text-white focus:outline-none"
           type={passwordVisible ? "text" : "password"}
           placeholder={"Password*"}
@@ -286,6 +298,9 @@ export default function RegistrationForm() {
       )}
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
         <input
+          id="confirmPassword"
+          name="confirmPassword"
+          autoComplete="new-password"
           className="w-full grow text-white focus:outline-none"
           type={confirmPasswordVisible ? "text" : "password"}
           placeholder={"Confirm Password*"}

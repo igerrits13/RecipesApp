@@ -21,6 +21,8 @@ export default function SearchBar() {
   return (
     <div className="flex items-center gap-1 rounded-full bg-sage-olive-500 py-1 px-3 sm:py-2 sm:px-5 font-body text-white">
       <input
+        id="search"
+        name="search"
         className="grow focus:outline-none"
         type="text"
         placeholder={

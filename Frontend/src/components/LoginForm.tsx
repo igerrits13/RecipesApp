@@ -47,6 +47,9 @@ export default function LoginForm() {
       </div>
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
+          id="login"
+          name="login"
+          autoComplete="username"
           className="w-full grow text-white focus:outline-none"
           type={"text"}
           placeholder={"Username or Email"}
@@ -58,6 +61,9 @@ export default function LoginForm() {
       </div>
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
         <input
+          id="password"
+          name="password"
+          autoComplete="current-password"
           className="w-full grow text-white focus:outline-none"
           type={passwordVisible ? "text" : "password"}
           placeholder={"Password"}

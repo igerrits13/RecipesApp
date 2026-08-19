@@ -109,7 +109,15 @@ export const useAuthStore = create<UserStore>((set) => ({
     try {
       const response = await axios.get("/api/v1/auth/authCheck");
       set({ user: response.data.user, isCheckingAuth: false });
-    } catch {
+    } catch (error) {
+      // If the user is not authenticated, this is expected
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        set({ user: null, isCheckingAuth: false });
+        return;
+      }
+
+      // Otherwise, something went wrong
+      console.error("Error checking authentication:", error);
       set({ user: null, isCheckingAuth: false });
     }
   },
