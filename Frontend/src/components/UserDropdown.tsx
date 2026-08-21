@@ -53,6 +53,14 @@ export default function UserDropdown() {
               </Link>
             </MenuItem>
             <MenuItem>
+              <Link
+                className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-antique-parchment-300"
+                to="/create-recipe"
+              >
+                Create a recipe
+              </Link>
+            </MenuItem>
+            <MenuItem>
               <button
                 className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-antique-parchment-300"
                 onClick={handleLogout}
