@@ -1,22 +1,5 @@
 import mongoose from "mongoose";
 
-// const mealTypes = [
-//     "breakfast",
-//     "brunch",
-//     "lunch",
-//     "dinner",
-//     "Dessert",
-//     "appetizer",
-//     "Snack",
-//     "drink",
-//     "Cocktail",
-//     "Soup, stew or chili",
-//     "Sauce or marinade",
-//     "Salad",
-//     "Bread",
-//     "Meal Prep",
-// ]
-
 const mealSchema = new mongoose.Schema({
   title: {
     type: String,

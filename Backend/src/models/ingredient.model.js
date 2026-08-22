@@ -10,6 +10,7 @@ const ingredientSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  // Whether or not to show this item in index searches
   indexItem: {
     type: Boolean,
     default: true,

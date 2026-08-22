@@ -28,7 +28,6 @@ const recipeSchema = mongoose.Schema(
             type: String,
             maxlength: 100,
             trim: true,
-            _id: false,
           },
           ingredients: {
             type: [
@@ -56,6 +55,7 @@ const recipeSchema = mongoose.Schema(
               },
             ],
             required: true,
+            _id: false,
             validate: {
               validator: (v) =>
                 Array.isArray(v) && v.length > 0 && v.length <= 50,
@@ -75,7 +75,6 @@ const recipeSchema = mongoose.Schema(
             type: String,
             maxlength: 100,
             trim: true,
-            _id: false,
           },
           steps: {
             type: [
