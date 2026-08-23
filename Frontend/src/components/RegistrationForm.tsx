@@ -7,9 +7,11 @@ import { Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "../store/AuthStore";
 import ValidationError from "./ValidationError";
 
-// Registration form with input fields for username, display name, email, password, and confirm password, along with a register button
+// Registration form for new users
 export default function RegistrationForm() {
+  // Allow navigation
   const navigate = useNavigate();
+
   // Auth error to display and register user function
   const { authError, registerUser } = useAuthStore();
 
@@ -203,11 +205,11 @@ export default function RegistrationForm() {
       )}
       {authError && <ValidationError message={authError} />}
       <button
-        className="w-1/2 mt-4 text-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300"
+        className={`w-1/2 mt-4 text-center rounded-full ${isSubmitting ? "bg-rosewood-300" : "bg-rosewood-500"} text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300`}
         type="submit"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Registering..." : "Register"}
+        Register
       </button>
       <div className="text-center text-xs text-ink-black-300">
         Already a member?{" "}
