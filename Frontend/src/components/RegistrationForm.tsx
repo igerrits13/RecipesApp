@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { registrationSchema } from "../schemas/AuthSchema";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
@@ -18,46 +19,6 @@ export default function RegistrationForm() {
   // State for password and confirm password visibility
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-
-  // Zod schema for the form values and errors
-  const registrationSchema = z
-    .object({
-      username: z
-        .string()
-        .trim()
-        .min(1, "Username is required")
-        .min(3, "Username must be at least 3 characters")
-        .max(32, "Username must be at most 32 characters")
-        .regex(
-          /^[a-zA-Z0-9_]+$/,
-          "Username can only contain letters, numbers, and underscores",
-        ),
-      displayName: z
-        .string()
-        .trim()
-        .min(1, "Display name is required")
-        .min(3, "Display name must be at least 3 characters")
-        .max(32, "Display name must be at most 32 characters"),
-      email: z
-        .string()
-        .trim()
-        .min(1, "Email is required")
-        .email("Invalid email"),
-      password: z
-        .string()
-        .min(1, "Password is required")
-        .min(6, "Password must be at least 6 characters")
-        .max(128, "Password must be at most 128 characters")
-        .regex(
-          /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/,
-          "Password must contain at least one uppercase letter, one number, and one special character",
-        ),
-      confirmPassword: z.string().min(1, "Confirm password is required"),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-      message: "Passwords do not match",
-      path: ["confirmPassword"],
-    });
 
   // Type for the form values
   type RegistrationCredentials = z.infer<typeof registrationSchema>;

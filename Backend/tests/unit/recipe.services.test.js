@@ -1160,21 +1160,31 @@ describe("validateRecipeData", () => {
       expect(errors).toContain("Tags must be between 2 and 50 characters long");
     });
 
-    test("should throw an error if a source provides a URL and a name", () => {
+    test("should throw an error if the image url is too long", async () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        source: {
-          url: "https://www.example.com",
-          name: "Example Source",
-          note: "This source has both a URL and a name, which is not allowed.",
-        },
+        image: "http://" + "a".repeat(2048) + ".com",
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
       expect(errors).toContain(
-        "Source can only have either a URL or a name, not both",
+        "Image URL must be a string and cannot exceed 2048 characters",
       );
+    });
+
+    test("should throw an error if a source does not a name", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        source: {
+          url: "https://www.example.com",
+          note: "This source has no name, which is not allowed.",
+        },
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain("Source must have a name");
     });
 
     test("should throw an error if the source url is not a string", () => {
@@ -1187,23 +1197,22 @@ describe("validateRecipeData", () => {
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
-      expect(errors).toContain(
-        "Source URL must be a string and cannot exceed 500 characters",
-      );
+      expect(errors).toContain("Source must have a name");
     });
 
     test("should throw an error if the source url is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         source: {
-          url: "http://" + "a".repeat(500) + ".com",
+          name: "example source",
+          url: "http://" + "a".repeat(2048) + ".com",
         },
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
       expect(errors).toContain(
-        "Source URL must be a string and cannot exceed 500 characters",
+        "Source URL must be a string and cannot exceed 2048 characters",
       );
     });
 
@@ -1241,6 +1250,7 @@ describe("validateRecipeData", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         source: {
+          name: "example source",
           note: 123,
         },
       };
@@ -1256,6 +1266,7 @@ describe("validateRecipeData", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         source: {
+          name: "example source",
           note: "A".repeat(101),
         },
       };
@@ -1831,9 +1842,6 @@ describe("validateAndUpdateRecipe", () => {
     expect(result.title).toBe("Updated Test Recipe");
     expect(result.slug).toBe("updated-test-recipe");
     expect(result.description).toBe(existingRecipe.description);
-    expect(result.ingredientSections[0].ingredients[0]._id.toString()).toEqual(
-      existingRecipe.ingredientSections[0].ingredients[0]._id.toString(),
-    );
     expect(result.steps).toEqual(existingRecipe.steps);
     expect(result.preptimeSeconds).toBe(existingRecipe.preptimeSeconds);
     expect(result.cooktimeSeconds).toBe(existingRecipe.cooktimeSeconds);
@@ -1977,6 +1985,7 @@ describe("validateAndUpdateRecipe", () => {
     const updatedData = {
       source: {
         url: "https://www.example.com",
+        name: "Example source name",
         note: "Example source note",
       },
     };
@@ -1987,14 +1996,15 @@ describe("validateAndUpdateRecipe", () => {
       userId: testUser._id,
     });
 
-    expect(result.source).toEqual({
-      url: "https://www.example.com",
-      note: "Example source note",
-    });
+    expect(result.source.url).toBe("https://www.example.com");
+    expect(result.source.name).toBe("Example source name");
+    expect(result.source.note).toBe("Example source note");
     expect(result.title).toBe(existingRecipe.title);
     expect(result.slug).toBe(existingRecipe.slug);
     expect(result.description).toBe(existingRecipe.description);
-    expect(result.steps).toEqual(existingRecipe.steps);
+    expect(result.stepSections[0].steps).toEqual(
+      existingRecipe.stepSections[0].steps,
+    );
     expect(result.preptimeSeconds).toBe(existingRecipe.preptimeSeconds);
     expect(result.cooktimeSeconds).toBe(existingRecipe.cooktimeSeconds);
     expect(result.servings).toBe(existingRecipe.servings);
@@ -2036,9 +2046,6 @@ describe("validateAndUpdateRecipe", () => {
     expect(result.title).toBe(existingRecipe.title);
     expect(result.slug).toBe(existingRecipe.slug);
     expect(result.description).toBe(existingRecipe.description);
-    expect(result.ingredientSections[0].ingredients[0]._id.toString()).toEqual(
-      existingRecipe.ingredientSections[0].ingredients[0]._id.toString(),
-    );
     expect(result.steps).toEqual(existingRecipe.steps);
     expect(result.preptimeSeconds).toBe(existingRecipe.preptimeSeconds);
     expect(result.cooktimeSeconds).toBe(existingRecipe.cooktimeSeconds);

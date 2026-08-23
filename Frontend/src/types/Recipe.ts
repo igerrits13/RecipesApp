@@ -55,7 +55,7 @@ export interface CreateRecipeData {
   linkedRecipes: { recipeId: string; role: string }[];
   source?: {
     url?: string;
-    name?: string;
+    name: string;
     note?: string;
   } | null;
   tags: string[];

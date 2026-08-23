@@ -1,5 +1,28 @@
 import mongoose from "mongoose";
 
+// Create a seperate schema for source to allow for source to be null while still requiring a name if source is not null
+const sourceSchema = new mongoose.Schema(
+  {
+    url: {
+      type: String,
+      maxlength: 2048,
+      trim: true,
+    },
+    name: {
+      type: String,
+      maxlength: 50,
+      trim: true,
+      required: true,
+    },
+    note: {
+      type: String,
+      maxlength: 100,
+      trim: true,
+    },
+  },
+  { _id: false },
+);
+
 const recipeSchema = mongoose.Schema(
   {
     title: {
@@ -45,7 +68,6 @@ const recipeSchema = mongoose.Schema(
                   type: mongoose.Schema.Types.ObjectId,
                   ref: "Ingredient",
                   required: true,
-                  _id: false,
                 },
                 additionalInfo: {
                   type: String,
@@ -80,6 +102,7 @@ const recipeSchema = mongoose.Schema(
             type: [
               {
                 type: String,
+                trim: true,
                 minlength: 3,
                 maxlength: 500,
                 required: true,
@@ -118,6 +141,8 @@ const recipeSchema = mongoose.Schema(
     },
     image: {
       type: String,
+      trim: true,
+      maxlength: 2048,
     },
     notes: {
       type: String,
@@ -149,21 +174,8 @@ const recipeSchema = mongoose.Schema(
       required: true,
     },
     source: {
-      url: {
-        type: String,
-        maxlength: 100,
-        trim: true,
-      },
-      name: {
-        type: String,
-        maxlength: 50,
-        trim: true,
-      },
-      note: {
-        type: String,
-        maxlength: 100,
-        trim: true,
-      },
+      type: sourceSchema,
+      default: null,
     },
     tags: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
@@ -191,7 +203,7 @@ const recipeSchema = mongoose.Schema(
     reportCount: { type: Number, default: 0, select: false },
     isDeleted: { type: Boolean, default: false, select: false },
     deletedAt: { type: Date, default: null, select: false },
-    isPublished: { type: Boolean, default: true },
+    isPublished: { type: Boolean, default: false },
     isApproved: { type: Boolean, default: true },
   },
   {

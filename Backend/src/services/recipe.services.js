@@ -84,6 +84,7 @@ export function validateRecipeData(recipe) {
     recipe._id,
     errors,
   );
+  normalizedRecipe.image = validateRecipeImage(recipe.image, errors);
   normalizedRecipe.source = recipe.source
     ? validateRecipeSource(recipe.source, errors)
     : null;
@@ -127,6 +128,7 @@ export function validateRecipeData(recipe) {
     itemName: "Seasons",
     errors,
   });
+  normalizedRecipe.isPublished = recipe.isPublished || false;
 
   if (errors.length > 0) {
     const error = new Error("Validation failed");
@@ -439,21 +441,33 @@ function validateLinkedRecipesArray(linkedRecipes, recipeId, errors) {
   return linkedRecipes;
 }
 
+// Helper function to validate recipe image
+function validateRecipeImage(image, errors) {
+  if (image && (typeof image !== "string" || image.trim().length > 2048)) {
+    pushUnique(
+      errors,
+      "Image URL must be a string and cannot exceed 2048 characters",
+    );
+    return null;
+  }
+  return image ? image.trim() : null;
+}
+
 // Helper function to validate recipe source
 function validateRecipeSource(source, errors) {
-  // A source should have either a URL or name, not both
-  if (source.url && source.name) {
-    pushUnique(errors, "Source can only have either a URL or a name, not both");
+  // Ensure the source has a name
+  if (!source.name) {
+    pushUnique(errors, "Source must have a name");
     return null;
   }
 
   if (
     source.url &&
-    (typeof source.url !== "string" || source.url.trim().length > 500)
+    (typeof source.url !== "string" || source.url.trim().length > 2048)
   ) {
     pushUnique(
       errors,
-      "Source URL must be a string and cannot exceed 500 characters",
+      "Source URL must be a string and cannot exceed 2048 characters",
     );
     return null;
   }
@@ -608,6 +622,7 @@ export async function validateAndSaveNewRecipe({
   meals,
   holidays,
   seasons,
+  isPublished,
   author,
 }) {
   // Ensure the user does not already have a recipe with the same title
@@ -624,6 +639,13 @@ export async function validateAndSaveNewRecipe({
 
   // Upload the image to cloudinary if one was provided and update all collections
   const imageURL = await uploadPhoto(image);
+
+  // Ensure the image url length is less than 2048 characters
+  if (imageURL && imageURL.length > 2048) {
+    const err = new Error("Image URL is too long");
+    err.statusCode = 400;
+    throw err;
+  }
 
   // Get all new measurements to prepare for saving ingredients
   const measurementNames = ingredientSections.flatMap((section) =>
@@ -731,6 +753,7 @@ export async function validateAndSaveNewRecipe({
     meals: mealIds,
     holidays: holidayIds,
     seasons: seasonIds,
+    isPublished,
     author,
   });
 
@@ -937,6 +960,10 @@ export async function validateAndUpdateRecipe({
       meals: mealIds,
       holidays: holidayIds,
       seasons: seasonIds,
+      isPublished:
+        updatedRecipeData.isPublished !== undefined
+          ? updatedRecipeData.isPublished
+          : oldRecipe.isPublished,
     },
     { new: true },
   );

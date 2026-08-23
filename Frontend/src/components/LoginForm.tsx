@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "../schemas/AuthSchema";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
@@ -17,12 +18,6 @@ export default function LoginForm() {
 
   // State for password visibility
   const [passwordVisible, setPasswordVisible] = useState(false);
-
-  // Zod schema for the form values and errors
-  const loginSchema = z.object({
-    login: z.string().min(1),
-    password: z.string().min(1),
-  });
 
   // Type for the form values
   type LoginCredentials = z.infer<typeof loginSchema>;

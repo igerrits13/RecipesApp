@@ -154,6 +154,7 @@ export const testRecipeData = {
   preptimeSeconds: 600,
   cooktimeSeconds: 1200,
   servings: 4,
+  isPublished: true,
 };
 
 export const customRecipe = (index, testIngredient) => {
@@ -167,6 +168,7 @@ export const customRecipe = (index, testIngredient) => {
         ingredients: [{ ingredient: testIngredient._id }],
       },
     ],
+    isPublished: true,
   };
 };
 
@@ -193,6 +195,7 @@ const fullTestRecipeData = {
   servings: 4,
   image: "",
   notes: "These are test notes.",
+  isPublished: true,
 };
 
 export const fullTestRecipeDataComplete = {
@@ -227,6 +230,7 @@ export const fullTestRecipeDataComplete = {
   linkedRecipes: [],
   seasons: ["season1", "season2"],
   holidays: ["holiday1", "holiday2"],
+  isPublished: true,
 };
 
 export const customFullRecipe = ({
