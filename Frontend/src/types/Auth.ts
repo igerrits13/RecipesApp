@@ -4,6 +4,7 @@ export interface RegistrationCredentials {
   displayName: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
 // Interface for login credentials

@@ -16,7 +16,7 @@ interface UserState {
 
 // Types of user actions
 interface UserActions {
-  register: (credentials: RegistrationCredentials) => Promise<void>;
+  registerUser: (credentials: RegistrationCredentials) => Promise<void>;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
   authCheck: () => Promise<void>;
@@ -43,10 +43,16 @@ export const useAuthStore = create<UserStore>((set) => ({
   ...initialAuthState,
 
   // Register user
-  register: async (credentials) => {
+  registerUser: async (credentials) => {
     set({ authError: null, isRegistering: true });
     try {
-      const response = await axios.post("/api/v1/auth/register", credentials);
+      const { confirmPassword, ...credentialsWithoutConfirmPassword } =
+        credentials;
+
+      const response = await axios.post(
+        "/api/v1/auth/register",
+        credentialsWithoutConfirmPassword,
+      );
       set({ user: response.data.user, authError: null, isRegistering: false });
     } catch (error) {
       if (axios.isAxiosError(error)) {

@@ -1,208 +1,88 @@
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import ValidationError from "./ValidationError";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "../store/AuthStore";
+import ValidationError from "./ValidationError";
 
 // Registration form with input fields for username, display name, email, password, and confirm password, along with a register button
 export default function RegistrationForm() {
-  const [username, setUsername] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate();
+  // Auth error to display and register user function
+  const { authError, registerUser } = useAuthStore();
+
+  // State for password and confirm password visibility
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [validationErrors, setValidationErrors] = useState({
-    username: "",
-    displayName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    passwordMatch: "",
-    general: "",
+
+  // Zod schema for the form values and errors
+  const registrationSchema = z
+    .object({
+      username: z
+        .string()
+        .trim()
+        .min(1, "Username is required")
+        .min(3, "Username must be at least 3 characters")
+        .max(32, "Username must be at most 32 characters")
+        .regex(
+          /^[a-zA-Z0-9_]+$/,
+          "Username can only contain letters, numbers, and underscores",
+        ),
+      displayName: z
+        .string()
+        .trim()
+        .min(1, "Display name is required")
+        .min(3, "Display name must be at least 3 characters")
+        .max(32, "Display name must be at most 32 characters"),
+      email: z
+        .string()
+        .trim()
+        .min(1, "Email is required")
+        .email("Invalid email"),
+      password: z
+        .string()
+        .min(1, "Password is required")
+        .min(6, "Password must be at least 6 characters")
+        .max(128, "Password must be at most 128 characters")
+        .regex(
+          /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/,
+          "Password must contain at least one uppercase letter, one number, and one special character",
+        ),
+      confirmPassword: z.string().min(1, "Confirm password is required"),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords do not match",
+      path: ["confirmPassword"],
+    });
+
+  // Type for the form values
+  type RegistrationCredentials = z.infer<typeof registrationSchema>;
+
+  // React hook form
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegistrationCredentials>({
+    defaultValues: {
+      username: "",
+      displayName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    resolver: zodResolver(registrationSchema),
+    mode: "onBlur",
   });
 
-  // Access the register function from the auth store
-  const { register, authError, clearAuthError } = useAuthStore();
-
-  // Allow navigation
-  const navigate = useNavigate();
-
-  // Regex for username, email and password, matching with backend logic
-  const usernameRegex = /^[a-zA-Z0-9_]+$/;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/;
-
-  // Handle username validation on blur event
-  const handleUsernameBlur = () => {
-    // Trim any whitespace added to the username
-    const trimmedUsername = username.trim();
-    setUsername(trimmedUsername);
-
-    if (trimmedUsername) {
-      // Ensure the username is in a valid format
-      if (!usernameRegex.test(trimmedUsername)) {
-        setValidationErrors((prevErrors) => ({
-          ...prevErrors,
-          username:
-            "Username can only contain letters, numbers, and underscores",
-        }));
-        return;
-      } else if (trimmedUsername.length < 3 || trimmedUsername.length > 32) {
-        setValidationErrors((prevErrors) => ({
-          ...prevErrors,
-          username: "Username must be between 3 and 32 characters",
-        }));
-        return;
-      }
-    }
-
-    // Otherwise clear the validation error
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      username: "",
-    }));
-  };
-
-  // Handle display name validation on blur event
-  const handleDisplayNameBlur = () => {
-    // Trim any whitespace added to the display name
-    const trimmedDisplayName = displayName.trim();
-    setDisplayName(trimmedDisplayName);
-
-    if (trimmedDisplayName) {
-      // Ensure the display name is in a valid format
-      if (trimmedDisplayName.length < 3 || trimmedDisplayName.length > 32) {
-        setValidationErrors((prevErrors) => ({
-          ...prevErrors,
-          displayName: "Display name must be between 3 and 32 characters",
-        }));
-        return;
-      }
-    }
-    // Otherwise, clear the validation error
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      displayName: "",
-    }));
-  };
-
-  // Handle email validation on blur event
-  const handleEmailBlur = () => {
-    // Trim any whitespace added to the email
-    const trimmedEmail = email.trim();
-    setEmail(trimmedEmail);
-
-    if (trimmedEmail) {
-      // Ensure the email is in a valid format
-      if (!emailRegex.test(trimmedEmail)) {
-        setValidationErrors((prevErrors) => ({
-          ...prevErrors,
-          email: "Please enter a valid email address",
-        }));
-        return;
-      }
-    }
-    // Otherwise, clear the validation error
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      email: "",
-    }));
-  };
-
-  // Handle password validation on blur event
-  const handlePasswordBlur = () => {
-    if (password) {
-      // Ensure the password is in a valid format
-      if (
-        password.length < 6 ||
-        password.length > 128 ||
-        !passwordRegex.test(password)
-      ) {
-        setValidationErrors((prevErrors) => ({
-          ...prevErrors,
-          password:
-            "Password must be between 6 and 128 characters and contain at least one uppercase letter, one number, and one special character",
-        }));
-        return;
-      }
-      // If the confirm password field is not empty, check if the passwords match
-      else if (confirmPassword) {
-        if (password !== confirmPassword) {
-          setValidationErrors((prevErrors) => ({
-            ...prevErrors,
-            confirmPassword: "Passwords do not match",
-          }));
-        } else {
-          setValidationErrors((prevErrors) => ({
-            ...prevErrors,
-            confirmPassword: "",
-          }));
-        }
-      }
-    }
-    // Otherwise, clear the validation error
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      password: "",
-    }));
-  };
-
-  // Handle confirm password validation on blur event
-  const handleConfirmPasswordBlur = () => {
-    if (confirmPassword) {
-      // Ensure the passwords match
-      if (password !== confirmPassword) {
-        setValidationErrors((prevErrors) => ({
-          ...prevErrors,
-          confirmPassword: "Passwords do not match",
-        }));
-        return;
-      }
-    }
-    // Otherwise, clear the validation error
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      confirmPassword: "",
-    }));
-  };
-
-  // Clear all validation errors when focusing on an input field
-  const handleInputFocus = () => {
-    setValidationErrors((prevErrors) => ({
-      ...prevErrors,
-      general: "",
-    }));
-    clearAuthError();
-  };
-
-  // Handle user registration logic and navigation when the register button is clicked
-  const handleRegisterUser = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  // Function to handle form submission
+  const onSubmit: SubmitHandler<RegistrationCredentials> = async (data) => {
     try {
-      if (
-        username === "" ||
-        displayName === "" ||
-        email === "" ||
-        password === "" ||
-        confirmPassword === ""
-      ) {
-        setValidationErrors((prevErrors) => ({
-          ...prevErrors,
-          general: "All fields are required",
-        }));
-        return;
-      } else if (password !== confirmPassword) {
-        setValidationErrors((prevErrors) => ({
-          ...prevErrors,
-          passwordMatch: "Passwords do not match",
-        }));
-        return;
-      } else {
-        await register({ username, displayName, email, password });
-        navigate("/");
-      }
+      await registerUser(data);
+      navigate("/");
     } catch {
       // Error is handled in the auth store and displayed to the user
     }
@@ -211,7 +91,7 @@ export default function RegistrationForm() {
   return (
     <form
       className="flex flex-col gap-2 sm:gap-4 items-center z-10 w-3/4 sm:w-1/2 lg:w-1/3 2xl:w-1/4 font-body rounded-4xl p-6 bg-antique-parchment-500"
-      onSubmit={handleRegisterUser}
+      onSubmit={handleSubmit(onSubmit)}
     >
       <div className="mb-4 font-subtitle font-bold text-center text-ink-black-500 text-xl md:text-2xl">
         Join the Family!
@@ -219,66 +99,64 @@ export default function RegistrationForm() {
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
           id="username"
-          name="username"
           autoComplete="username"
           className="w-full grow text-white focus:outline-none"
           type={"text"}
           placeholder={"Username*"}
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          onFocus={handleInputFocus}
-          onBlur={handleUsernameBlur}
+          {...register("username")}
+          onBlur={(e) => {
+            const trimmedUsername = e.target.value.trim();
+            setValue("username", trimmedUsername, { shouldValidate: true });
+          }}
         />
       </div>
-      {validationErrors.username && (
-        <ValidationError message={validationErrors.username} />
+      {errors.username?.message && (
+        <ValidationError message={errors.username.message} />
       )}
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
           id="displayName"
-          name="displayName"
           autoComplete="name"
           className="w-full grow text-white focus:outline-none"
           type={"text"}
           placeholder={"Displayname*"}
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          onFocus={handleInputFocus}
-          onBlur={handleDisplayNameBlur}
+          {...register("displayName")}
+          onBlur={(e) => {
+            const trimmedDisplayName = e.target.value.trim();
+            setValue("displayName", trimmedDisplayName, {
+              shouldValidate: true,
+            });
+          }}
         />
       </div>
-      {validationErrors.displayName && (
-        <ValidationError message={validationErrors.displayName} />
+      {errors.displayName?.message && (
+        <ValidationError message={errors.displayName.message} />
       )}
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">
         <input
           id="email"
-          name="email"
           autoComplete="email"
           className="w-full grow text-white focus:outline-none"
           type={"email"}
           placeholder={"Email*"}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onFocus={handleInputFocus}
-          onBlur={handleEmailBlur}
+          {...register("email")}
+          onBlur={(e) => {
+            const trimmedEmail = e.target.value.trim();
+            setValue("email", trimmedEmail, { shouldValidate: true });
+          }}
         />
       </div>
-      {validationErrors.email && (
-        <ValidationError message={validationErrors.email} />
+      {errors.email?.message && (
+        <ValidationError message={errors.email.message} />
       )}
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
         <input
           id="password"
-          name="password"
           autoComplete="new-password"
           className="w-full grow text-white focus:outline-none"
           type={passwordVisible ? "text" : "password"}
           placeholder={"Password*"}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onFocus={handleInputFocus}
-          onBlur={handlePasswordBlur}
+          {...register("password")}
         />
         <button
           type="button"
@@ -293,21 +171,17 @@ export default function RegistrationForm() {
           )}
         </button>
       </div>
-      {validationErrors.password && (
-        <ValidationError message={validationErrors.password} />
+      {errors.password?.message && (
+        <ValidationError message={errors.password.message} />
       )}
       <div className="flex w-full gap-1 rounded-full bg-sage-olive-500 py-1 px-3">
         <input
           id="confirmPassword"
-          name="confirmPassword"
           autoComplete="new-password"
           className="w-full grow text-white focus:outline-none"
           type={confirmPasswordVisible ? "text" : "password"}
           placeholder={"Confirm Password*"}
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          onFocus={handleInputFocus}
-          onBlur={handleConfirmPasswordBlur}
+          {...register("confirmPassword")}
         />
         <button
           type="button"
@@ -324,18 +198,16 @@ export default function RegistrationForm() {
           )}
         </button>
       </div>
-      {validationErrors.confirmPassword && (
-        <ValidationError message={validationErrors.confirmPassword} />
+      {errors.confirmPassword?.message && (
+        <ValidationError message={errors.confirmPassword.message} />
       )}
       {authError && <ValidationError message={authError} />}
-      {validationErrors.general && (
-        <ValidationError message={validationErrors.general} />
-      )}
       <button
         className="w-1/2 mt-4 text-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300"
         type="submit"
+        disabled={isSubmitting}
       >
-        Register
+        {isSubmitting ? "Registering..." : "Register"}
       </button>
       <div className="text-center text-xs text-ink-black-300">
         Already a member?{" "}
