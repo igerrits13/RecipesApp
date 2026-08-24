@@ -7,6 +7,10 @@ const sourceSchema = new mongoose.Schema(
       type: String,
       maxlength: 2048,
       trim: true,
+      validate: {
+        validator: (url) => !url || url.startsWith("https://"),
+        message: "URL must start with https://",
+      },
     },
     name: {
       type: String,

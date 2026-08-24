@@ -31,7 +31,10 @@ function App() {
       <Routes>
         <Route path="/" element={<HomeView />} />
         <Route path="/recipe" element={<RecipeView />} />
-        <Route path="/create-recipe" element={<CreateRecipeView />} />
+        <Route
+          path="/create-recipe"
+          element={!user ? <Navigate to="/login" /> : <CreateRecipeView />}
+        />
         <Route path="/user-profile" element={<UserProfileView />} />
         <Route path="/other-profile" element={<OtherProfileView />} />
         <Route

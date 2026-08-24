@@ -95,21 +95,21 @@ export const createRecipeSchema = z.object({
     .max(3, "No more than 3 linked recipes allowed"),
   source: z
     .object({
-      url: z
-        .string()
-        .trim()
-        .max(2048, "URL must be at most 2048 characters")
-        .optional(),
+      url: z.union([
+        z.literal(""),
+        z
+          .string()
+          .trim()
+          .url("Please enter a valid URL")
+          .startsWith("https://", "URL must start with https://")
+          .max(2048, "URL must be at most 2048 characters"),
+      ]),
       name: z
         .string()
         .trim()
         .min(1, "Name is required")
         .max(50, "Name must be at most 50 characters"),
-      note: z
-        .string()
-        .trim()
-        .max(100, "Note must be at most 100 characters")
-        .optional(),
+      note: z.string().trim().max(100, "Note must be at most 100 characters"),
     })
     .nullable(),
   tags: z

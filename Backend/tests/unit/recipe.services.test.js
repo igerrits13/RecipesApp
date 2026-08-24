@@ -1216,6 +1216,20 @@ describe("validateRecipeData", () => {
       );
     });
 
+    test("should throw an error if the source url is not https", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        source: {
+          name: "example source",
+          url: "http://www.example.com",
+        },
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain("Source URL must start with https://");
+    });
+
     test("should throw an error if the source name is not a string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,

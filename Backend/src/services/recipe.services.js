@@ -472,6 +472,11 @@ function validateRecipeSource(source, errors) {
     return null;
   }
 
+  if (source.url && !source.url.startsWith("https://")) {
+    pushUnique(errors, "Source URL must start with https://");
+    return null;
+  }
+
   if (
     source.name &&
     (typeof source.name !== "string" || source.name.trim().length > 100)
