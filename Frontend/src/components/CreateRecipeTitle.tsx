@@ -4,8 +4,13 @@ import { useFormContext } from "react-hook-form";
 import type { CreateRecipeData } from "../types/Recipe";
 import ValidationError from "./ValidationError";
 
+// Props for the CreateRecipeTitle component
+type ChildProps = {
+  width: number;
+};
+
 // CreateRecipeTitle component takes in and stores the title and inspiration information for a new recipe
-export default function CreateRecipeTitle() {
+export default function CreateRecipeTitle({ width }: ChildProps) {
   const {
     register,
     setValue,
@@ -15,14 +20,13 @@ export default function CreateRecipeTitle() {
     formState: { errors },
   } = useFormContext<CreateRecipeData>();
 
-  // State to track if the recipe will have a source
+  // State to track if the recipe will have a source and if the recipe should be public
   const [hasSource, setHasSource] = useState(false);
   const isPublished = watch("isPublished");
 
   // Function to handle updating the publish status of a recipe
   const handleTogglePublish = () => {
     setValue("isPublished", !getValues("isPublished"));
-    console.log(getValues("isPublished"));
   };
 
   // Function to clear all data from source values and their errors on removing source user
@@ -33,7 +37,7 @@ export default function CreateRecipeTitle() {
   };
 
   return (
-    <div className="px-4 py-2 flex flex-col place-items-center">
+    <div className="sm:col-start-2 px-4 py-2 flex flex-col place-items-center">
       <div className="flex place-self-end gap-1 items-center text-sage-olive-500">
         *Make Recipe Public
         <button
@@ -97,7 +101,11 @@ export default function CreateRecipeTitle() {
               id="inspirationLink"
               className="grow focus:outline-none text-olive-500 autofill-light"
               type="text"
-              placeholder="Inspiration Link (ex. https://example.com)"
+              placeholder={
+                width > 640
+                  ? "Inspiration Link (ex. https://example.com)"
+                  : "Inspiration Link (ex. https://...)"
+              }
               {...register("source.url")}
               onBlur={(e) => {
                 const trimmedSourceUrl = e.target.value.trim();

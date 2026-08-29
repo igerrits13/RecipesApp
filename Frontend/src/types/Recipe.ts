@@ -50,7 +50,7 @@ export interface CreateRecipeData {
   preptimeSeconds: number;
   cooktimeSeconds: number;
   servings: number;
-  image: string;
+  image: File | null;
   notes: string;
   linkedRecipes: { recipeId: string; role: string }[];
   source?: {

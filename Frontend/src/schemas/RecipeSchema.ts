@@ -1,5 +1,33 @@
 import { z } from "zod";
 
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB max image size
+const MAX_IMAGE_PIXELS = 12_000_000; // 12MP max image resolution
+const ACCEPTED_TYPES = ["image/jpeg", "image/png"]; // Only allow JPEG and PNG
+
+// Check the images resolution and size before uploading them to the server
+const checkImageResolution = (file: File): Promise<boolean> => {
+  return new Promise((resolve) => {
+    // Create a temporary URL for the image
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+
+    // Load the image and check its resolution
+    img.onload = () => {
+      const resolution = img.width * img.height;
+      URL.revokeObjectURL(objectUrl);
+      resolve(resolution <= MAX_IMAGE_PIXELS);
+    };
+
+    // If the image fails to load, reject the promise
+    img.onerror = () => {
+      URL.revokeObjectURL(img.src);
+      resolve(false);
+    };
+
+    img.src = objectUrl;
+  });
+};
+
 // Zod schema for the form values and errors for creating a new recipe
 export const createRecipeSchema = z.object({
   title: z
@@ -81,9 +109,33 @@ export const createRecipeSchema = z.object({
     .min(0, "Servings must be at least 0")
     .max(99, "Servings must be at most 99"),
   image: z
-    .string()
-    .trim()
-    .max(2048, "Image link must be at most 2048 characters"),
+    .instanceof(File)
+    .nullable()
+    .superRefine(async (file, ctx) => {
+      if (!file) return; // Skip validation if no file is selected
+      // Check file type and size
+      if (!ACCEPTED_TYPES.includes(file.type)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Only JPEG and PNG images are allowed",
+        });
+        return;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Image size must be less than 10MB",
+        });
+        return;
+      }
+      const isValidResolution = await checkImageResolution(file);
+      if (!isValidResolution) {
+        return ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Image resolution must be less than 25MP",
+        });
+      }
+    }),
   notes: z.string().trim().max(500, "Notes must be at most 500 characters"),
   linkedRecipes: z
     .array(
