@@ -5,6 +5,7 @@ import { createRecipeSchema } from "../schemas/RecipeSchema";
 import { FormProvider, useForm, type SubmitHandler } from "react-hook-form";
 import CreateRecipeTitle from "./CreateRecipeTitle";
 import CreateRecipeImage from "./CreateRecipeImage";
+import { compressRecipeImage } from "../utils/ImageHelpers";
 
 export default function CreateRecipeForm() {
   // Type for the form values
@@ -14,21 +15,21 @@ export default function CreateRecipeForm() {
   const methods = useForm<CreateRecipeData>({
     defaultValues: {
       title: "",
-      description: "",
-      ingredientSections: [],
-      stepSections: [],
-      preptimeSeconds: 0,
-      cooktimeSeconds: 0,
-      servings: 0,
+      // description: "",
+      // ingredientSections: [],
+      // stepSections: [],
+      // preptimeSeconds: 0,
+      // cooktimeSeconds: 0,
+      // servings: 0,
       image: null,
-      notes: "",
-      linkedRecipes: [],
-      source: null,
-      tags: [],
-      cuisines: [],
-      meals: [],
-      holidays: [],
-      seasons: [],
+      // notes: "",
+      // linkedRecipes: [],
+      // source: null,
+      // tags: [],
+      // cuisines: [],
+      // meals: [],
+      // holidays: [],
+      // seasons: [],
       isPublished: false,
     },
     resolver: zodResolver(createRecipeSchema),
@@ -49,9 +50,44 @@ export default function CreateRecipeForm() {
   });
 
   // Function to handle form submission
-  const onSubmit: SubmitHandler<CreateRecipeData> = (data) => {
+  const onSubmit: SubmitHandler<CreateRecipeData> = async (data) => {
+    console.log("Submitting");
+
     try {
-      console.log(data);
+      // Convert all data into a formData object to send to the backend
+      const formData = new FormData();
+
+      formData.append("title", data.title);
+      formData.append("isPublished", data.isPublished.toString());
+
+      if (data.source) {
+        formData.append("source.name", data.source.name);
+        formData.append("source.url", data.source.url);
+        formData.append("source.note", data.source.note);
+      }
+
+      if (data.image) {
+        const compressedImage = await compressRecipeImage(data.image);
+
+        console.log("Original:", {
+          name: data.image.name,
+          sizeMB: (data.image.size / 1024 / 1024).toFixed(2),
+          type: data.image.type,
+        });
+
+        console.log("Compressed:", {
+          name: compressedImage.name,
+          sizeMB: (compressedImage.size / 1024 / 1024).toFixed(2),
+          type: compressedImage.type,
+        });
+
+        formData.append("image", compressedImage);
+      }
+
+      // Temp debugging
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
     } catch (error) {
       console.error(error);
     }
