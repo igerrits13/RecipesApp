@@ -47,8 +47,8 @@ export interface CreateRecipeData {
   description: string;
   ingredientSections: CreateIngredientSectionData[];
   stepSections: CreateStepSectionData[];
-  preptimeSeconds: number;
-  cooktimeSeconds: number;
+  preptime: { hours: number; minutes: number };
+  cooktime: { hours: number; minutes: number };
   servings: number;
   image: File | null;
   notes: string;

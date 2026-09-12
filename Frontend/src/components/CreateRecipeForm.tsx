@@ -6,6 +6,7 @@ import { FormProvider, useForm, type SubmitHandler } from "react-hook-form";
 import CreateRecipeTitle from "./CreateRecipeTitle";
 import CreateRecipeImage from "./CreateRecipeImage";
 import { compressRecipeImage } from "../utils/ImageHelpers";
+import CreateRecipeDescription from "./CreateRecipeDescription";
 
 export default function CreateRecipeForm() {
   // Type for the form values
@@ -15,12 +16,12 @@ export default function CreateRecipeForm() {
   const methods = useForm<CreateRecipeData>({
     defaultValues: {
       title: "",
-      // description: "",
+      description: "",
       // ingredientSections: [],
       // stepSections: [],
-      // preptimeSeconds: 0,
-      // cooktimeSeconds: 0,
-      // servings: 0,
+      preptime: { hours: 0, minutes: 0 },
+      cooktime: { hours: 0, minutes: 0 },
+      servings: 0,
       image: null,
       // notes: "",
       // linkedRecipes: [],
@@ -58,14 +59,18 @@ export default function CreateRecipeForm() {
       const formData = new FormData();
 
       formData.append("title", data.title);
+      formData.append("description", data.description);
       formData.append("isPublished", data.isPublished.toString());
 
-      if (data.source) {
-        formData.append("source.name", data.source.name);
-        formData.append("source.url", data.source.url);
-        formData.append("source.note", data.source.note);
-      }
+      // Convert preptime and cooktime to seconds
+      const preptimeSeconds =
+        data.preptime.hours * 3600 + data.preptime.minutes * 60;
+      formData.append("preptimeSeconds", preptimeSeconds.toString());
+      const cooktimeSeconds =
+        data.cooktime.hours * 3600 + data.cooktime.minutes * 60;
+      formData.append("cooktimeSeconds", cooktimeSeconds.toString());
 
+      // Add the image if one is provided
       if (data.image) {
         const compressedImage = await compressRecipeImage(data.image);
 
@@ -84,6 +89,13 @@ export default function CreateRecipeForm() {
         formData.append("image", compressedImage);
       }
 
+      // Add the source if one is provided
+      if (data.source) {
+        formData.append("source.name", data.source.name);
+        formData.append("source.url", data.source.url);
+        formData.append("source.note", data.source.note);
+      }
+
       // Temp debugging
       for (const [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
@@ -96,9 +108,17 @@ export default function CreateRecipeForm() {
   return (
     <FormProvider {...methods}>
       <form className="flex flex-col" onSubmit={methods.handleSubmit(onSubmit)}>
-        <div className="grid sm:grid-cols-[1fr_3fr]">
+        <div className="md:grid md:grid-cols-[1fr_4fr]">
           <CreateRecipeTitle width={width} />
-          <CreateRecipeImage />
+          {width <= 768 ? (
+            <>
+              <CreateRecipeImage /> <CreateRecipeDescription />
+            </>
+          ) : (
+            <>
+              <CreateRecipeDescription /> <CreateRecipeImage />
+            </>
+          )}
         </div>
         <button
           className={`place-self-center w-1/2 sm:w-1/3 lg:w-1/4 2xl:w-1/6 mt-4 text-center rounded-full ${methods.formState.isSubmitting ? "bg-rosewood-300" : "bg-rosewood-500"} text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300`}

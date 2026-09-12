@@ -45,6 +45,15 @@ input.autofill-light:-webkit-autofill:active {
   box-shadow: 0 0 0px 1000px #ffffff inset !important;
 }
 
+input.autofill-parchment:-webkit-autofill,
+input.autofill-parchment:-webkit-autofill:hover,
+input.autofill-parchment:-webkit-autofill:focus,
+input.autofill-parchment:-webkit-autofill:active {
+  -webkit-text-fill-color: #788164 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #f0e4cc inset !important;
+  box-shadow: 0 0 0px 1000px #f0e4cc inset !important;
+}
+
 @theme {
   /* Fonts */
   --font-body: "Source Sans 3", sans-serif;

@@ -102,9 +102,9 @@ export default function CreateRecipeTitle({ width }: ChildProps) {
               className="grow focus:outline-none text-olive-500 autofill-light"
               type="text"
               placeholder={
-                width > 640
-                  ? "Inspiration Link (ex. https://example.com)"
-                  : "Inspiration Link (ex. https://...)"
+                width <= 768
+                  ? "Inspiration Link (ex. https://...)"
+                  : "Inspiration Link (ex. https://example.com)"
               }
               {...register("source.url")}
               onBlur={(e) => {

@@ -28,6 +28,25 @@ const checkImageResolution = (file: File): Promise<boolean> => {
   });
 };
 
+// Check to make sure the prep or cook time does not go over one full day
+const durationSchema = z
+  .object({
+    hours: z
+      .number({ message: "Hours must be a number" })
+      .finite({ message: "Hours must be a number" })
+      .min(0, "Hours must be at least 0")
+      .max(24, "Hours must be at most 24"),
+    minutes: z
+      .number({ message: "Minutes must be a number" })
+      .finite({ message: "Minutes must be a number" })
+      .min(0, "Minutes must be at least 0")
+      .max(59, "Minutes must be at most 59"),
+  })
+  .refine((data) => data.hours * 3600 + data.minutes * 60 <= 86400, {
+    message: "Total duration must not exceed 24 hours",
+    path: ["hours"],
+  });
+
 // Zod schema for the form values and errors for creating a new recipe
 export const createRecipeSchema = z.object({
   title: z
@@ -36,10 +55,10 @@ export const createRecipeSchema = z.object({
     .min(1, "Title is required")
     .min(3, "Title must be at least 3 characters")
     .max(100, "Title must be at most 100 characters"),
-  // description: z
-  //   .string()
-  //   .trim()
-  //   .max(500, "Description must be at most 500 characters"),
+  description: z
+    .string()
+    .trim()
+    .max(500, "Description must be at most 500 characters"),
   // ingredientSections: z
   //   .array(
   //     z.object({
@@ -100,14 +119,17 @@ export const createRecipeSchema = z.object({
   //   .number()
   //   .min(0, "Prep time must be at least 0 seconds")
   //   .max(86400, "Prep time must be at most 1 day"),
+  preptime: durationSchema,
+  cooktime: durationSchema,
   // cooktimeSeconds: z
   //   .number()
   //   .min(0, "Cook time must be at least 0 seconds")
   //   .max(86400, "Cook time must be at most 1 day"),
-  // servings: z
-  //   .number()
-  //   .min(0, "Servings must be at least 0")
-  //   .max(99, "Servings must be at most 99"),
+  servings: z
+    .number({ message: "Servings must be a whole number" })
+    .int({ message: "Servings must be a whole number" })
+    .min(0, "Servings must be at least 0")
+    .max(99, "Servings must be at most 99"),
   image: z
     .instanceof(File)
     .nullable()
