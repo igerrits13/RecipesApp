@@ -18,7 +18,7 @@ export default function SecondaryNavBar() {
   });
 
   return (
-    <nav className="w-full flex items-center justify-between">
+    <nav className="w-full flex items-center pb-4 justify-between">
       <div className="font-title text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl">
         Recipe Website
       </div>

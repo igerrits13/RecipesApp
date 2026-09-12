@@ -27,7 +27,7 @@ export default function UserDropdown() {
         className="inline-flex items-center focus:not-data-focus:outline-none cursor-pointer"
       >
         <img
-          className="rounded-full size-8 sm:size-12 md:size-14 lg:size-16 xl:size-18 2xl:size-20"
+          className="rounded-full size-8 sm:size-12 md:size-14 lg:size-16 xl:size-18 2xl:size-20 object-cover"
           src={
             user
               ? user.profileImage
