@@ -59,40 +59,40 @@ export const createRecipeSchema = z.object({
     .string()
     .trim()
     .max(500, "Description must be at most 500 characters"),
-  // ingredientSections: z
-  //   .array(
-  //     z.object({
-  //       sectionTitle: z
-  //         .string()
-  //         .trim()
-  //         .max(100, "Section title must be at most 100 characters"),
-  //       ingredients: z
-  //         .array(
-  //           z.object({
-  //             quantity: z
-  //               .number()
-  //               .min(0, "Quantity must be at least 0")
-  //               .max(99, "Quantity must be at most 99")
-  //               .nullable(),
-  //             measurement: z.string().nullable(),
-  //             ingredient: z
-  //               .string()
-  //               .trim()
-  //               .min(1, "Ingredient is required")
-  //               .min(2, "Ingredient must be at least 2 characters")
-  //               .max(100, "Ingredient must be at most 100 characters"),
-  //             additionalInfo: z
-  //               .string()
-  //               .trim()
-  //               .max(100, "Additional info must be at most 100 characters"),
-  //           }),
-  //         )
-  //         .min(1, "At least one ingredient is required")
-  //         .max(50, "No more than 50 ingredients allowed"),
-  //     }),
-  //   )
-  //   .min(1, "At least one ingredient section is required")
-  //   .max(5, "No more than 5 ingredient sections allowed"),
+  ingredientSections: z
+    .array(
+      z.object({
+        sectionTitle: z
+          .string()
+          .trim()
+          .max(100, "Section title must be at most 100 characters"),
+        ingredients: z
+          .array(
+            z.object({
+              quantity: z
+                .number()
+                .min(0, "Quantity must be at least 0")
+                .max(99, "Quantity must be at most 99")
+                .nullable(),
+              measurement: z.string().nullable(),
+              ingredient: z
+                .string()
+                .trim()
+                .min(1, "Ingredient is required")
+                .min(2, "Ingredient must be at least 2 characters")
+                .max(100, "Ingredient must be at most 100 characters"),
+              additionalInfo: z
+                .string()
+                .trim()
+                .max(100, "Additional info must be at most 100 characters"),
+            }),
+          )
+          .min(1, "At least one ingredient is required")
+          .max(50, "No more than 50 ingredients allowed"),
+      }),
+    )
+    .min(1, "At least one ingredient section is required")
+    .max(5, "No more than 5 ingredient sections allowed"),
   // stepSections: z
   //   .array(
   //     z.object({

@@ -13,9 +13,9 @@ export default function CreateRecipeDescription() {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex grow flex-col py-6 px-2 items-center gap-2 h-full bg-antique-parchment-500 text-ink-black-500 text-nowrap">
+      <div className="flex grow flex-col py-6 items-center gap-2 h-full bg-antique-parchment-500 text-ink-black-500 text-nowrap">
         {/* Prep/Cook time */}
-        <div className="flex">
+        <div className="flex px-2">
           <div className="text-olive-500"> * </div>
           <input
             className="focus:outline-none w-6 lg:w-8 text-center text-olive-500 autofill-parchment"
@@ -61,7 +61,7 @@ export default function CreateRecipeDescription() {
         )}
 
         {/* Servings */}
-        <div className="flex">
+        <div className="flex px-2">
           <div className="text-olive-500"> * </div>
           <input
             className="focus:outline-none w-6 lg:w-8 text-center text-olive-500 autofill-parchment"
@@ -78,7 +78,7 @@ export default function CreateRecipeDescription() {
 
         {/* Description */}
         <textarea
-          className="focus:outline-none w-full h-full px-2 text-center text-olive-500 autofill-parchment resize-none"
+          className="focus:outline-none w-full h-full px-4 text-start text-olive-500 autofill-parchment resize-none"
           placeholder="Describe your dish"
           {...register("description")}
           onBlur={(e) => {

@@ -7,6 +7,7 @@ import CreateRecipeTitle from "./CreateRecipeTitle";
 import CreateRecipeImage from "./CreateRecipeImage";
 import { compressRecipeImage } from "../utils/ImageHelpers";
 import CreateRecipeDescription from "./CreateRecipeDescription";
+import CreateRecipeIngredients from "./CreateRecipeIngredients";
 
 export default function CreateRecipeForm() {
   // Type for the form values
@@ -17,7 +18,19 @@ export default function CreateRecipeForm() {
     defaultValues: {
       title: "",
       description: "",
-      // ingredientSections: [],
+      ingredientSections: [
+        {
+          sectionTitle: "",
+          ingredients: [
+            {
+              quantity: null,
+              measurement: null,
+              ingredient: "",
+              additionalInfo: "",
+            },
+          ],
+        },
+      ],
       // stepSections: [],
       preptime: { hours: 0, minutes: 0 },
       cooktime: { hours: 0, minutes: 0 },
@@ -25,7 +38,7 @@ export default function CreateRecipeForm() {
       image: null,
       // notes: "",
       // linkedRecipes: [],
-      // source: null,
+      source: null,
       // tags: [],
       // cuisines: [],
       // meals: [],
@@ -60,6 +73,13 @@ export default function CreateRecipeForm() {
 
       formData.append("title", data.title);
       formData.append("description", data.description);
+
+      // Convert the ingredient sections into a JSON string and add it to the formData object
+      formData.append(
+        "ingredientSections",
+        JSON.stringify(data.ingredientSections),
+      );
+
       formData.append("isPublished", data.isPublished.toString());
 
       // Convert preptime and cooktime to seconds
@@ -69,6 +89,8 @@ export default function CreateRecipeForm() {
       const cooktimeSeconds =
         data.cooktime.hours * 3600 + data.cooktime.minutes * 60;
       formData.append("cooktimeSeconds", cooktimeSeconds.toString());
+
+      formData.append("servings", data.servings.toString());
 
       // Add the image if one is provided
       if (data.image) {
@@ -91,9 +113,7 @@ export default function CreateRecipeForm() {
 
       // Add the source if one is provided
       if (data.source) {
-        formData.append("source.name", data.source.name);
-        formData.append("source.url", data.source.url);
-        formData.append("source.note", data.source.note);
+        formData.append("source", JSON.stringify(data.source));
       }
 
       // Temp debugging
@@ -107,7 +127,22 @@ export default function CreateRecipeForm() {
 
   return (
     <FormProvider {...methods}>
-      <form className="flex flex-col" onSubmit={methods.handleSubmit(onSubmit)}>
+      {/* <form className="flex flex-col" onSubmit={methods.handleSubmit(onSubmit)}> */}
+      <form
+        className="flex flex-col"
+        onSubmit={methods.handleSubmit(
+          (data) => {
+            console.log("SUBMIT SUCCESS - data:", data);
+            onSubmit(data);
+          },
+          (errors) => {
+            console.log(
+              "SUBMIT FAILED - validation errors:",
+              JSON.stringify(errors, null, 2),
+            );
+          },
+        )}
+      >
         <div className="md:grid md:grid-cols-[1fr_4fr]">
           <CreateRecipeTitle width={width} />
           {width <= 768 ? (
@@ -119,6 +154,7 @@ export default function CreateRecipeForm() {
               <CreateRecipeDescription /> <CreateRecipeImage />
             </>
           )}
+          <CreateRecipeIngredients />
         </div>
         <button
           className={`place-self-center w-1/2 sm:w-1/3 lg:w-1/4 2xl:w-1/6 mt-4 text-center rounded-full ${methods.formState.isSubmitting ? "bg-rosewood-300" : "bg-rosewood-500"} text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300`}
