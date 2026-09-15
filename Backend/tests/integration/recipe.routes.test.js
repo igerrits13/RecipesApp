@@ -398,7 +398,7 @@ describe("POST /api/v1/recipes", () => {
           ingredients: [
             {
               ingredient: testIngredient.title,
-              quantity: 2,
+              quantity: "2",
               measurement: "tablespoon",
             },
           ],
@@ -771,7 +771,7 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
           ingredients: [
             {
               ingredient: testIngredient._id,
-              quantity: 2,
+              quantity: "2",
               measurement: testMeasurement._id,
             },
           ],
@@ -1084,7 +1084,7 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
           ingredients: [
             {
               ingredient: testIngredient._id,
-              quantity: 2,
+              quantity: "2",
               measurement: deletedMeasurement._id,
             },
           ],
@@ -1127,7 +1127,7 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
           ingredients: [
             {
               ingredient: deletedIngredient._id,
-              quantity: 2,
+              quantity: "2",
               measurement: testMeasurement._id,
             },
           ],
@@ -1173,7 +1173,7 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
           ingredients: [
             {
               ingredient: testIngredient._id,
-              quantity: 2,
+              quantity: "2",
               measurement: testMeasurement._id,
             },
           ],
@@ -1280,7 +1280,7 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
           ingredients: [
             {
               ingredient: testIngredient._id,
-              quantity: 2,
+              quantity: "2",
               measurement: testMeasurement._id,
             },
           ],
@@ -1387,12 +1387,12 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
           ingredients: [
             {
               ingredient: deletedIngredient._id,
-              quantity: 2,
+              quantity: "2",
               measurement: deletedMeasurement._id,
             },
             {
               ingredient: testIngredient._id,
-              quantity: 2,
+              quantity: "2",
               measurement: testMeasurement._id,
             },
           ],
@@ -1736,7 +1736,7 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
           ingredients: [
             {
               ingredient: testIngredient.title,
-              quantity: 3,
+              quantity: "3",
               measurement: testMeasurement.title,
             },
           ],

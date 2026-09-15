@@ -204,8 +204,8 @@ export const fullTestRecipeDataComplete = {
     {
       sectionTitle: "Test Section",
       ingredients: [
-        { quantity: 1, ingredient: "ingredient1" },
-        { quantity: 2, ingredient: "ingredient2" },
+        { quantity: "1", ingredient: "ingredient1" },
+        { quantity: "2", ingredient: "ingredient2" },
       ],
     },
   ],

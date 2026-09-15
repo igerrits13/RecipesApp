@@ -71,7 +71,7 @@ export interface IngredientSection {
   _id: string;
   sectionTitle: string;
   ingredients: {
-    quantity?: number | null;
+    quantity?: string | null;
     measurement?: Measurement | null;
     ingredient: Ingredient;
     additionalInfo?: string | null;
@@ -82,7 +82,7 @@ export interface IngredientSection {
 export interface CreateIngredientSectionData {
   sectionTitle: string;
   ingredients: {
-    quantity?: number | null;
+    quantity?: string | null;
     measurement?: string | null;
     ingredient: string;
     additionalInfo?: string | null;

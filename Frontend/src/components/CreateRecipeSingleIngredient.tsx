@@ -39,10 +39,23 @@ export default function CreateRecipeSingleIngredient({
         type="text"
         {...register(
           `ingredientSections.${sectionIndex}.ingredients.${ingredientIndex}.quantity`,
-          {
-            valueAsNumber: true,
-          },
         )}
+        onBlur={(e) => {
+          const trimmedQuantity = e.target.value.trim();
+          if (trimmedQuantity === "") {
+            setValue(
+              `ingredientSections.${sectionIndex}.ingredients.${ingredientIndex}.quantity`,
+              null,
+              { shouldValidate: true },
+            );
+          } else {
+            setValue(
+              `ingredientSections.${sectionIndex}.ingredients.${ingredientIndex}.quantity`,
+              trimmedQuantity,
+              { shouldValidate: true },
+            );
+          }
+        }}
       />
       <input
         className="focus:outline-none w-full text-center bg-gray-300 autofill-gray"

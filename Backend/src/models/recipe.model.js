@@ -60,9 +60,11 @@ const recipeSchema = mongoose.Schema(
             type: [
               {
                 quantity: {
-                  type: Number,
-                  min: 0,
-                  max: 99,
+                  type: String,
+                  maxlength: 20,
+                  trim: true,
+                  regex:
+                    /^(?:(?:0(?!\.0+$)\.\d+|[1-9]\d?(?:\.\d+)?)|(?:[1-9]\d?\s+[1-9]\d*\/[1-9]\d*)|(?:[1-9]\d*\/[1-9]\d*))$/,
                 },
                 measurement: {
                   type: mongoose.Schema.Types.ObjectId,

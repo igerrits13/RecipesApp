@@ -70,9 +70,13 @@ export const createRecipeSchema = z.object({
           .array(
             z.object({
               quantity: z
-                .number()
-                .min(0, "Quantity must be at least 0")
-                .max(99, "Quantity must be at most 99")
+                .string()
+                .trim()
+                .max(10, "Quantity must be at most 10 characters")
+                .regex(
+                  /^(?:(?:0(?!\.0+$)\.\d+|[1-9]\d?(?:\.\d+)?)|(?:[1-9]\d?\s+[1-9]\d*\/[1-9]\d*)|(?:[1-9]\d*\/[1-9]\d*))$/,
+                  "Quantity must be a valid number or fraction bertween 0 and 99",
+                )
                 .nullable(),
               measurement: z.string().nullable(),
               ingredient: z

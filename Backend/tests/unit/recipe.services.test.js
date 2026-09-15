@@ -247,12 +247,12 @@ describe("validateRecipeData", () => {
         {
           ingredient: "   Test Ingredient 1   ",
           measurement: "cup",
-          quantity: 1,
+          quantity: "1",
         },
         {
           ingredient: "   Test Ingredient 2   ",
           measurement: "tablespoon",
-          quantity: 2,
+          quantity: "2",
         },
       ];
 
@@ -272,14 +272,64 @@ describe("validateRecipeData", () => {
             {
               ingredient: "Test Ingredient 1",
               measurement: "cup",
-              quantity: 1,
+              quantity: "1",
             },
             {
               ingredient: "Test Ingredient 2",
               measurement: "tablespoon",
-              quantity: 2,
+              quantity: "2",
             },
           ],
+        },
+      ]);
+    });
+
+    test("should return an array of valid ingredients while allowing different forms of quantities", () => {
+      const validIngredients = [
+        {
+          ingredient: "Test Ingredient 1",
+          measurement: "cup",
+          quantity: "1.5",
+        },
+
+        {
+          ingredient: "Test Ingredient 1",
+          measurement: "cup",
+          quantity: "0.5",
+        },
+
+        {
+          ingredient: "Test Ingredient 1",
+          measurement: "cup",
+          quantity: "99.99",
+        },
+
+        {
+          ingredient: "Test Ingredient 2",
+          measurement: "tablespoon",
+          quantity: "1/3",
+        },
+
+        {
+          ingredient: "Test Ingredient 3",
+          measurement: "ounce",
+          quantity: "1 1/2",
+        },
+      ];
+
+      const dataWithWhitespace = {
+        ...fullTestRecipeDataComplete,
+        ingredientSections: [
+          { sectionTitle: "Test Section", ingredients: validIngredients },
+        ],
+      };
+
+      const result = validateRecipeData(dataWithWhitespace);
+
+      expect(result.ingredientSections).toEqual([
+        {
+          sectionTitle: "Test Section",
+          ingredients: validIngredients,
         },
       ]);
     });
@@ -352,7 +402,7 @@ describe("validateRecipeData", () => {
             {
               ingredient: "Test Ingredient",
               measurement: "cup",
-              quantity: 1,
+              quantity: "1",
             },
           ],
         })),
@@ -375,7 +425,7 @@ describe("validateRecipeData", () => {
               {
                 ingredient: "Test Ingredient",
                 measurement: "cup",
-                quantity: 1,
+                quantity: "1",
               },
             ],
           },
@@ -399,7 +449,7 @@ describe("validateRecipeData", () => {
               {
                 ingredient: "Test Ingredient",
                 measurement: "cup",
-                quantity: 1,
+                quantity: "1",
               },
             ],
           },
@@ -429,6 +479,54 @@ describe("validateRecipeData", () => {
       expect(errors).toContain("Ingredients must be an array");
     });
 
+    test("should throw an error if quantity is not a string", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        ingredientSections: [
+          {
+            sectionTitle: "Test Section",
+            ingredients: [
+              {
+                ingredient: "Test Ingredient",
+                measurement: "cup",
+                quantity: 123,
+              },
+            ],
+          },
+        ],
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain(
+        "Ingredient quantities must be a string and cannot exceed 10 characters",
+      );
+    });
+
+    test("should throw an error if quantity is too long", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        ingredientSections: [
+          {
+            sectionTitle: "Test Section",
+            ingredients: [
+              {
+                ingredient: "Test Ingredient",
+                measurement: "cup",
+                quantity: "A".repeat(11),
+              },
+            ],
+          },
+        ],
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain(
+        "Ingredient quantities must be a string and cannot exceed 10 characters",
+      );
+    });
+
     test("should throw an error if ingredient is not a valid string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
@@ -436,8 +534,8 @@ describe("validateRecipeData", () => {
           {
             sectionTitle: "Test Section",
             ingredients: [
-              { ingredient: 123, measurement: "cups", quantity: 1 },
-              { ingredient: "   ", measurement: "tablespoons", quantity: 2 },
+              { ingredient: 123, measurement: "cups", quantity: "1" },
+              { ingredient: "   ", measurement: "tablespoons", quantity: "2" },
             ],
           },
         ],
@@ -457,7 +555,7 @@ describe("validateRecipeData", () => {
             ingredients: Array.from({ length: 51 }, (_, i) => ({
               ingredient: `Ingredient ${i + 1}`,
               measurement: "units",
-              quantity: 1,
+              quantity: "1",
             })),
           },
         ],
@@ -475,7 +573,7 @@ describe("validateRecipeData", () => {
           {
             sectionTitle: "Test Section",
             ingredients: [
-              { ingredient: "A", measurement: "cups", quantity: 1 },
+              { ingredient: "A", measurement: "cups", quantity: "1" },
             ],
           },
         ],
@@ -495,7 +593,11 @@ describe("validateRecipeData", () => {
           {
             sectionTitle: "Test Section",
             ingredients: [
-              { ingredient: "A".repeat(101), measurement: "cups", quantity: 1 },
+              {
+                ingredient: "A".repeat(101),
+                measurement: "cups",
+                quantity: "1",
+              },
             ],
           },
         ],
@@ -518,7 +620,7 @@ describe("validateRecipeData", () => {
               {
                 ingredient: "Test Ingredient",
                 measurement: "cups",
-                quantity: -1,
+                quantity: "-1",
               },
             ],
           },
@@ -528,7 +630,7 @@ describe("validateRecipeData", () => {
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
       expect(errors).toContain(
-        "Ingredient quantities must be between 0 and 99",
+        "Ingredient quantities must be a represent a number or fraction between 0 and 99",
       );
     });
 
@@ -542,7 +644,7 @@ describe("validateRecipeData", () => {
               {
                 ingredient: "Test Ingredient",
                 measurement: "cups",
-                quantity: 100,
+                quantity: "100",
               },
             ],
           },
@@ -552,7 +654,7 @@ describe("validateRecipeData", () => {
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
       expect(errors).toContain(
-        "Ingredient quantities must be between 0 and 99",
+        "Ingredient quantities must be a represent a number or fraction between 0 and 99",
       );
     });
 
@@ -566,7 +668,7 @@ describe("validateRecipeData", () => {
               {
                 ingredient: "Test Ingredient",
                 measurement: "invalid",
-                quantity: 1,
+                quantity: "1",
               },
             ],
           },
@@ -588,7 +690,7 @@ describe("validateRecipeData", () => {
               {
                 ingredient: "Test Ingredient",
                 measurement: "cup",
-                quantity: 1,
+                quantity: "1",
                 additionalInfo: 123,
               },
             ],
@@ -613,7 +715,7 @@ describe("validateRecipeData", () => {
               {
                 ingredient: "Test Ingredient",
                 measurement: "cup",
-                quantity: 1,
+                quantity: "1",
                 additionalInfo: "A".repeat(101),
               },
             ],
@@ -1542,7 +1644,7 @@ describe("validateAndSaveNewRecipe", () => {
     for (const section of result.ingredientSections) {
       section.ingredients.forEach((item) => {
         expect(item.measurement).toBeNull();
-        expect(typeof item.quantity).toBe("number");
+        expect(typeof item.quantity).toBe("string");
       });
     }
     expect(result.stepSections[0].steps).toEqual(
@@ -1593,7 +1695,7 @@ describe("validateAndSaveNewRecipe", () => {
             {
               ingredient: "Test Ingredient",
               measurement: null,
-              quantity: 1,
+              quantity: "1",
               additionalInfo:
                 "   This is additional info with extra whitespace.   ",
             },
@@ -1796,7 +1898,7 @@ describe("validateAndUpdateRecipe", () => {
     );
     result.ingredientSections[0].ingredients.forEach((item) => {
       expect(item.measurement).toBeNull();
-      expect(typeof item.quantity).toBe("number");
+      expect(typeof item.quantity).toBe("string");
     });
     for (const section of result.stepSections) {
       section.steps.forEach((step, index) => {
@@ -1950,7 +2052,7 @@ describe("validateAndUpdateRecipe", () => {
       ingredientSections: [
         {
           sectionTitle: "Test Section",
-          ingredients: [{ ingredient: "New Ingredient", quantity: 2 }],
+          ingredients: [{ ingredient: "New Ingredient", quantity: "2" }],
         },
       ],
     };
@@ -1969,7 +2071,7 @@ describe("validateAndUpdateRecipe", () => {
     expect(
       result.ingredientSections[0].ingredients[0].ingredient.toString(),
     ).toBe(newIngredient._id.toString());
-    expect(result.ingredientSections[0].ingredients[0].quantity).toBe(2);
+    expect(result.ingredientSections[0].ingredients[0].quantity).toBe("2");
     expect(result.title).toBe(existingRecipe.title);
     expect(result.slug).toBe(existingRecipe.slug);
     expect(result.description).toBe(existingRecipe.description);

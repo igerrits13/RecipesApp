@@ -39,6 +39,8 @@ const allowedMeasurementUnits = [
   "a dash",
   "to taste",
 ];
+const quantityRegex =
+  /^(?:(?:0(?!\.0+$)\.\d+|[1-9]\d?(?:\.\d+)?)|(?:[1-9]\d?\s+[1-9]\d*\/[1-9]\d*)|(?:[1-9]\d*\/[1-9]\d*))$/;
 
 // Helper function to validate that all object fields are filled in correctly
 export function validateRecipeData(recipe) {
@@ -251,9 +253,25 @@ function validateRecipeIngredients(ingredientSections, errors) {
         return [];
       }
 
-      if (item.quantity !== null && (item.quantity < 0 || item.quantity > 99)) {
-        pushUnique(errors, "Ingredient quantities must be between 0 and 99");
-        return [];
+      if (item.quantity) {
+        if (
+          typeof item.quantity !== "string" ||
+          item.quantity.trim().length > 10
+        ) {
+          pushUnique(
+            errors,
+            "Ingredient quantities must be a string and cannot exceed 10 characters",
+          );
+          return [];
+        } else if (!quantityRegex.test(item.quantity)) {
+          pushUnique(
+            errors,
+            "Ingredient quantities must be a represent a number or fraction between 0 and 99",
+          );
+          return [];
+        } else {
+          item.quantity = item.quantity.trim();
+        }
       }
 
       if (
@@ -274,7 +292,9 @@ function validateRecipeIngredients(ingredientSections, errors) {
             "Additional information for ingredients must be a string and cannot exceed 100 characters",
           );
           return [];
-        } else item.additionalInfo = item.additionalInfo.trim();
+        } else {
+          item.additionalInfo = item.additionalInfo.trim();
+        }
       }
     });
 
@@ -677,7 +697,7 @@ export async function validateAndSaveNewRecipe({
       collectionModel: Ingredient,
       getName: (item) => item.ingredient,
       mapResults: (item, ingredientId) => ({
-        quantity: item.quantity || null,
+        quantity: item.quantity || "",
         // measurement: item.measurement || null,
         measurement: item.measurement
           ? measurementMap.get(item.measurement.trim().toLowerCase())
@@ -852,7 +872,7 @@ export async function validateAndUpdateRecipe({
         collectionModel: Ingredient,
         getName: (item) => item.ingredient,
         mapResults: (item, ingredientId) => ({
-          quantity: item.quantity || null,
+          quantity: item.quantity || "",
           // measurement: item.measurement || null,
           measurement: item.measurement
             ? measurementMap.get(item.measurement.trim().toLowerCase())
