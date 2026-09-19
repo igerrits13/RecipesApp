@@ -58,7 +58,7 @@ export default function CreateRecipeIngredientSection({
               className="place-items-center hover:cursor-pointer"
               onClick={() => removeSection(sectionIndex)}
             >
-              <Minus className="text-olive-500 " />
+              <Minus className="size-6 text-olive-500 " />
             </button>
           )}
         </div>
@@ -93,7 +93,7 @@ export default function CreateRecipeIngredientSection({
                 )
               }
             >
-              <Plus className="text-olive-500" />
+              <Plus className="size-6 text-olive-500" />
             </button>
           )}
         </div>

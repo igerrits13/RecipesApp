@@ -107,14 +107,17 @@ const recipeSchema = mongoose.Schema(
           steps: {
             type: [
               {
-                type: String,
-                trim: true,
-                minlength: 3,
-                maxlength: 500,
-                required: true,
+                step: {
+                  type: String,
+                  trim: true,
+                  minlength: 3,
+                  maxlength: 500,
+                  required: true,
+                },
               },
             ],
             required: true,
+            _id: false,
             validate: {
               validator: (v) =>
                 Array.isArray(v) && v.length > 0 && v.length <= 50,

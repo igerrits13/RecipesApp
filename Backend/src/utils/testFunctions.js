@@ -148,7 +148,7 @@ export const testRecipeData = {
   slug: `test-recipe`,
   stepSections: [
     {
-      steps: ["Step 1", "Step 2"],
+      steps: [{ step: "Step 1" }, { step: "Step 2" }],
     },
   ],
   preptimeSeconds: 600,
@@ -187,7 +187,7 @@ const fullTestRecipeData = {
   description: "This is a test recipe.",
   stepSections: [
     {
-      steps: ["Step 1", "Step 2"],
+      steps: [{ step: "Step 1" }, { step: "Step 2" }],
     },
   ],
   preptimeSeconds: 600,
@@ -212,7 +212,7 @@ export const fullTestRecipeDataComplete = {
   description: "This is a test recipe.",
   stepSections: [
     {
-      steps: ["Step 1", "Step 2"],
+      steps: [{ step: "Step 1" }, { step: "Step 2" }],
     },
   ],
   preptimeSeconds: 600,

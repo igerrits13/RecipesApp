@@ -347,8 +347,10 @@ function validateRecipeSteps(stepSections, errors) {
     }
 
     const validSteps = section.steps
-      .filter((step) => typeof step === "string" && step.trim().length !== 0)
-      .map((step) => step.trim());
+      .filter(
+        (step) => typeof step.step === "string" && step.step.trim() !== "",
+      )
+      .map((step) => ({ step: step.step.trim() }));
 
     if (validSteps.length === 0) {
       pushUnique(errors, "A recipe must have at least one step");
@@ -362,7 +364,7 @@ function validateRecipeSteps(stepSections, errors) {
 
     // Confirm all step lengths are valid
     validSteps.forEach((step) => {
-      if (step.length < 3 || step.length > 500) {
+      if (step.step.length < 3 || step.step.length > 500) {
         pushUnique(
           errors,
           "Each step must be between 3 and 500 characters long",

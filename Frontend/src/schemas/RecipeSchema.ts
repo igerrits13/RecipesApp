@@ -97,38 +97,32 @@ export const createRecipeSchema = z.object({
     )
     .min(1, "At least one ingredient section is required")
     .max(5, "No more than 5 ingredient sections allowed"),
-  // stepSections: z
-  //   .array(
-  //     z.object({
-  //       sectionTitle: z
-  //         .string()
-  //         .trim()
-  //         .max(100, "Section title must be at most 100 characters"),
-  //       steps: z
-  //         .array(
-  //           z
-  //             .string()
-  //             .trim()
-  //             .min(1, "Step is required")
-  //             .min(3, "Step must be at least 3 characters")
-  //             .max(500, "Step must be at most 500 characters"),
-  //         )
-  //         .min(1, "At least one step is required")
-  //         .max(50, "No more than 50 steps allowed"),
-  //     }),
-  //   )
-  //   .min(1, "At least one step section is required")
-  //   .max(5, "No more than 5 step sections allowed"),
-  // preptimeSeconds: z
-  //   .number()
-  //   .min(0, "Prep time must be at least 0 seconds")
-  //   .max(86400, "Prep time must be at most 1 day"),
+  stepSections: z
+    .array(
+      z.object({
+        sectionTitle: z
+          .string()
+          .trim()
+          .max(100, "Section title must be at most 100 characters"),
+        steps: z
+          .array(
+            z.object({
+              step: z
+                .string()
+                .trim()
+                .min(1, "Step is required")
+                .min(3, "Step must be at least 3 characters")
+                .max(500, "Step must be at most 500 characters"),
+            }),
+          )
+          .min(1, "At least one step is required")
+          .max(50, "No more than 50 steps allowed"),
+      }),
+    )
+    .min(1, "At least one step section is required")
+    .max(5, "No more than 5 step sections allowed"),
   preptime: durationSchema,
   cooktime: durationSchema,
-  // cooktimeSeconds: z
-  //   .number()
-  //   .min(0, "Cook time must be at least 0 seconds")
-  //   .max(86400, "Cook time must be at most 1 day"),
   servings: z
     .number({ message: "Servings must be a whole number" })
     .int({ message: "Servings must be a whole number" })

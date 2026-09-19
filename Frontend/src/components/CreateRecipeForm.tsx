@@ -8,6 +8,7 @@ import CreateRecipeImage from "./CreateRecipeImage";
 import { compressRecipeImage } from "../utils/ImageHelpers";
 import CreateRecipeDescription from "./CreateRecipeDescription";
 import CreateRecipeIngredients from "./CreateRecipeIngredients";
+import CreateRecipeSteps from "./CreateRecipeSteps";
 
 export default function CreateRecipeForm() {
   // Type for the form values
@@ -31,7 +32,7 @@ export default function CreateRecipeForm() {
           ],
         },
       ],
-      // stepSections: [],
+      stepSections: [{ sectionTitle: "", steps: [{ step: "" }] }],
       preptime: { hours: 0, minutes: 0 },
       cooktime: { hours: 0, minutes: 0 },
       servings: 0,
@@ -79,6 +80,9 @@ export default function CreateRecipeForm() {
         "ingredientSections",
         JSON.stringify(data.ingredientSections),
       );
+
+      // Convert the step sections into a JSON string and add it to the formData object
+      formData.append("stepSections", JSON.stringify(data.stepSections));
 
       formData.append("isPublished", data.isPublished.toString());
 
@@ -136,10 +140,7 @@ export default function CreateRecipeForm() {
             onSubmit(data);
           },
           (errors) => {
-            console.log(
-              "SUBMIT FAILED - validation errors:",
-              JSON.stringify(errors, null, 2),
-            );
+            console.log("SUBMIT FAILED - validation errors:", errors);
           },
         )}
       >
@@ -155,6 +156,7 @@ export default function CreateRecipeForm() {
             </>
           )}
           <CreateRecipeIngredients />
+          <CreateRecipeSteps />
         </div>
         <button
           className={`place-self-center w-1/2 sm:w-1/3 lg:w-1/4 2xl:w-1/6 mt-4 text-center rounded-full ${methods.formState.isSubmitting ? "bg-rosewood-300" : "bg-rosewood-500"} text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300`}

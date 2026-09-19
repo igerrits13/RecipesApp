@@ -407,7 +407,7 @@ describe("POST /api/v1/recipes", () => {
       stepSections: [
         {
           sectionTitle: "Test Steps",
-          steps: ["Step 1", "Step 2"],
+          steps: [{ step: "Step 1" }, { step: "Step 2" }],
         },
       ],
       source: {
@@ -468,7 +468,7 @@ describe("POST /api/v1/recipes", () => {
       expect(stepSection.sectionTitle).toBeDefined();
       expect(Array.isArray(stepSection.steps)).toBe(true);
       for (const step of stepSection.steps) {
-        expect(typeof step).toBe("string");
+        expect(typeof step.step).toBe("string");
       }
     }
     expect(response.body.recipe.notes).toBe(newRecipeData.notes);
@@ -627,7 +627,7 @@ describe("POST /api/v1/recipes", () => {
       stepSections: [
         {
           sectionTitle: "Test Section",
-          steps: ["Banned test step"],
+          steps: [{ step: "Banned test step" }],
         },
       ],
     };
@@ -714,7 +714,7 @@ describe("POST /api/v1/recipes", () => {
       stepSections: [
         {
           sectionTitle: "Test Section",
-          steps: ["Flagged test step"],
+          steps: [{ step: "Flagged test step" }],
         },
       ],
       notes: "Flagged test note",
@@ -1745,7 +1745,7 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
       stepSections: [
         {
           sectionTitle: "Updated Test Steps",
-          steps: ["Updated Step 1", "Updated Step 2"],
+          steps: [{ step: "Updated Step 1" }, { step: "Updated Step 2" }],
         },
       ],
       source: {
@@ -1957,7 +1957,7 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
       stepSections: [
         {
           sectionTitle: "Updated Test Section",
-          steps: ["Banned Step"],
+          steps: [{ step: "Banned Step" }],
         },
       ],
     };
@@ -2095,7 +2095,7 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
       stepSections: [
         {
           sectionTitle: "Updated Test Section",
-          steps: ["Flagged test step"],
+          steps: [{ step: "Flagged test step" }],
         },
       ],
       notes: "Flagged",
@@ -2173,7 +2173,7 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
       stepSections: [
         {
           sectionTitle: "Updated Test Steps",
-          steps: ["Updated Step 1", "Updated Step 2"],
+          steps: [{ step: "Updated Step 1" }, { step: "Updated Step 2" }],
         },
       ],
       preptimeSeconds: 400,

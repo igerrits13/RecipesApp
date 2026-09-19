@@ -20,42 +20,44 @@ export default function CreateRecipeIngredients() {
   });
 
   return (
-    <div className="flex flex-col w-full h-full bg-antique-parchment-500">
-      {sectionFields.map((field, sectionIndex) => (
-        <CreateRecipeIngredientSection
-          key={field.id}
-          sectionIndex={sectionIndex}
-          removeSection={removeSection}
-        />
-      ))}
-      {/* Add section button */}
-      {sectionFields.length < 5 && (
-        <button
-          type="button"
-          className="place-items-center hover:cursor-pointer mt-4 w-full bg-gray-300"
-          onClick={() =>
-            appendSection(
-              {
-                sectionTitle: "",
-                ingredients: [
-                  {
-                    quantity: null,
-                    measurement: null,
-                    ingredient: "",
-                    additionalInfo: "",
-                  },
-                ],
-              },
-              { shouldFocus: false },
-            )
-          }
-        >
-          <Plus className="text-olive-500" />
-        </button>
-      )}
-      {errors.ingredientSections?.message && (
-        <ValidationError message={errors.ingredientSections.message} />
-      )}
+    <div className="w-full h-full  bg-antique-parchment-500">
+      <div className="flex flex-col w-full h-fit">
+        {sectionFields.map((field, sectionIndex) => (
+          <CreateRecipeIngredientSection
+            key={field.id}
+            sectionIndex={sectionIndex}
+            removeSection={removeSection}
+          />
+        ))}
+        {/* Add section button */}
+        {sectionFields.length < 5 && (
+          <button
+            type="button"
+            className="place-items-center hover:cursor-pointer mt-4 w-full bg-gray-300"
+            onClick={() =>
+              appendSection(
+                {
+                  sectionTitle: "",
+                  ingredients: [
+                    {
+                      quantity: null,
+                      measurement: null,
+                      ingredient: "",
+                      additionalInfo: "",
+                    },
+                  ],
+                },
+                { shouldFocus: false },
+              )
+            }
+          >
+            <Plus className="size-6 text-olive-500" />
+          </button>
+        )}
+        {errors.ingredientSections?.message && (
+          <ValidationError message={errors.ingredientSections.message} />
+        )}
+      </div>
     </div>
   );
 }
