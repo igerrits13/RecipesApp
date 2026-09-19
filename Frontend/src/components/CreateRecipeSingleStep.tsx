@@ -3,6 +3,7 @@ import type { CreateRecipeData } from "../types/Recipe";
 import { Minus } from "lucide-react";
 import ValidationError from "./ValidationError";
 
+// CreateRecipeSingleStep component is a single step as part of a step section
 export default function CreateRecipeSingleStep({
   sectionIndex,
   stepIndex,
@@ -35,7 +36,7 @@ export default function CreateRecipeSingleStep({
       )}{" "}
       <div className="flex items-start"> {stepIndex + 1} - </div>
       <textarea
-        className="field-sizing-content overflow-hidden px-2 bg-gray-300 autofill-gray resize-none"
+        className="field-sizing-content overflow-hidden px-2 bg-gray-300 autofill-gray resize-none focus:outline-none"
         placeholder="*Cooking Instructions..."
         {...register(`stepSections.${sectionIndex}.steps.${stepIndex}.step`)}
         onBlur={(e) => {

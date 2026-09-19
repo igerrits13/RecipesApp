@@ -1029,20 +1029,20 @@ describe("validateRecipeData", () => {
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
       expect(errors).toContain(
-        "Notes must be a string and cannot exceed 500 characters",
+        "Notes must be a string and cannot exceed 2000 characters",
       );
     });
 
     test("should throw an error if notes is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        notes: "A".repeat(501),
+        notes: "A".repeat(2001),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
       expect(errors).toContain(
-        "Notes must be a string and cannot exceed 500 characters",
+        "Notes must be a string and cannot exceed 2000 characters",
       );
     });
   });
@@ -1484,7 +1484,7 @@ describe("validateRecipeData", () => {
         preptimeSeconds: -1,
         cooktimeSeconds: 86401,
         servings: 100,
-        notes: "A".repeat(501),
+        notes: "A".repeat(2001),
         linkedRecipes: [
           { recipeId: "60c72b2f9b1d8e5a5c8f9a1", role: "invalidrole" },
           { recipeId: "60c72b2f9b1d8e5a5c8f9a1", role: "component" },
@@ -1507,7 +1507,7 @@ describe("validateRecipeData", () => {
       );
       expect(errors).toContain("Servings must be a number between 0 and 99");
       expect(errors).toContain(
-        "Notes must be a string and cannot exceed 500 characters",
+        "Notes must be a string and cannot exceed 2000 characters",
       );
       expect(errors).toContain("Each linked recipe must have a valid role");
       expect(errors).toContain("Each linked recipe must be unique");

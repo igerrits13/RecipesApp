@@ -410,10 +410,10 @@ function validateRecipeServings(servings, errors) {
 
 // Helper function to validate recipe notes
 function validateRecipeNotes(notes, errors) {
-  if (notes && (typeof notes !== "string" || notes.trim().length > 500)) {
+  if (notes && (typeof notes !== "string" || notes.trim().length > 2000)) {
     pushUnique(
       errors,
-      "Notes must be a string and cannot exceed 500 characters",
+      "Notes must be a string and cannot exceed 2000 characters",
     );
     return "";
   }

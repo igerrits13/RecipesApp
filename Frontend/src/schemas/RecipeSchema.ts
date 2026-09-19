@@ -156,7 +156,7 @@ export const createRecipeSchema = z.object({
         });
       }
     }),
-  // notes: z.string().trim().max(500, "Notes must be at most 500 characters"),
+  notes: z.string().trim().max(2000, "Notes must be at most 2000 characters"),
   // linkedRecipes: z
   //   .array(
   //     z.object({
