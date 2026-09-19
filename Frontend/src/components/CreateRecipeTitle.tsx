@@ -46,9 +46,9 @@ export default function CreateRecipeTitle({ width }: ChildProps) {
           onClick={handleTogglePublish}
         >
           {isPublished ? (
-            <SquareCheck className="size-4 lg:size-6 text-rosewood-500" />
+            <SquareCheck className="size-4 lg:size-6 text-rosewood-500 hover:text-rosewood-300" />
           ) : (
-            <Square className="size-4 lg:size-6 text-rosewood-500" />
+            <Square className="size-4 lg:size-6 text-rosewood-500 hover:text-rosewood-300" />
           )}
         </button>
       </div>

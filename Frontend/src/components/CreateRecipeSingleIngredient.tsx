@@ -29,7 +29,7 @@ export default function CreateRecipeSingleIngredient({
           className="place-items-center hover:cursor-pointer"
           onClick={() => removeIngredient(ingredientIndex)}
         >
-          <Minus className="size-6 text-olive-500" />
+          <Minus className="size-6 text-olive-500 hover:text-olive-400" />
         </button>
       ) : (
         <div></div>

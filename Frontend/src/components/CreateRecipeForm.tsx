@@ -10,6 +10,7 @@ import CreateRecipeDescription from "./CreateRecipeDescription";
 import CreateRecipeIngredients from "./CreateRecipeIngredients";
 import CreateRecipeSteps from "./CreateRecipeSteps";
 import CreateRecipeChefNotes from "./CreateRecipeChefNotes";
+import CreateRecipeLinkedRecipeSection from "./CreateRecipeLinkedRecipes";
 
 export default function CreateRecipeForm() {
   // Type for the form values
@@ -39,7 +40,7 @@ export default function CreateRecipeForm() {
       servings: 0,
       image: null,
       notes: "",
-      // linkedRecipes: [],
+      linkedRecipes: [],
       source: null,
       // tags: [],
       // cuisines: [],
@@ -121,6 +122,11 @@ export default function CreateRecipeForm() {
         formData.append("notes", data.notes);
       }
 
+      // Add linked recipes if provided
+      if (data.linkedRecipes.length > 0) {
+        formData.append("linkedRecipes", JSON.stringify(data.linkedRecipes));
+      }
+
       // Add the source if one is provided
       if (data.source) {
         formData.append("source", JSON.stringify(data.source));
@@ -164,6 +170,7 @@ export default function CreateRecipeForm() {
           <CreateRecipeSteps />
         </div>
         <CreateRecipeChefNotes />
+        <CreateRecipeLinkedRecipeSection />
         <button
           className={`place-self-center w-1/2 sm:w-1/3 lg:w-1/4 2xl:w-1/6 mt-4 text-center rounded-full ${methods.formState.isSubmitting ? "bg-rosewood-300" : "bg-rosewood-500"} text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300`}
           type="submit"

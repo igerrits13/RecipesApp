@@ -58,7 +58,7 @@ export default function CreateRecipeIngredientSection({
               className="place-items-center hover:cursor-pointer"
               onClick={() => removeSection(sectionIndex)}
             >
-              <Minus className="size-6 text-olive-500 " />
+              <Minus className="size-6 text-olive-500 hover:text-olive-400" />
             </button>
           )}
         </div>
@@ -80,7 +80,7 @@ export default function CreateRecipeIngredientSection({
           {ingredientFields.length < 50 && (
             <button
               type="button"
-              className="place-items-center hover:cursor-pointer"
+              className="place-items-center hover:cursor-pointer text-olive-500 hover:text-olive-400"
               onClick={() =>
                 appendIngredient(
                   {
@@ -93,7 +93,7 @@ export default function CreateRecipeIngredientSection({
                 )
               }
             >
-              <Plus className="size-6 text-olive-500" />
+              <Plus className="size-6" />
             </button>
           )}
         </div>

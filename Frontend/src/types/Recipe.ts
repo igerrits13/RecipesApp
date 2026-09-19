@@ -19,7 +19,11 @@ export interface Recipe {
   servings: number;
   image: string;
   notes: string;
-  linkedRecipes: { _id: string; recipeId: LinkedRecipe; role: string }[];
+  linkedRecipes: {
+    _id: string;
+    recipeId: LinkedRecipe;
+    role: "component" | "pairing" | "variation";
+  }[];
   author: Author;
   source?: {
     url?: string;
@@ -52,7 +56,10 @@ export interface CreateRecipeData {
   servings: number;
   image: File | null;
   notes: string;
-  linkedRecipes: { recipeId: string; role: string }[];
+  linkedRecipes: {
+    recipeId: string;
+    role: "component" | "pairing" | "variation";
+  }[];
   source?: {
     url?: string;
     name: string;

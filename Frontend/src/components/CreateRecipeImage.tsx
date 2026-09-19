@@ -33,7 +33,7 @@ export default function CreateRecipeImage() {
       <div className="relative flex items-center justify-center w-full py-2 overflow-hidden min-h-75 max-h-[60vh]">
         {!selectedImage ? (
           <label htmlFor="recipe-image" className="cursor-pointer">
-            <ImagePlus className="size-6 text-sage-olive-500" />
+            <ImagePlus className="size-6 text-sage-olive-500 hover:text-sage-olive-300" />
             <input
               id="recipe-image"
               type="file"
@@ -55,12 +55,12 @@ export default function CreateRecipeImage() {
             )}
             <button
               type="button"
-              className="absolute top-2 right-4 lg:right-6 bg-antique-parchment-500 rounded-full p-1 hover:bg-antique-parchment-300 cursor-pointer"
+              className="absolute top-2 right-4 lg:right-6 bg-antique-parchment-500 rounded-full p-1 hover:bg-antique-parchment-300 cursor-pointer text-sage-olive-500 hover:text-sage-olive-300"
               onClick={() => {
                 setValue("image", null, { shouldValidate: true });
               }}
             >
-              <X className="size-6 text-sage-olive-500" />
+              <X className="size-6" />
             </button>
           </div>
         )}

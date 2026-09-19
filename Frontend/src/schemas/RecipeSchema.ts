@@ -157,14 +157,14 @@ export const createRecipeSchema = z.object({
       }
     }),
   notes: z.string().trim().max(2000, "Notes must be at most 2000 characters"),
-  // linkedRecipes: z
-  //   .array(
-  //     z.object({
-  //       recipeId: z.string(),
-  //       role: z.enum(["component", "pairing", "variation"]),
-  //     }),
-  //   )
-  //   .max(3, "No more than 3 linked recipes allowed"),
+  linkedRecipes: z
+    .array(
+      z.object({
+        recipeId: z.string(),
+        role: z.enum(["component", "pairing", "variation"]),
+      }),
+    )
+    .max(3, "No more than 3 linked recipes allowed"),
   source: z
     .object({
       url: z.union([

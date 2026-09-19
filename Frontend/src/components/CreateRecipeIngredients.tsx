@@ -33,7 +33,7 @@ export default function CreateRecipeIngredients() {
         {sectionFields.length < 5 && (
           <button
             type="button"
-            className="place-items-center hover:cursor-pointer mt-4 w-full bg-gray-300"
+            className="place-items-center hover:cursor-pointer mt-4 w-full bg-gray-300 text-olive-500 hover:text-olive-400"
             onClick={() =>
               appendSection(
                 {
@@ -51,7 +51,7 @@ export default function CreateRecipeIngredients() {
               )
             }
           >
-            <Plus className="size-6 text-olive-500" />
+            <Plus className="size-6" />
           </button>
         )}
         {errors.ingredientSections?.message && (

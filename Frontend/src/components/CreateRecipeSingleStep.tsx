@@ -25,11 +25,11 @@ export default function CreateRecipeSingleStep({
       {/* Remove step button */}
       {stepIndex > 0 ? (
         <button
-          type="button"
           className="place-items-start hover:cursor-pointer"
+          type="button"
           onClick={() => removeStep(stepIndex)}
         >
-          <Minus className="size-6 text-olive-500" />
+          <Minus className="size-6 text-olive-500 hover:text-olive-400" />
         </button>
       ) : (
         <div></div>
