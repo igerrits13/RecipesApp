@@ -14,6 +14,7 @@ export function sanitizeUser(user) {
     allergies: user.allergies,
     shoppingList: user.shoppingList,
     preferences: user.preferences,
+    role: user.role,
     lastLogin: user.lastLogin,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,

@@ -79,7 +79,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "moderator", "admin"],
       default: "user",
-      select: false,
     },
     previousDisplayName: {
       type: String,

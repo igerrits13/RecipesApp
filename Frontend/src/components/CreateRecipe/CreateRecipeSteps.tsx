@@ -1,8 +1,8 @@
 import { useFieldArray, useFormContext } from "react-hook-form";
-import type { CreateRecipeData } from "../types/Recipe";
+import type { CreateRecipeData } from "../../types/Recipe";
 import CreateRecipeStepSection from "./CreateRecipeStepSection";
 import { Plus } from "lucide-react";
-import ValidationError from "./ValidationError";
+import ValidationError from "../ValidationError";
 
 // CreateRecipeSteps component is a wrapper for all step sections and allows for adding/removing sections
 export default function CreateRecipeSteps() {

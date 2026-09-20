@@ -1,7 +1,7 @@
 import { ImagePlus, X } from "lucide-react";
 import { useFormContext, useWatch } from "react-hook-form";
-import type { CreateRecipeData } from "../types/Recipe";
-import ValidationError from "./ValidationError";
+import type { CreateRecipeData } from "../../types/Recipe";
+import ValidationError from "../ValidationError";
 
 export default function CreateRecipeImage() {
   const {

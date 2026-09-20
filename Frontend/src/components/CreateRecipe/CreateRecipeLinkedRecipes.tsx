@@ -1,8 +1,8 @@
 import { useFieldArray, useFormContext } from "react-hook-form";
 import CreateRecipeLinkedRecipeAdd from "./CreateRecipeLinkedRecipeAdd";
-import type { CreateRecipeData } from "../types/Recipe";
+import type { CreateRecipeData } from "../../types/Recipe";
 import CreateRecipeLinkedRecipeCard from "./CreateRecipeLinkedRecipeCard";
-import ValidationError from "./ValidationError";
+import ValidationError from "../ValidationError";
 
 const MAX_LINKED_RECIPES = 3;
 

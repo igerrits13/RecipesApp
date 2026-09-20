@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createRecipeSchema } from "../schemas/RecipeSchema";
+import { createRecipeSchema } from "../../schemas/RecipeSchema";
 import { FormProvider, useForm, type SubmitHandler } from "react-hook-form";
 import CreateRecipeTitle from "./CreateRecipeTitle";
 import CreateRecipeImage from "./CreateRecipeImage";
-import { compressRecipeImage } from "../utils/ImageHelpers";
+import { compressRecipeImage } from "../../utils/ImageHelpers";
 import CreateRecipeDescription from "./CreateRecipeDescription";
 import CreateRecipeIngredients from "./CreateRecipeIngredients";
 import CreateRecipeSteps from "./CreateRecipeSteps";

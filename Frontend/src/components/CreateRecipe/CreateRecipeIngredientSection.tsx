@@ -1,7 +1,7 @@
 import { Minus, Plus } from "lucide-react";
-import type { CreateRecipeData } from "../types/Recipe";
+import type { CreateRecipeData } from "../../types/Recipe";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import ValidationError from "./ValidationError";
+import ValidationError from "../ValidationError";
 import CreateRecipeSingleIngredient from "./CreateRecipeSingleIngredient";
 
 // CreateRecipeIngredientSection component is a single ingredient section

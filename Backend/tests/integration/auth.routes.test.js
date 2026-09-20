@@ -45,11 +45,11 @@ describe("POST /api/v1/auth/register", () => {
     expect(res.body.user).toHaveProperty("allergies");
     expect(res.body.user).toHaveProperty("shoppingList");
     expect(res.body.user).toHaveProperty("preferences");
+    expect(res.body.user).toHaveProperty("role");
     expect(res.body.user).toHaveProperty("lastLogin");
     expect(res.body.user).toHaveProperty("createdAt");
     expect(res.body.user).toHaveProperty("updatedAt");
     expect(res.body.user).not.toHaveProperty("password");
-    expect(res.body.user).not.toHaveProperty("role");
     expect(res.body.user).not.toHaveProperty("previousDisplayName");
     expect(res.body.user).not.toHaveProperty("lastDisplayNameChange");
     expect(res.body.user).not.toHaveProperty("previousEmail");
@@ -220,11 +220,11 @@ describe("POST /api/v1/auth/login", () => {
     expect(res.body.user).toHaveProperty("allergies");
     expect(res.body.user).toHaveProperty("shoppingList");
     expect(res.body.user).toHaveProperty("preferences");
+    expect(res.body.user).toHaveProperty("role");
     expect(res.body.user).toHaveProperty("lastLogin");
     expect(res.body.user).toHaveProperty("createdAt");
     expect(res.body.user).toHaveProperty("updatedAt");
     expect(res.body.user).not.toHaveProperty("password");
-    expect(res.body.user).not.toHaveProperty("role");
     expect(res.body.user).not.toHaveProperty("previousDisplayName");
     expect(res.body.user).not.toHaveProperty("lastDisplayNameChange");
     expect(res.body.user).not.toHaveProperty("previousEmail");

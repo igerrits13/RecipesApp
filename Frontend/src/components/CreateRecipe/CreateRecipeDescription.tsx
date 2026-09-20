@@ -1,6 +1,6 @@
 import { useFormContext } from "react-hook-form";
-import type { CreateRecipeData } from "../types/Recipe";
-import ValidationError from "./ValidationError";
+import type { CreateRecipeData } from "../../types/Recipe";
+import ValidationError from "../ValidationError";
 import { Clock, HandPlatter } from "lucide-react";
 
 // CreateRecipeDescription component takes in and stores the description information for a new recipe

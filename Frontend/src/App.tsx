@@ -19,6 +19,8 @@ function App() {
   // Check if there is an authenticated user
   const { user, authCheck, isCheckingAuth } = useAuthStore();
 
+  console.log(user);
+
   useEffect(() => {
     authCheck();
   }, [authCheck]);
@@ -47,7 +49,16 @@ function App() {
         />
         <Route path="/index" element={<IndexView />} />
         <Route path="/search" element={<SearchView />} />
-        <Route path="/admin" element={<AdminView />} />
+        <Route
+          path="/admin"
+          element={
+            user && (user.role === "moderator" || user.role === "admin") ? (
+              <AdminView />
+            ) : (
+              <NotFoundView />
+            )
+          }
+        />
         <Route path="*" element={<NotFoundView />} />
       </Routes>
     </div>

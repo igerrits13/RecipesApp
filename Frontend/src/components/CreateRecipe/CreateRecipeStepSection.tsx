@@ -1,8 +1,8 @@
 import { useFieldArray, useFormContext } from "react-hook-form";
-import type { CreateRecipeData } from "../types/Recipe";
+import type { CreateRecipeData } from "../../types/Recipe";
 import { Minus, Plus } from "lucide-react";
 import CreateRecipeSingleStep from "./CreateRecipeSingleStep";
-import ValidationError from "./ValidationError";
+import ValidationError from "../ValidationError";
 
 // CreateRecipeStepSection component is a single step section
 export default function CreateRecipeStepSection({

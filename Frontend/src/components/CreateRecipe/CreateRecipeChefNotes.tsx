@@ -1,6 +1,6 @@
 import { useFormContext } from "react-hook-form";
-import type { CreateRecipeData } from "../types/Recipe";
-import ValidationError from "./ValidationError";
+import type { CreateRecipeData } from "../../types/Recipe";
+import ValidationError from "../ValidationError";
 
 // CreaterecipeChefNotes component that allows users to add notes to a recipe
 export default function CreateRecipeChefNotes() {

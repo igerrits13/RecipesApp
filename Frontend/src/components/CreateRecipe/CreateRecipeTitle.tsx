@@ -1,8 +1,8 @@
 import { Square, SquareCheck } from "lucide-react";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
-import type { CreateRecipeData } from "../types/Recipe";
-import ValidationError from "./ValidationError";
+import type { CreateRecipeData } from "../../types/Recipe";
+import ValidationError from "../ValidationError";
 
 // Props for the CreateRecipeTitle component
 type ChildProps = {

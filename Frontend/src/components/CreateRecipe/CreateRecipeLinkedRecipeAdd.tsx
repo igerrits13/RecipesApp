@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
-import RecipeCardTemplate from "./RecipeCardTemplate";
+import RecipeCardTemplate from "../RecipeCardTemplate";
 import type { UseFieldArrayAppend } from "react-hook-form";
-import type { CreateRecipeData } from "../types/Recipe";
+import type { CreateRecipeData } from "../../types/Recipe";
 
 export default function CreateRecipeLinkedRecipeAdd({
   maxLinkedRecipes,

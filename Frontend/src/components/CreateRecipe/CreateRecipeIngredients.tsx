@@ -1,8 +1,8 @@
 import { Plus } from "lucide-react";
 import CreateRecipeIngredientSection from "./CreateRecipeIngredientSection";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import ValidationError from "./ValidationError";
-import type { CreateRecipeData } from "../types/Recipe";
+import ValidationError from "../ValidationError";
+import type { CreateRecipeData } from "../../types/Recipe";
 
 // CreateRecipeIngredients component is a wrapper for all ingredient sections and allows for adding/removing sections
 export default function CreateRecipeIngredients() {

@@ -1,4 +1,4 @@
-import CreateRecipeForm from "../components/CreateRecipeForm";
+import CreateRecipeForm from "../components/CreateRecipe/CreateRecipeForm";
 import Footer from "../components/Footer";
 import SecondaryNavBar from "../components/SecondaryNavBar";
 

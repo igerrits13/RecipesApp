@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import RecipeCardTemplate from "./RecipeCardTemplate";
+import RecipeCardTemplate from "../RecipeCardTemplate";
 
 export default function CreateRecipeLinkedRecipeCard({
   recipe,

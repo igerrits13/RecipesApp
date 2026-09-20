@@ -13,6 +13,7 @@ export interface User {
   preferences: {
     measurementSystem: string; // Metric or Imperial
   };
+  role: string;
   lastLogin: string;
   createdAt: string;
   updatedAt: string;
