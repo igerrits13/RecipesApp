@@ -3,8 +3,8 @@ import { useFormContext } from "react-hook-form";
 import type { CreateRecipeData } from "../../types/Recipe";
 import ValidationError from "../ValidationError";
 
-// CreateRecipeSingleIngredient component is a single ingredient as part of an ingredient section
-export default function CreateRecipeSingleIngredient({
+// CreateRecipeIngredientSingle component is a single ingredient as part of an ingredient section
+export default function CreateRecipeIngredientSingle({
   sectionIndex,
   ingredientIndex,
   removeIngredient,

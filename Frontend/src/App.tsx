@@ -19,8 +19,6 @@ function App() {
   // Check if there is an authenticated user
   const { user, authCheck, isCheckingAuth } = useAuthStore();
 
-  console.log(user);
-
   useEffect(() => {
     authCheck();
   }, [authCheck]);

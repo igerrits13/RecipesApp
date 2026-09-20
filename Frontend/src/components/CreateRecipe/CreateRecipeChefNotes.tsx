@@ -11,7 +11,7 @@ export default function CreateRecipeChefNotes() {
   } = useFormContext<CreateRecipeData>();
 
   return (
-    <div className="flex flex-col w-full h-full py-6 text-ink-black-500">
+    <div className="flex flex-col w-full h-full text-ink-black-500">
       Notes from the Kitchen:
       <textarea
         className="field-sizing-content overflow-hidden w-full my-4 px-4 bg-gray-300 resize-none text-olive-500 focus:outline-none"

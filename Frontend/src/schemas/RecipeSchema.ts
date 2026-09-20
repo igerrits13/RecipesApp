@@ -184,50 +184,50 @@ export const createRecipeSchema = z.object({
       note: z.string().trim().max(100, "Note must be at most 100 characters"),
     })
     .nullable(),
-  // tags: z
-  //   .array(
-  //     z
-  //       .string()
-  //       .trim()
-  //       .min(2, "Tag must be at least 2 characters")
-  //       .max(50, "Tag must be at most 50 characters"),
-  //   )
-  //   .max(10, "No more than 10 tags allowed"),
-  // cuisines: z
-  //   .array(
-  //     z
-  //       .string()
-  //       .trim()
-  //       .min(2, "Cuisine must be at least 2 characters")
-  //       .max(50, "Cuisine must be at most 50 characters"),
-  //   )
-  //   .max(3, "No more than 3 cuisines allowed"),
-  // meals: z
-  //   .array(
-  //     z
-  //       .string()
-  //       .trim()
-  //       .min(2, "Meal must be at least 2 characters")
-  //       .max(50, "Meal must be at most 50 characters"),
-  //   )
-  //   .max(3, "No more than 3 meals allowed"),
-  // holidays: z
-  //   .array(
-  //     z
-  //       .string()
-  //       .trim()
-  //       .min(2, "Holiday must be at least 2 characters")
-  //       .max(50, "Holiday must be at most 50 characters"),
-  //   )
-  //   .max(3, "No more than 3 holidays allowed"),
-  // seasons: z
-  //   .array(
-  //     z
-  //       .string()
-  //       .trim()
-  //       .min(2, "Season must be at least 2 characters")
-  //       .max(50, "Season must be at most 50 characters"),
-  //   )
-  //   .max(3, "No more than 3 seasons allowed"),
+  tags: z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(2, "Tag must be at least 2 characters")
+        .max(50, "Tag must be at most 50 characters"),
+    )
+    .max(10, "No more than 10 tags allowed"),
+  cuisines: z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(2, "Cuisine must be at least 2 characters")
+        .max(50, "Cuisine must be at most 50 characters"),
+    )
+    .max(3, "No more than 3 cuisines allowed"),
+  meals: z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(2, "Meal must be at least 2 characters")
+        .max(50, "Meal must be at most 50 characters"),
+    )
+    .max(3, "No more than 3 meals allowed"),
+  holidays: z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(2, "Holiday must be at least 2 characters")
+        .max(50, "Holiday must be at most 50 characters"),
+    )
+    .max(3, "No more than 3 holidays allowed"),
+  seasons: z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(2, "Season must be at least 2 characters")
+        .max(50, "Season must be at most 50 characters"),
+    )
+    .max(3, "No more than 3 seasons allowed"),
   isPublished: z.boolean(),
 });

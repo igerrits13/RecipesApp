@@ -42,9 +42,6 @@ export async function login(req, res) {
     // Create the JSON web token
     generateTokenAndSetCookie(user._id, res);
 
-    console.log("User:", sanitizeUser(user));
-    console.log("Unsanitized user:", user);
-
     // Send the user information and web token
     res.status(200).json({
       user: sanitizeUser(user),
@@ -72,8 +69,6 @@ export async function logout(req, res) {
 // Create a route for checking authentication status
 export async function authCheck(req, res) {
   try {
-    console.log("User:", sanitizeUser(req.user));
-    console.log("Unsanitized user:", req.user);
     res.status(200).json({
       user: sanitizeUser(req.user),
       success: true,

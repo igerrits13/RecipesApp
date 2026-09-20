@@ -3,8 +3,8 @@ import type { CreateRecipeData } from "../../types/Recipe";
 import { Minus } from "lucide-react";
 import ValidationError from "../ValidationError";
 
-// CreateRecipeSingleStep component is a single step as part of a step section
-export default function CreateRecipeSingleStep({
+// CreateRecipeStepSingle component is a single step as part of a step section
+export default function CreateRecipeStepSingle({
   sectionIndex,
   stepIndex,
   removeStep,

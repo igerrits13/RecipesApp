@@ -10,7 +10,8 @@ import CreateRecipeDescription from "./CreateRecipeDescription";
 import CreateRecipeIngredients from "./CreateRecipeIngredients";
 import CreateRecipeSteps from "./CreateRecipeSteps";
 import CreateRecipeChefNotes from "./CreateRecipeChefNotes";
-import CreateRecipeLinkedRecipeSection from "./CreateRecipeLinkedRecipes";
+import CreateRecipeLinkedRecipes from "./CreateRecipeLinkedRecipes";
+import CreateRecipeMetadata from "./CreateRecipeMetadata";
 
 export default function CreateRecipeForm() {
   // Type for the form values
@@ -42,11 +43,11 @@ export default function CreateRecipeForm() {
       notes: "",
       linkedRecipes: [],
       source: null,
-      // tags: [],
-      // cuisines: [],
-      // meals: [],
-      // holidays: [],
-      // seasons: [],
+      tags: [],
+      cuisines: [],
+      meals: [],
+      holidays: [],
+      seasons: [],
       isPublished: false,
     },
     resolver: zodResolver(createRecipeSchema),
@@ -85,8 +86,6 @@ export default function CreateRecipeForm() {
 
       // Convert the step sections into a JSON string and add it to the formData object
       formData.append("stepSections", JSON.stringify(data.stepSections));
-
-      formData.append("isPublished", data.isPublished.toString());
 
       // Convert preptime and cooktime to seconds
       const preptimeSeconds =
@@ -132,6 +131,25 @@ export default function CreateRecipeForm() {
         formData.append("source", JSON.stringify(data.source));
       }
 
+      // Add additional metadata if provided
+      if (data.tags.length > 0) {
+        formData.append("tags", JSON.stringify(data.tags));
+      }
+      if (data.cuisines.length > 0) {
+        formData.append("cuisines", JSON.stringify(data.cuisines));
+      }
+      if (data.meals.length > 0) {
+        formData.append("meals", JSON.stringify(data.meals));
+      }
+      if (data.holidays.length > 0) {
+        formData.append("holidays", JSON.stringify(data.holidays));
+      }
+      if (data.seasons.length > 0) {
+        formData.append("seasons", JSON.stringify(data.seasons));
+      }
+
+      formData.append("isPublished", data.isPublished.toString());
+
       // Temp debugging
       for (const [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
@@ -169,8 +187,11 @@ export default function CreateRecipeForm() {
           <CreateRecipeIngredients />
           <CreateRecipeSteps />
         </div>
-        <CreateRecipeChefNotes />
-        <CreateRecipeLinkedRecipeSection />
+        <div className="flex flex-col pt-8 gap-8">
+          <CreateRecipeChefNotes />
+          <CreateRecipeLinkedRecipes />
+          <CreateRecipeMetadata />
+        </div>
         <button
           className={`place-self-center w-1/2 sm:w-1/3 lg:w-1/4 2xl:w-1/6 mt-4 text-center rounded-full ${methods.formState.isSubmitting ? "bg-rosewood-300" : "bg-rosewood-500"} text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300`}
           type="submit"

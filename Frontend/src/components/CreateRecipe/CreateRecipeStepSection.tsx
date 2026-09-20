@@ -1,7 +1,7 @@
 import { useFieldArray, useFormContext } from "react-hook-form";
 import type { CreateRecipeData } from "../../types/Recipe";
 import { Minus, Plus } from "lucide-react";
-import CreateRecipeSingleStep from "./CreateRecipeSingleStep";
+import CreateRecipeStepSingle from "./CreateRecipeStepSingle";
 import ValidationError from "../ValidationError";
 
 // CreateRecipeStepSection component is a single step section
@@ -65,7 +65,7 @@ export default function CreateRecipeStepSection({
         </div>
         <div className="grid grid-cols-[auto_auto_1fr] gap-1 pt-2 text-olive-500 text-nowrap">
           {stepFields.map((field, stepIndex) => (
-            <CreateRecipeSingleStep
+            <CreateRecipeStepSingle
               key={field.id}
               sectionIndex={sectionIndex}
               stepIndex={stepIndex}

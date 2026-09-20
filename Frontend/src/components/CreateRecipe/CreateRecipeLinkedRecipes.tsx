@@ -24,7 +24,7 @@ export default function CreateRecipeLinkedRecipes() {
       Add any linked recipes here (3 max):
       <div className="flex flex-col gap-2 mt-6">
         You may need to make a bit of this (components):{" "}
-        <div className="flex flex-col sm:flex-row gap-6 overflow-hidden scroll-auto">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-6">
           {linkedRecipeFields.map((field, linkedRecipeIndex) => {
             if (field.role !== "component") return null;
 
@@ -47,7 +47,7 @@ export default function CreateRecipeLinkedRecipes() {
       </div>{" "}
       <div className="flex flex-col gap-2 mt-6">
         Some of our favorite additionas to this meal (pairings):{" "}
-        <div className="flex flex-col sm:flex-row gap-6 overflow-hidden scroll-auto">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-6">
           {linkedRecipeFields.map((field, linkedRecipeIndex) => {
             if (field.role !== "pairing") return null;
 
@@ -70,7 +70,7 @@ export default function CreateRecipeLinkedRecipes() {
       </div>{" "}
       <div className="flex flex-col gap-2 mt-6">
         Different ways to make this recipe your own (variations):{" "}
-        <div className="flex flex-col sm:flex-row gap-6 overflow-hidden scroll-auto">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-6">
           {linkedRecipeFields.map((field, linkedRecipeIndex) => {
             if (field.role !== "variation") return null;
 

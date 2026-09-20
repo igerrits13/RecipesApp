@@ -2,7 +2,7 @@ import { Minus, Plus } from "lucide-react";
 import type { CreateRecipeData } from "../../types/Recipe";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import ValidationError from "../ValidationError";
-import CreateRecipeSingleIngredient from "./CreateRecipeSingleIngredient";
+import CreateRecipeIngredientSingle from "./CreateRecipeIngredientSingle";
 
 // CreateRecipeIngredientSection component is a single ingredient section
 export default function CreateRecipeIngredientSection({
@@ -69,7 +69,7 @@ export default function CreateRecipeIngredientSection({
           <div>*Ingredient</div>
           <div>Additional Info</div>
           {ingredientFields.map((field, ingredientIndex) => (
-            <CreateRecipeSingleIngredient
+            <CreateRecipeIngredientSingle
               key={field.id}
               sectionIndex={sectionIndex}
               ingredientIndex={ingredientIndex}
@@ -97,15 +97,15 @@ export default function CreateRecipeIngredientSection({
             </button>
           )}
         </div>
-        <div className="place-self-center pt-2">
-          {errors.ingredientSections?.[sectionIndex]?.sectionTitle?.message && (
+        {errors.ingredientSections?.[sectionIndex]?.sectionTitle?.message && (
+          <div className="place-self-center pt-2">
             <ValidationError
               message={
                 errors.ingredientSections[sectionIndex].sectionTitle.message
               }
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </>
   );
