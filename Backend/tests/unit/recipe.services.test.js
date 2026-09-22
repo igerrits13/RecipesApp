@@ -315,6 +315,12 @@ describe("validateRecipeData", () => {
           measurement: "ounce",
           quantity: "1 1/2",
         },
+
+        {
+          ingredient: "Test Ingredient 3",
+          measurement: "ounce",
+          quantity: "1 1/2-2 1/2",
+        },
       ];
 
       const dataWithWhitespace = {
@@ -499,7 +505,7 @@ describe("validateRecipeData", () => {
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
       expect(errors).toContain(
-        "Ingredient quantities must be a string and cannot exceed 10 characters",
+        "Ingredient quantities must be a string and cannot exceed 15 characters",
       );
     });
 
@@ -513,7 +519,7 @@ describe("validateRecipeData", () => {
               {
                 ingredient: "Test Ingredient",
                 measurement: "cup",
-                quantity: "A".repeat(11),
+                quantity: "A".repeat(16),
               },
             ],
           },
@@ -523,7 +529,7 @@ describe("validateRecipeData", () => {
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
       expect(errors).toContain(
-        "Ingredient quantities must be a string and cannot exceed 10 characters",
+        "Ingredient quantities must be a string and cannot exceed 15 characters",
       );
     });
 

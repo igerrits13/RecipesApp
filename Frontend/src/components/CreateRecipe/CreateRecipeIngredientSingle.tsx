@@ -42,7 +42,11 @@ export default function CreateRecipeIngredientSingle({
         )}
         onBlur={(e) => {
           const trimmedQuantity = e.target.value.trim();
-          if (trimmedQuantity === "") {
+          const formattedQuantity = trimmedQuantity
+            .split("-")
+            .map((quantity) => quantity.trim().replace(/^0+(?=\d)/, ""))
+            .join("-");
+          if (formattedQuantity === "") {
             setValue(
               `ingredientSections.${sectionIndex}.ingredients.${ingredientIndex}.quantity`,
               null,
@@ -51,7 +55,7 @@ export default function CreateRecipeIngredientSingle({
           } else {
             setValue(
               `ingredientSections.${sectionIndex}.ingredients.${ingredientIndex}.quantity`,
-              trimmedQuantity,
+              formattedQuantity,
               { shouldValidate: true },
             );
           }

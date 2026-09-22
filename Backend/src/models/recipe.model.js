@@ -27,6 +27,14 @@ const sourceSchema = new mongoose.Schema(
   { _id: false },
 );
 
+// Regex for part of quantity validation
+const quantitySectionRegex = String.raw`(?:[1-9]\d?(?:\.\d+)?|0?\.\d+|[1-9]\d*\/[1-9]\d*|[1-9]\d?\s+[1-9]\d*\/[1-9]\d*)`;
+
+// Regex for quantity validation
+const quantityRegex = new RegExp(
+  `^(?:${quantitySectionRegex}|${quantitySectionRegex}-${quantitySectionRegex})$`,
+);
+
 const recipeSchema = mongoose.Schema(
   {
     title: {
@@ -61,10 +69,9 @@ const recipeSchema = mongoose.Schema(
               {
                 quantity: {
                   type: String,
-                  maxlength: 20,
+                  maxlength: 15,
                   trim: true,
-                  regex:
-                    /^(?:(?:0(?!\.0+$)\.\d+|[1-9]\d?(?:\.\d+)?)|(?:[1-9]\d?\s+[1-9]\d*\/[1-9]\d*)|(?:[1-9]\d*\/[1-9]\d*))$/,
+                  regex: quantityRegex,
                 },
                 measurement: {
                   type: mongoose.Schema.Types.ObjectId,

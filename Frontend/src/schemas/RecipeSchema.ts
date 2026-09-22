@@ -4,6 +4,14 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB max image size
 const MAX_IMAGE_PIXELS = 25_000_000; // 25MP max image resolution
 const ACCEPTED_TYPES = ["image/jpeg", "image/png"]; // Only allow JPEG and PNG
 
+// Regex for part of quantity validation
+const quantitySectionRegex = String.raw`(?:[1-9]\d?(?:\.\d+)?|0?\.\d+|[1-9]\d*\/[1-9]\d*|[1-9]\d?\s+[1-9]\d*\/[1-9]\d*)`;
+
+// Regex for quantity validation
+const quantityRegex = new RegExp(
+  `^(?:${quantitySectionRegex}|${quantitySectionRegex}-${quantitySectionRegex})$`,
+);
+
 // Check the images resolution and size before uploading them to the server
 const checkImageResolution = (file: File): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -72,10 +80,10 @@ export const createRecipeSchema = z.object({
               quantity: z
                 .string()
                 .trim()
-                .max(10, "Quantity must be at most 10 characters")
+                .max(15, "Quantity must be at most 15 characters")
                 .regex(
-                  /^(?:(?:0(?!\.0+$)\.\d+|[1-9]\d?(?:\.\d+)?)|(?:[1-9]\d?\s+[1-9]\d*\/[1-9]\d*)|(?:[1-9]\d*\/[1-9]\d*))$/,
-                  "Quantity must be a valid number or fraction bertween 0 and 99",
+                  quantityRegex,
+                  "Quantity must be a valid number, range, or fraction between 0 and 99",
                 )
                 .nullable(),
               measurement: z.string().nullable(),

@@ -39,8 +39,14 @@ const allowedMeasurementUnits = [
   "a dash",
   "to taste",
 ];
-const quantityRegex =
-  /^(?:(?:0(?!\.0+$)\.\d+|[1-9]\d?(?:\.\d+)?)|(?:[1-9]\d?\s+[1-9]\d*\/[1-9]\d*)|(?:[1-9]\d*\/[1-9]\d*))$/;
+
+// Regex for part of quantity validation
+const quantitySectionRegex = String.raw`(?:[1-9]\d?(?:\.\d+)?|0?\.\d+|[1-9]\d*\/[1-9]\d*|[1-9]\d?\s+[1-9]\d*\/[1-9]\d*)`;
+
+// Regex for quantity validation
+const quantityRegex = new RegExp(
+  `^(?:${quantitySectionRegex}|${quantitySectionRegex}-${quantitySectionRegex})$`,
+);
 
 // Helper function to validate that all object fields are filled in correctly
 export function validateRecipeData(recipe) {
@@ -256,21 +262,31 @@ function validateRecipeIngredients(ingredientSections, errors) {
       if (item.quantity) {
         if (
           typeof item.quantity !== "string" ||
-          item.quantity.trim().length > 10
+          item.quantity
+            .split("-")
+            .map((quantity) => quantity.trim().replace(/^0+(?=\d)/, ""))
+            .join("-").length > 15
         ) {
           pushUnique(
             errors,
-            "Ingredient quantities must be a string and cannot exceed 10 characters",
+            "Ingredient quantities must be a string and cannot exceed 15 characters",
           );
           return [];
-        } else if (!quantityRegex.test(item.quantity)) {
+        }
+
+        const formattedQuantity = item.quantity
+          .split("-")
+          .map((quantity) => quantity.trim().replace(/^0+(?=\d)/, ""))
+          .join("-");
+
+        if (!quantityRegex.test(formattedQuantity)) {
           pushUnique(
             errors,
             "Ingredient quantities must be a represent a number or fraction between 0 and 99",
           );
           return [];
         } else {
-          item.quantity = item.quantity.trim();
+          item.quantity = formattedQuantity;
         }
       }
 
