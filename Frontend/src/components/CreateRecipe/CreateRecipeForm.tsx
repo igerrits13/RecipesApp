@@ -35,7 +35,7 @@ export default function CreateRecipeForm() {
           ],
         },
       ],
-      stepSections: [{ sectionTitle: "", steps: [{ step: "" }] }],
+      stepSections: [{ sectionTitle: "", steps: [""] }],
       preptime: { hours: 0, minutes: 0 },
       cooktime: { hours: 0, minutes: 0 },
       servings: 0,

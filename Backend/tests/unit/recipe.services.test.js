@@ -739,16 +739,13 @@ describe("validateRecipeData", () => {
         stepSections: [
           {
             sectionTitle: "Test Section",
-            steps: [{ step: "   Step 1   " }, { step: "   Step 2   " }],
+            steps: ["   Step 1   ", "   Step 2   "],
           },
         ],
       };
 
       const result = validateRecipeData(dataWithWhitespace);
-      expect(result.stepSections[0].steps).toEqual([
-        { step: "Step 1" },
-        { step: "Step 2" },
-      ]);
+      expect(result.stepSections[0].steps).toEqual(["Step 1", "Step 2"]);
     });
 
     test("should throw an error if step sections are not an array", () => {
@@ -778,7 +775,7 @@ describe("validateRecipeData", () => {
         ...fullTestRecipeDataComplete,
         stepSections: Array.from({ length: 6 }, (_, i) => ({
           sectionTitle: `Test Section ${i + 1}`,
-          steps: [{ step: "Step 1" }],
+          steps: ["Step 1"],
         })),
       };
 
@@ -795,7 +792,7 @@ describe("validateRecipeData", () => {
         stepSections: [
           {
             sectionTitle: 123,
-            steps: [{ step: "Step 1" }],
+            steps: ["Step 1"],
           },
         ],
       };
@@ -813,7 +810,7 @@ describe("validateRecipeData", () => {
         stepSections: [
           {
             sectionTitle: "A".repeat(101),
-            steps: [{ step: "Step 1" }],
+            steps: ["Step 1"],
           },
         ],
       };
@@ -858,7 +855,7 @@ describe("validateRecipeData", () => {
         stepSections: [
           {
             sectionTitle: "Test Section",
-            steps: [{ step: "   " }, { step: 123 }, { step: null }],
+            steps: ["   ", 123, null],
           },
         ],
       };
@@ -874,9 +871,7 @@ describe("validateRecipeData", () => {
         stepSections: [
           {
             sectionTitle: "Test Section",
-            steps: Array.from({ length: 51 }, (_, i) => ({
-              step: `Step ${i + 1}`,
-            })),
+            steps: Array.from({ length: 51 }, (_, i) => `Step ${i + 1}`),
           },
         ],
       };
@@ -892,7 +887,7 @@ describe("validateRecipeData", () => {
         stepSections: [
           {
             sectionTitle: "Test Section",
-            steps: [{ step: "Hi" }],
+            steps: ["Hi"],
           },
         ],
       };
@@ -910,7 +905,7 @@ describe("validateRecipeData", () => {
         stepSections: [
           {
             sectionTitle: "Test Section",
-            steps: [{ step: "A".repeat(501) }],
+            steps: ["A".repeat(501)],
           },
         ],
       };
@@ -1478,7 +1473,7 @@ describe("validateRecipeData", () => {
         stepSections: [
           {
             sectionTitle: "Test Section",
-            steps: [{ step: "   " }],
+            steps: ["   "],
           },
         ],
         preptimeSeconds: -1,
@@ -1652,13 +1647,13 @@ describe("validateAndSaveNewRecipe", () => {
         expect(typeof item.quantity).toBe("string");
       });
     }
-    expect(result.stepSections[0].steps).toHaveLength(
-      fullTestRecipeDataComplete.stepSections[0].steps.length,
+    expect(result.stepSections[0].steps).toEqual(
+      expect.arrayContaining(fullTestRecipeDataComplete.stepSections[0].steps),
     );
     for (const section of result.stepSections) {
       section.steps.forEach((step) => {
-        expect(typeof step.step).toBe("string");
-        expect(step.step.trim()).toBe(step.step);
+        expect(typeof step).toBe("string");
+        expect(step.trim()).toBe(step);
       });
     }
     expect(result.preptimeSeconds).toBe(
@@ -1710,7 +1705,7 @@ describe("validateAndSaveNewRecipe", () => {
       stepSections: [
         {
           sectionTitle: "Test Section",
-          steps: [{ step: "Test step 1" }],
+          steps: ["Test step 1"],
         },
       ],
       preptimeSeconds: 600,
@@ -1907,10 +1902,10 @@ describe("validateAndUpdateRecipe", () => {
     });
     for (const section of result.stepSections) {
       section.steps.forEach((step, index) => {
-        expect(typeof step.step).toBe("string");
-        expect(step.step.trim()).toBe(step.step);
-        expect(step.step).toBe(
-          fullTestRecipeDataComplete.stepSections[0].steps[index].step,
+        expect(typeof step).toBe("string");
+        expect(step.trim()).toBe(step);
+        expect(step).toBe(
+          fullTestRecipeDataComplete.stepSections[0].steps[index],
         );
       });
     }
@@ -2123,8 +2118,8 @@ describe("validateAndUpdateRecipe", () => {
     expect(result.title).toBe(existingRecipe.title);
     expect(result.slug).toBe(existingRecipe.slug);
     expect(result.description).toBe(existingRecipe.description);
-    expect(result.stepSections[0].steps.map((step) => step.toObject())).toEqual(
-      existingRecipe.stepSections[0].steps.map((step) => step.toObject()),
+    expect(result.stepSections[0].steps).toEqual(
+      existingRecipe.stepSections[0].steps,
     );
     expect(result.preptimeSeconds).toBe(existingRecipe.preptimeSeconds);
     expect(result.cooktimeSeconds).toBe(existingRecipe.cooktimeSeconds);

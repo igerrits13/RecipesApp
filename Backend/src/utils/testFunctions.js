@@ -16,7 +16,7 @@ import Meal from "../../src/models/meal.model.js";
 import Holiday from "../models/holiday.model.js";
 import Season from "../models/season.model.js";
 import Rating from "../models/rating.model.js";
-import BannedWord from "../models/BannedWord.model.js";
+import BannedWord from "../models/bannedWord.model.js";
 import Log from "../models/log.model.js";
 import Report from "../models/report.model.js";
 
@@ -148,7 +148,7 @@ export const testRecipeData = {
   slug: `test-recipe`,
   stepSections: [
     {
-      steps: [{ step: "Step 1" }, { step: "Step 2" }],
+      steps: ["Step 1", "Step 2"],
     },
   ],
   preptimeSeconds: 600,
@@ -187,7 +187,7 @@ const fullTestRecipeData = {
   description: "This is a test recipe.",
   stepSections: [
     {
-      steps: [{ step: "Step 1" }, { step: "Step 2" }],
+      steps: ["Step 1", "Step 2"],
     },
   ],
   preptimeSeconds: 600,
@@ -212,7 +212,7 @@ export const fullTestRecipeDataComplete = {
   description: "This is a test recipe.",
   stepSections: [
     {
-      steps: [{ step: "Step 1" }, { step: "Step 2" }],
+      steps: ["Step 1", "Step 2"],
     },
   ],
   preptimeSeconds: 600,

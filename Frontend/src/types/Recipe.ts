@@ -100,13 +100,13 @@ export interface CreateIngredientSectionData {
 export interface StepSection {
   _id: string;
   sectionTitle: string;
-  steps: { step: string }[];
+  steps: string[];
 }
 
 // Interface for creating a step section
 export interface CreateStepSectionData {
   sectionTitle: string;
-  steps: { step: string }[];
+  steps: string[];
 }
 
 // Interface for a linked recipe

@@ -34,7 +34,7 @@ export default function CreateRecipeSteps() {
             className="place-items-center hover:cursor-pointer mt-4 w-full bg-gray-300 text-olive-500 hover:text-olive-400"
             onClick={() =>
               appendSection(
-                { sectiontitle: "", steps: [{ step: "" }] },
+                { sectiontitle: "", steps: [""] },
                 { shouldFocus: false },
               )
             }

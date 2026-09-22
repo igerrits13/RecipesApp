@@ -107,13 +107,11 @@ const recipeSchema = mongoose.Schema(
           steps: {
             type: [
               {
-                step: {
-                  type: String,
-                  trim: true,
-                  minlength: 3,
-                  maxlength: 500,
-                  required: true,
-                },
+                type: String,
+                trim: true,
+                minlength: 3,
+                maxlength: 500,
+                required: true,
               },
             ],
             required: true,

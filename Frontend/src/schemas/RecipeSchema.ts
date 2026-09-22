@@ -106,14 +106,12 @@ export const createRecipeSchema = z.object({
           .max(100, "Section title must be at most 100 characters"),
         steps: z
           .array(
-            z.object({
-              step: z
-                .string()
-                .trim()
-                .min(1, "Step is required")
-                .min(3, "Step must be at least 3 characters")
-                .max(500, "Step must be at most 500 characters"),
-            }),
+            z
+              .string()
+              .trim()
+              .min(1, "Step is required")
+              .min(3, "Step must be at least 3 characters")
+              .max(500, "Step must be at most 500 characters"),
           )
           .min(1, "At least one step is required")
           .max(50, "No more than 50 steps allowed"),

@@ -3,16 +3,18 @@ import type { CreateRecipeData } from "../../types/Recipe";
 import { Minus } from "lucide-react";
 import ValidationError from "../ValidationError";
 
+type CreateRecipeStepSingleProps = {
+  sectionIndex: number;
+  stepIndex: number;
+  handleRemoveStep: (stepIndex: number) => void;
+};
+
 // CreateRecipeStepSingle component is a single step as part of a step section
 export default function CreateRecipeStepSingle({
   sectionIndex,
   stepIndex,
-  removeStep,
-}: {
-  sectionIndex: number;
-  stepIndex: number;
-  removeStep: (stepIndex: number) => void;
-}) {
+  handleRemoveStep,
+}: CreateRecipeStepSingleProps) {
   // React hook form for tracking individual steps
   const {
     register,
@@ -27,7 +29,7 @@ export default function CreateRecipeStepSingle({
         <button
           className="place-items-start hover:cursor-pointer"
           type="button"
-          onClick={() => removeStep(stepIndex)}
+          onClick={() => handleRemoveStep(stepIndex)}
         >
           <Minus className="size-6 text-olive-500 hover:text-olive-400" />
         </button>
@@ -38,23 +40,21 @@ export default function CreateRecipeStepSingle({
       <textarea
         className="field-sizing-content overflow-hidden px-2 bg-gray-300 autofill-gray resize-none focus:outline-none"
         placeholder="*Cooking Instructions..."
-        {...register(`stepSections.${sectionIndex}.steps.${stepIndex}.step`)}
+        {...register(`stepSections.${sectionIndex}.steps.${stepIndex}`)}
         onBlur={(e) => {
           const trimmedStep = e.target.value.trim();
           setValue(
-            `stepSections.${sectionIndex}.steps.${stepIndex}.step`,
+            `stepSections.${sectionIndex}.steps.${stepIndex}`,
             trimmedStep,
             { shouldValidate: true },
           );
         }}
       />
       <div className="place-self-center place-items-center py-2 col-span-full">
-        {errors.stepSections?.[sectionIndex]?.steps?.[stepIndex]?.step
-          ?.message && (
+        {errors.stepSections?.[sectionIndex]?.steps?.[stepIndex]?.message && (
           <ValidationError
             message={
-              errors.stepSections?.[sectionIndex]?.steps?.[stepIndex]?.step
-                ?.message
+              errors.stepSections?.[sectionIndex]?.steps?.[stepIndex]?.message
             }
           />
         )}

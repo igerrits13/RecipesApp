@@ -1,4 +1,4 @@
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import type { CreateRecipeData } from "../../types/Recipe";
 import { Minus, Plus } from "lucide-react";
 import CreateRecipeStepSingle from "./CreateRecipeStepSingle";
@@ -19,13 +19,24 @@ export default function CreateRecipeStepSection({
     formState: { errors },
   } = useFormContext<CreateRecipeData>();
 
-  const {
-    fields: stepFields,
-    append: appendStep,
-    remove: removeStep,
-  } = useFieldArray({
+  const values = useWatch({
     name: `stepSections.${sectionIndex}.steps`,
   });
+
+  // Helper function to add a new step
+  const handleAddStep = (value: string) => {
+    if (values.length >= 50) return;
+
+    setValue(`stepSections.${sectionIndex}.steps`, [...values, value]);
+  };
+
+  // Helper function to remove a step
+  const handleRemoveStep = (stepIndex: number) => {
+    setValue(
+      `stepSections.${sectionIndex}.steps`,
+      values.filter((_: string, i: number) => i !== stepIndex),
+    );
+  };
 
   return (
     <>
@@ -64,20 +75,20 @@ export default function CreateRecipeStepSection({
           )}
         </div>
         <div className="grid grid-cols-[auto_auto_1fr] gap-1 pt-2 text-olive-500 text-nowrap">
-          {stepFields.map((field, stepIndex) => (
+          {values.map((value: string, index: number) => (
             <CreateRecipeStepSingle
-              key={field.id}
+              key={`${index}`}
               sectionIndex={sectionIndex}
-              stepIndex={stepIndex}
-              removeStep={removeStep}
+              stepIndex={index}
+              handleRemoveStep={handleRemoveStep}
             />
           ))}
           {/* Add step button */}
-          {stepFields.length < 50 && (
+          {values.length < 50 && (
             <button
               type="button"
               className="place-items-center hover:cursor-pointer text-olive-500 hover:text-olive-400"
-              onClick={() => appendStep({}, { shouldFocus: false })}
+              onClick={() => handleAddStep("")}
             >
               <Plus className="size-6" />
             </button>
