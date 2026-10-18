@@ -172,6 +172,7 @@ export default function CreateRecipeForm() {
             console.log("SUBMIT FAILED - validation errors:", errors);
           },
         )}
+        encType="multipart/form-data"
       >
         <div className="md:grid md:grid-cols-[1fr_4fr]">
           <CreateRecipeTitle width={width} />

@@ -1,4 +1,5 @@
 import express from "express";
+import upload from "../middleware/fileUpload.js";
 import {
   optionalProtectRoute,
   protectRoute,
@@ -28,6 +29,7 @@ router.get("/", optionalProtectRoute, getAllRecipes);
 // Create a route for creating a new recipe
 router.post(
   "/",
+  upload.single("image"),
   checkBannedWord(
     [
       "title",

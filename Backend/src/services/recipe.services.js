@@ -50,12 +50,6 @@ const quantityRegex = new RegExp(
 
 // Helper function to validate that all object fields are filled in correctly
 export function validateRecipeData(recipe) {
-  let normalizedRecipe = {
-    preptimeSeconds: recipe.preptimeSeconds,
-    cooktimeSeconds: recipe.cooktimeSeconds,
-    servings: recipe.servings,
-  };
-
   const errors = [];
 
   // Confirm required fields are present
@@ -67,9 +61,93 @@ export function validateRecipeData(recipe) {
     recipe.cooktimeSeconds == null ||
     recipe.servings == null
   ) {
-    const err = new Error("Missing required recipe fields");
-    pushUnique(errors, err.message);
+    pushUnique(errors, "Missing required recipe fields");
   }
+
+  // Convert strings to numbers
+  const preptimeSeconds = Number(recipe.preptimeSeconds);
+  const cooktimeSeconds = Number(recipe.cooktimeSeconds);
+  const servings = Number(recipe.servings);
+
+  // Parse the request body
+  let ingredientSections = [];
+  try {
+    ingredientSections = JSON.parse(recipe.ingredientSections);
+  } catch (error) {
+    pushUnique(errors, "Invalid ingredient sections");
+  }
+
+  let stepSections = [];
+  try {
+    stepSections = JSON.parse(recipe.stepSections);
+  } catch (error) {
+    pushUnique(errors, "Invalid step sections");
+  }
+
+  let linkedRecipes = [];
+  if (recipe.linkedRecipes !== undefined) {
+    try {
+      linkedRecipes = JSON.parse(recipe.linkedRecipes);
+    } catch (error) {
+      pushUnique(errors, "Invalid linked recipes");
+    }
+  }
+
+  let source = null;
+  if (recipe.source) {
+    try {
+      source = JSON.parse(recipe.source);
+    } catch (error) {
+      pushUnique(errors, "Invalid source");
+    }
+  }
+
+  let tags = [];
+  if (recipe.tags) {
+    try {
+      tags = JSON.parse(recipe.tags);
+    } catch (error) {
+      pushUnique(errors, "Invalid tags");
+    }
+  }
+
+  let cuisines = [];
+  if (recipe.cuisines) {
+    try {
+      cuisines = JSON.parse(recipe.cuisines);
+    } catch (error) {
+      pushUnique(errors, "Invalid cuisines");
+    }
+  }
+
+  let meals = [];
+  if (recipe.meals) {
+    try {
+      meals = JSON.parse(recipe.meals);
+    } catch (error) {
+      pushUnique(errors, "Invalid meals");
+    }
+  }
+
+  let holidays = [];
+  if (recipe.holidays) {
+    try {
+      holidays = JSON.parse(recipe.holidays);
+    } catch (error) {
+      pushUnique(errors, "Invalid holidays");
+    }
+  }
+
+  let seasons = [];
+  if (recipe.seasons) {
+    try {
+      seasons = JSON.parse(recipe.seasons);
+    } catch (error) {
+      pushUnique(errors, "Invalid seasons");
+    }
+  }
+
+  let normalizedRecipe = {};
 
   normalizedRecipe.title = validateRecipeTitle(recipe.title, errors);
   normalizedRecipe.description = validateRecipeDescription(
@@ -77,27 +155,27 @@ export function validateRecipeData(recipe) {
     errors,
   );
   normalizedRecipe.ingredientSections = validateRecipeIngredients(
-    recipe.ingredientSections,
+    ingredientSections,
     errors,
   );
-  normalizedRecipe.stepSections = validateRecipeSteps(
-    recipe.stepSections,
-    errors,
-  );
-  validateRecipeTime(recipe.preptimeSeconds, recipe.cooktimeSeconds, errors);
-  validateRecipeServings(recipe.servings, errors);
+  normalizedRecipe.stepSections = validateRecipeSteps(stepSections, errors);
+  ({
+    preptimeSeconds: normalizedRecipe.preptimeSeconds,
+    cooktimeSeconds: normalizedRecipe.cooktimeSeconds,
+  } = validateRecipeTime(preptimeSeconds, cooktimeSeconds, errors));
+  normalizedRecipe.servings = validateRecipeServings(servings, errors);
   normalizedRecipe.notes = validateRecipeNotes(recipe.notes, errors);
   normalizedRecipe.linkedRecipes = validateLinkedRecipesArray(
-    recipe.linkedRecipes || [],
+    linkedRecipes || [],
     recipe._id,
     errors,
   );
   normalizedRecipe.image = validateRecipeImage(recipe.image, errors);
-  normalizedRecipe.source = recipe.source
-    ? validateRecipeSource(recipe.source, errors)
+  normalizedRecipe.source = source
+    ? validateRecipeSource(source, errors)
     : null;
   normalizedRecipe.tags = validateRecipeArray({
-    arr: recipe.tags || [],
+    arr: tags || [],
     minLength: 2,
     maxLength: 50,
     maxArrayLength: 10,
@@ -105,7 +183,7 @@ export function validateRecipeData(recipe) {
     errors,
   });
   normalizedRecipe.cuisines = validateRecipeArray({
-    arr: recipe.cuisines || [],
+    arr: cuisines || [],
     minLength: 2,
     maxLength: 50,
     maxArrayLength: 3,
@@ -113,7 +191,7 @@ export function validateRecipeData(recipe) {
     errors,
   });
   normalizedRecipe.meals = validateRecipeArray({
-    arr: recipe.meals || [],
+    arr: meals || [],
     minLength: 2,
     maxLength: 50,
     maxArrayLength: 3,
@@ -121,7 +199,7 @@ export function validateRecipeData(recipe) {
     errors,
   });
   normalizedRecipe.holidays = validateRecipeArray({
-    arr: recipe.holidays || [],
+    arr: holidays || [],
     minLength: 2,
     maxLength: 50,
     maxArrayLength: 3,
@@ -129,14 +207,14 @@ export function validateRecipeData(recipe) {
     errors,
   });
   normalizedRecipe.seasons = validateRecipeArray({
-    arr: recipe.seasons || [],
+    arr: seasons || [],
     minLength: 2,
     maxLength: 50,
     maxArrayLength: 3,
     itemName: "Seasons",
     errors,
   });
-  normalizedRecipe.isPublished = recipe.isPublished || false;
+  normalizedRecipe.isPublished = recipe.isPublished === "true";
 
   if (errors.length > 0) {
     const error = new Error("Validation failed");
@@ -211,13 +289,21 @@ function validateRecipeIngredients(ingredientSections, errors) {
   // Verify each ingredient section has valid section title and ingredients, and that all ingredient names and quantities are valid
   for (const section of ingredientSections) {
     if (
-      section.sectionTitle &&
-      (typeof section.sectionTitle !== "string" ||
-        section.sectionTitle.trim().length > 100)
+      section.sectionTitle !== undefined &&
+      section.sectionTitle !== null &&
+      typeof section.sectionTitle !== "string"
+    ) {
+      pushUnique(errors, "Ingredient section titles must be a string");
+      return [];
+    }
+
+    if (
+      typeof section.sectionTitle === "string" &&
+      section.sectionTitle.trim().length > 100
     ) {
       pushUnique(
         errors,
-        "Ingredient section titles must be a string and cannot exceed 100 characters",
+        "Ingredient section titles cannot exceed 100 characters",
       );
       return [];
     }
@@ -249,7 +335,7 @@ function validateRecipeIngredients(ingredientSections, errors) {
       return [];
     }
 
-    // confirm all ingredient name lengths are valid and quantities are valid numbers
+    // Confirm ingredient names, quantities, measurements, and additional info are valid
     validIngredients.forEach((item) => {
       if (item.ingredient.length < 2 || item.ingredient.length > 100) {
         pushUnique(
@@ -259,7 +345,7 @@ function validateRecipeIngredients(ingredientSections, errors) {
         return [];
       }
 
-      if (item.quantity) {
+      if (item.quantity !== null && item.quantity !== undefined) {
         if (
           typeof item.quantity !== "string" ||
           item.quantity
@@ -315,7 +401,10 @@ function validateRecipeIngredients(ingredientSections, errors) {
     });
 
     validSections.push({
-      sectionTitle: section.sectionTitle ? section.sectionTitle.trim() : "",
+      sectionTitle:
+        typeof section.sectionTitle === "string"
+          ? section.sectionTitle.trim()
+          : "",
       ingredients: validIngredients,
     });
   }
@@ -346,14 +435,19 @@ function validateRecipeSteps(stepSections, errors) {
   // Verify each step section has valid section title and steps, and that all steps are valid
   for (const section of stepSections) {
     if (
-      section.sectionTitle &&
-      (typeof section.sectionTitle !== "string" ||
-        section.sectionTitle.trim().length > 100)
+      section.sectionTitle !== undefined &&
+      section.sectionTitle !== null &&
+      typeof section.sectionTitle !== "string"
     ) {
-      pushUnique(
-        errors,
-        "Step section titles must be a string and cannot exceed 100 characters",
-      );
+      pushUnique(errors, "Step section titles must be a string");
+      return [];
+    }
+
+    if (
+      typeof section.sectionTitle === "string" &&
+      section.sectionTitle.trim().length > 100
+    ) {
+      pushUnique(errors, "Step section titles cannot exceed 100 characters");
       return [];
     }
 
@@ -388,7 +482,10 @@ function validateRecipeSteps(stepSections, errors) {
     });
 
     validSections.push({
-      sectionTitle: section.sectionTitle ? section.sectionTitle.trim() : "",
+      sectionTitle:
+        typeof section.sectionTitle === "string"
+          ? section.sectionTitle.trim()
+          : "",
       steps: validSteps,
     });
   }
@@ -413,6 +510,8 @@ function validateRecipeTime(preptimeSeconds, cooktimeSeconds, errors) {
   ) {
     pushUnique(errors, "Cook time must be a number between 0 and 1 day");
   }
+
+  return { preptimeSeconds, cooktimeSeconds };
 }
 
 // Helper function to validate recipe servings
@@ -420,6 +519,8 @@ function validateRecipeServings(servings, errors) {
   if (typeof servings !== "number" || servings < 0 || servings > 99) {
     pushUnique(errors, "Servings must be a number between 0 and 99");
   }
+
+  return servings;
 }
 
 // Helper function to validate recipe notes
@@ -615,8 +716,10 @@ export async function saveNewCollection({
     existingDocs.map((doc) => [doc.title, doc._id]),
   );
 
-  // Get the list of items that need to be created in the collection
-  const missingItems = itemNames.filter((name) => !existingItems.has(name));
+  // Get the list of items that need to be created in the collection while  removing duplicates
+  const missingItems = [
+    ...new Set(itemNames.filter((name) => !existingItems.has(name))),
+  ];
 
   // Create the missing items in the collection
   let newDocs = [];
@@ -679,14 +782,14 @@ export async function validateAndSaveNewRecipe({
   }
 
   // Upload the image to cloudinary if one was provided and update all collections
-  const imageURL = await uploadPhoto(image);
+  // const imageURL = await uploadPhoto(image);
 
   // Ensure the image url length is less than 2048 characters
-  if (imageURL && imageURL.length > 2048) {
-    const err = new Error("Image URL is too long");
-    err.statusCode = 400;
-    throw err;
-  }
+  // if (imageURL && imageURL.length > 2048) {
+  //   const err = new Error("Image URL is too long");
+  //   err.statusCode = 400;
+  //   throw err;
+  // }
 
   // Get all new measurements to prepare for saving ingredients
   const measurementNames = ingredientSections.flatMap((section) =>
@@ -713,8 +816,7 @@ export async function validateAndSaveNewRecipe({
       collectionModel: Ingredient,
       getName: (item) => item.ingredient,
       mapResults: (item, ingredientId) => ({
-        quantity: item.quantity || "",
-        // measurement: item.measurement || null,
+        quantity: item.quantity || null,
         measurement: item.measurement
           ? measurementMap.get(item.measurement.trim().toLowerCase())
           : null,
@@ -785,7 +887,7 @@ export async function validateAndSaveNewRecipe({
     preptimeSeconds,
     cooktimeSeconds,
     servings,
-    image: imageURL,
+    image: null,
     notes,
     linkedRecipes,
     source,
@@ -811,7 +913,7 @@ export async function validateAndUpdateRecipe({
   userId,
 }) {
   let newSlug = null;
-  let imageURL = oldRecipe.image || "";
+  let imageURL = oldRecipe.image || null;
 
   // Confirm the user is the author of the recipe
   if (oldRecipe.author._id.toString() !== userId.toString()) {
@@ -888,7 +990,7 @@ export async function validateAndUpdateRecipe({
         collectionModel: Ingredient,
         getName: (item) => item.ingredient,
         mapResults: (item, ingredientId) => ({
-          quantity: item.quantity || "",
+          quantity: item.quantity || null,
           // measurement: item.measurement || null,
           measurement: item.measurement
             ? measurementMap.get(item.measurement.trim().toLowerCase())
@@ -973,15 +1075,15 @@ export async function validateAndUpdateRecipe({
           : oldRecipe.stepSections,
       preptimeSeconds:
         updatedRecipeData.preptimeSeconds !== undefined
-          ? updatedRecipeData.preptimeSeconds
+          ? Number(updatedRecipeData.preptimeSeconds)
           : oldRecipe.preptimeSeconds,
       cooktimeSeconds:
         updatedRecipeData.cooktimeSeconds !== undefined
-          ? updatedRecipeData.cooktimeSeconds
+          ? Number(updatedRecipeData.cooktimeSeconds)
           : oldRecipe.cooktimeSeconds,
       servings:
         updatedRecipeData.servings !== undefined
-          ? updatedRecipeData.servings
+          ? Number(updatedRecipeData.servings)
           : oldRecipe.servings,
       image: imageURL,
       notes:

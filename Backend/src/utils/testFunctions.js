@@ -151,10 +151,10 @@ export const testRecipeData = {
       steps: ["Step 1", "Step 2"],
     },
   ],
-  preptimeSeconds: 600,
-  cooktimeSeconds: 1200,
-  servings: 4,
-  isPublished: true,
+  preptimeSeconds: "600",
+  cooktimeSeconds: "1200",
+  servings: "4",
+  isPublished: "true",
 };
 
 export const customRecipe = (index, testIngredient) => {
@@ -168,7 +168,7 @@ export const customRecipe = (index, testIngredient) => {
         ingredients: [{ ingredient: testIngredient._id }],
       },
     ],
-    isPublished: true,
+    isPublished: "true",
   };
 };
 
@@ -190,15 +190,50 @@ const fullTestRecipeData = {
       steps: ["Step 1", "Step 2"],
     },
   ],
-  preptimeSeconds: 600,
-  cooktimeSeconds: 1200,
-  servings: 4,
-  image: "",
+  preptimeSeconds: "600",
+  cooktimeSeconds: "1200",
+  servings: "4",
+  image: null,
   notes: "These are test notes.",
-  isPublished: true,
+  isPublished: "true",
 };
 
 export const fullTestRecipeDataComplete = {
+  title: "Full Test Recipe",
+  ingredientSections: JSON.stringify([
+    {
+      sectionTitle: "Test Section",
+      ingredients: [
+        { quantity: "1", ingredient: "ingredient1" },
+        { quantity: "2", ingredient: "ingredient2" },
+      ],
+    },
+  ]),
+  description: "This is a test recipe.",
+  stepSections: JSON.stringify([
+    {
+      steps: ["Step 1", "Step 2"],
+    },
+  ]),
+  preptimeSeconds: "600",
+  cooktimeSeconds: "1200",
+  servings: "4",
+  image: null,
+  source: JSON.stringify({
+    name: "Test source",
+    note: "Test note",
+  }),
+  tags: JSON.stringify(["tag1", "tag2"]),
+  cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+  meals: JSON.stringify(["meal1", "meal2"]),
+  notes: "These are test notes.",
+  linkedRecipes: JSON.stringify([]),
+  seasons: JSON.stringify(["season1", "season2"]),
+  holidays: JSON.stringify(["holiday1", "holiday2"]),
+  isPublished: "true",
+};
+
+export const fullTestRecipeDataCompleteNonJSON = {
   title: "Full Test Recipe",
   ingredientSections: [
     {
@@ -215,10 +250,10 @@ export const fullTestRecipeDataComplete = {
       steps: ["Step 1", "Step 2"],
     },
   ],
-  preptimeSeconds: 600,
-  cooktimeSeconds: 1200,
-  servings: 4,
-  image: "",
+  preptimeSeconds: "600",
+  cooktimeSeconds: "1200",
+  servings: "4",
+  image: null,
   source: {
     name: "Test source",
     note: "Test note",
@@ -230,7 +265,7 @@ export const fullTestRecipeDataComplete = {
   linkedRecipes: [],
   seasons: ["season1", "season2"],
   holidays: ["holiday1", "holiday2"],
-  isPublished: true,
+  isPublished: "true",
 };
 
 export const customFullRecipe = ({
@@ -247,15 +282,19 @@ export const customFullRecipe = ({
     ingredients: testIngredients.map((ingredient) => ({
       ingredient: ingredient._id,
     })),
-    tags: tags ? tags.map((tag) => tag._id) : [],
+    tags: tags ? JSON.stringify(tags.map((tag) => tag._id)) : [],
     linkedRecipes: linkedRecipes
-      ? linkedRecipes.map((recipe) => ({
-          recipeId: recipe._id,
-          role: "component",
-        }))
+      ? JSON.stringify(
+          linkedRecipes.map((recipe) => ({
+            recipeId: recipe._id,
+            role: "component",
+          })),
+        )
       : [],
-    holidays: holidays ? holidays.map((holiday) => holiday._id) : [],
-    seasons: seasons ? seasons.map((season) => season._id) : [],
+    holidays: holidays
+      ? JSON.stringify(holidays.map((holiday) => holiday._id))
+      : [],
+    seasons: seasons ? JSON.stringify(seasons.map((season) => season._id)) : [],
   };
 };
 

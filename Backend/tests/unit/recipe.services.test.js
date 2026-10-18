@@ -24,6 +24,7 @@ import {
   createTestChildComments,
   createTestMeasurement,
   createTestNote,
+  fullTestRecipeDataCompleteNonJSON,
 } from "../../src/utils/testFunctions.js";
 
 import {
@@ -106,6 +107,22 @@ describe("validateRecipeData", () => {
         seasons: expect.any(Array),
       }),
     );
+  });
+
+  test("should throw an error if the sections are not the right format", () => {
+    const invalidData = {
+      ...fullTestRecipeDataComplete,
+      ingredientSections: "Not an array",
+      stepSections: "Not an array",
+      source: "Not an array",
+      tags: "Not an array",
+      cuisines: "Not an array",
+      meals: "Not an array",
+      holidays: "Not an array",
+      seasons: "Not an array",
+    };
+
+    expect(() => validateRecipeData(invalidData)).toThrow("Validation failed");
   });
 
   test("should throw an error if title is missing", () => {
@@ -258,9 +275,9 @@ describe("validateRecipeData", () => {
 
       const dataWithWhitespace = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           { sectionTitle: "Test Section", ingredients: validIngredients },
-        ],
+        ]),
       };
 
       const result = validateRecipeData(dataWithWhitespace);
@@ -325,9 +342,9 @@ describe("validateRecipeData", () => {
 
       const dataWithWhitespace = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           { sectionTitle: "Test Section", ingredients: validIngredients },
-        ],
+        ]),
       };
 
       const result = validateRecipeData(dataWithWhitespace);
@@ -357,12 +374,12 @@ describe("validateRecipeData", () => {
 
       const dataWithNullQuantities = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: validIngredients,
           },
-        ],
+        ]),
       };
 
       const result = validateRecipeData(dataWithNullQuantities);
@@ -375,7 +392,7 @@ describe("validateRecipeData", () => {
       ]);
     });
 
-    test("should throw an error if ingredient sections are not an array", () => {
+    test("should throw an error if ingredient sections is not JSON", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         ingredientSections: "Not an array",
@@ -383,13 +400,35 @@ describe("validateRecipeData", () => {
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
+      expect(errors).toContain("Invalid ingredient sections");
+    });
+
+    test("should throw an error if ingredient sections are not an array", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        ingredientSections: JSON.stringify("Not an array"),
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
       expect(errors).toContain("Ingredient sections must be an array");
+    });
+
+    test("should throw an error if ingredient sections is not JSON", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        ingredientSections: [],
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain("Invalid ingredient sections");
     });
 
     test("should throw an error if ingredient sections array is empty", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [],
+        ingredientSections: JSON.stringify([]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -402,16 +441,18 @@ describe("validateRecipeData", () => {
     test("should throw an error if ingredient sections is longer than 5 sections", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: Array.from({ length: 6 }, (_, i) => ({
-          sectionTitle: `Test Section ${i + 1}`,
-          ingredients: [
-            {
-              ingredient: "Test Ingredient",
-              measurement: "cup",
-              quantity: "1",
-            },
-          ],
-        })),
+        ingredientSections: JSON.stringify(
+          Array.from({ length: 6 }, (_, i) => ({
+            sectionTitle: `Test Section ${i + 1}`,
+            ingredients: [
+              {
+                ingredient: "Test Ingredient",
+                measurement: "cup",
+                quantity: "1",
+              },
+            ],
+          })),
+        ),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -424,7 +465,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if the ingredient section title is not a string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: 123,
             ingredients: [
@@ -435,20 +476,18 @@ describe("validateRecipeData", () => {
               },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
-      expect(errors).toContain(
-        "Ingredient section titles must be a string and cannot exceed 100 characters",
-      );
+      expect(errors).toContain("Ingredient section titles must be a string");
     });
 
     test("should throw an error if the ingredient section title is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "A".repeat(101),
             ingredients: [
@@ -459,25 +498,25 @@ describe("validateRecipeData", () => {
               },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
       expect(errors).toContain(
-        "Ingredient section titles must be a string and cannot exceed 100 characters",
+        "Ingredient section titles cannot exceed 100 characters",
       );
     });
 
     test("should throw an error if ingredients within a section are not an array", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: "Not an array",
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -488,7 +527,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if quantity is not a string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [
@@ -499,7 +538,7 @@ describe("validateRecipeData", () => {
               },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -512,7 +551,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if quantity is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [
@@ -523,7 +562,7 @@ describe("validateRecipeData", () => {
               },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -536,7 +575,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if ingredient is not a valid string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [
@@ -544,7 +583,7 @@ describe("validateRecipeData", () => {
               { ingredient: "   ", measurement: "tablespoons", quantity: "2" },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -555,7 +594,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if there are too many ingredients", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: Array.from({ length: 51 }, (_, i) => ({
@@ -564,7 +603,7 @@ describe("validateRecipeData", () => {
               quantity: "1",
             })),
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -575,14 +614,14 @@ describe("validateRecipeData", () => {
     test("should throw an error if ingredient name is too short", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [
               { ingredient: "A", measurement: "cups", quantity: "1" },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -595,7 +634,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if ingredient name is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [
@@ -606,7 +645,7 @@ describe("validateRecipeData", () => {
               },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -619,7 +658,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if ingredient quantity is less than 0", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [
@@ -630,7 +669,7 @@ describe("validateRecipeData", () => {
               },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -643,7 +682,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if ingredient quantity is greater than 99", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [
@@ -654,7 +693,7 @@ describe("validateRecipeData", () => {
               },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -667,7 +706,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if ingredient measurement is not a valid choice", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [
@@ -678,7 +717,7 @@ describe("validateRecipeData", () => {
               },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -689,7 +728,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if ingredient aditional information is not a string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [
@@ -701,7 +740,7 @@ describe("validateRecipeData", () => {
               },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -714,7 +753,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if ingredient aditional information is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [
@@ -726,7 +765,7 @@ describe("validateRecipeData", () => {
               },
             ],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -742,19 +781,19 @@ describe("validateRecipeData", () => {
     test("should trim whitespace from steps and return them", () => {
       const dataWithWhitespace = {
         ...fullTestRecipeDataComplete,
-        stepSections: [
+        stepSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             steps: ["   Step 1   ", "   Step 2   "],
           },
-        ],
+        ]),
       };
 
       const result = validateRecipeData(dataWithWhitespace);
       expect(result.stepSections[0].steps).toEqual(["Step 1", "Step 2"]);
     });
 
-    test("should throw an error if step sections are not an array", () => {
+    test("should throw an error if step sections is not JSON", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         stepSections: "Not an array",
@@ -762,13 +801,35 @@ describe("validateRecipeData", () => {
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
+      expect(errors).toContain("Invalid step sections");
+    });
+
+    test("should throw an error if step sections are not an array", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        stepSections: JSON.stringify("Not an array"),
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
       expect(errors).toContain("Step sections must be an array");
+    });
+
+    test("should throw an error if step sections array is not JSON", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        stepSections: [],
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain("Invalid step sections");
     });
 
     test("should throw an error if step sections array is empty", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        stepSections: [],
+        stepSections: JSON.stringify([]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -779,10 +840,12 @@ describe("validateRecipeData", () => {
     test("should throw an error if step sections array is longer than 5 sections", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        stepSections: Array.from({ length: 6 }, (_, i) => ({
-          sectionTitle: `Test Section ${i + 1}`,
-          steps: ["Step 1"],
-        })),
+        stepSections: JSON.stringify(
+          Array.from({ length: 6 }, (_, i) => ({
+            sectionTitle: `Test Section ${i + 1}`,
+            steps: ["Step 1"],
+          })),
+        ),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -795,48 +858,46 @@ describe("validateRecipeData", () => {
     test("should throw an error if the step section title is not a string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        stepSections: [
+        stepSections: JSON.stringify([
           {
             sectionTitle: 123,
             steps: ["Step 1"],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
-      expect(errors).toContain(
-        "Step section titles must be a string and cannot exceed 100 characters",
-      );
+      expect(errors).toContain("Step section titles must be a string");
     });
 
     test("should throw an error if the step section title is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        stepSections: [
+        stepSections: JSON.stringify([
           {
             sectionTitle: "A".repeat(101),
             steps: ["Step 1"],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
       expect(errors).toContain(
-        "Step section titles must be a string and cannot exceed 100 characters",
+        "Step section titles cannot exceed 100 characters",
       );
     });
 
     test("should throw an error if steps within a step section are not an array", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        stepSections: [
+        stepSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             steps: "Not an array",
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -847,7 +908,9 @@ describe("validateRecipeData", () => {
     test("should throw an error if steps array is empty", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        stepSections: [{ sectionTitle: "Test Section", steps: [] }],
+        stepSections: JSON.stringify([
+          { sectionTitle: "Test Section", steps: [] },
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -858,12 +921,12 @@ describe("validateRecipeData", () => {
     test("should throw an error if steps are invalid", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        stepSections: [
+        stepSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             steps: ["   ", 123, null],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -874,12 +937,12 @@ describe("validateRecipeData", () => {
     test("should throw an error if there are too many steps", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        stepSections: [
+        stepSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             steps: Array.from({ length: 51 }, (_, i) => `Step ${i + 1}`),
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -890,12 +953,12 @@ describe("validateRecipeData", () => {
     test("should throw an error if step length is less than 3 characters", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        stepSections: [
+        stepSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             steps: ["Hi"],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -908,12 +971,12 @@ describe("validateRecipeData", () => {
     test("should throw an error if step length is greater than 500 characters", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        stepSections: [
+        stepSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             steps: ["A".repeat(501)],
           },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -929,7 +992,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if preptimeSeconds is less than 0", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        preptimeSeconds: -1,
+        preptimeSeconds: "-1",
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -942,7 +1005,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if preptimeSeconds is greater than 86400", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        preptimeSeconds: 86401,
+        preptimeSeconds: "86401",
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -955,7 +1018,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if cooktimeSeconds is less than 0", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        cooktimeSeconds: -1,
+        cooktimeSeconds: "-1",
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -968,7 +1031,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if cooktimeSeconds is greater than 86400", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        cooktimeSeconds: 86401,
+        cooktimeSeconds: "86401",
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -984,7 +1047,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if servings is less than 0", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        servings: -1,
+        servings: "-1",
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -995,7 +1058,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if servings is greater than 99", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        servings: 100,
+        servings: "100",
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1059,7 +1122,7 @@ describe("validateRecipeData", () => {
 
       const dataWithValidLinkedRecipes = {
         ...fullTestRecipeDataComplete,
-        linkedRecipes: validLinkedRecipes,
+        linkedRecipes: JSON.stringify(validLinkedRecipes),
       };
 
       const result = validateRecipeData(dataWithValidLinkedRecipes);
@@ -1074,10 +1137,21 @@ describe("validateRecipeData", () => {
       expect(result.linkedRecipes).toEqual([]);
     });
 
-    test("should throw an error if linkedRecipes is not an array", () => {
+    test("should throw an error if linkedRecipes is not JSON", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         linkedRecipes: "Not an array",
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain("Invalid linked recipes");
+    });
+
+    test("should throw an error if linkedRecipes is not an array", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        linkedRecipes: JSON.stringify("Not an array"),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1088,7 +1162,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if a linked recipe is missing recipeId", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        linkedRecipes: [{ role: "pairing" }],
+        linkedRecipes: JSON.stringify([{ role: "pairing" }]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1099,7 +1173,9 @@ describe("validateRecipeData", () => {
     test("should throw an error if a linked recipe is missing role", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        linkedRecipes: [{ recipeId: "60c72b2f9b1d8e5a5c8f9a1" }],
+        linkedRecipes: JSON.stringify([
+          { recipeId: "60c72b2f9b1d8e5a5c8f9a1" },
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1110,9 +1186,9 @@ describe("validateRecipeData", () => {
     test("should throw an error if a linked recipe has an invalid role", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        linkedRecipes: [
+        linkedRecipes: JSON.stringify([
           { recipeId: "60c72b2f9b1d8e5a5c8f9a1", role: "invalidrole" },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1123,10 +1199,10 @@ describe("validateRecipeData", () => {
     test("should throw an error if there are duplicate linked recipes", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        linkedRecipes: [
+        linkedRecipes: JSON.stringify([
           { recipeId: "60c72b2f9b1d8e5a5c8f9a1", role: "component" },
           { recipeId: "60c72b2f9b1d8e5a5c8f9a1", role: "pairing" },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1137,9 +1213,9 @@ describe("validateRecipeData", () => {
     test("should throw an error if a linked recipe is the same as the current recipe", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        linkedRecipes: [
+        linkedRecipes: JSON.stringify([
           { recipeId: "60c72b2f9b1d8e5a5c8f9a1", role: "component" },
-        ],
+        ]),
         _id: "60c72b2f9b1d8e5a5c8f9a1",
       };
 
@@ -1151,12 +1227,12 @@ describe("validateRecipeData", () => {
     test("should throw an error if there are more than 3 linked recipes", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        linkedRecipes: [
+        linkedRecipes: JSON.stringify([
           { recipeId: "60c72b2f9b1d8e5a5c8f9a1", role: "component" },
           { recipeId: "60c72b2f9b1d8e5a5c8f9a2", role: "pairing" },
           { recipeId: "60c72b2f9b1d8e5a5c8f9a3", role: "variation" },
           { recipeId: "60c72b2f9b1d8e5a5c8f9a4", role: "component" },
-        ],
+        ]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1172,7 +1248,7 @@ describe("validateRecipeData", () => {
     test("should trim whitespace from array items and return them", () => {
       const dataWithWhitespace = {
         ...fullTestRecipeDataComplete,
-        tags: ["   Tag1   ", "   Tag2   "],
+        tags: JSON.stringify(["   Tag1   ", "   Tag2   "]),
       };
 
       const result = validateRecipeData(dataWithWhitespace);
@@ -1192,7 +1268,7 @@ describe("validateRecipeData", () => {
     test("should remove duplicate items from the array and return unique items", () => {
       const dataWithDuplicates = {
         ...fullTestRecipeDataComplete,
-        tags: ["Tag1", "Tag2", "Tag1", "Tag3", "Tag2"],
+        tags: JSON.stringify(["Tag1", "Tag2", "Tag1", "Tag3", "Tag2"]),
       };
 
       const result = validateRecipeData(dataWithDuplicates);
@@ -1202,10 +1278,21 @@ describe("validateRecipeData", () => {
       expect(result.tags.length).toBe(3);
     });
 
-    test("should throw an error if array is not an array", () => {
+    test("should throw an error if tags is not JSON", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         tags: "Not an array",
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain("Invalid tags");
+    });
+
+    test("should throw an error if tags is not an array", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        tags: JSON.stringify("Not an array"),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1216,7 +1303,9 @@ describe("validateRecipeData", () => {
     test("should throw an error if there are too many tags in the array", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        tags: Array.from({ length: 11 }, (_, i) => `Tag${i + 1}`),
+        tags: JSON.stringify(
+          Array.from({ length: 11 }, (_, i) => `Tag${i + 1}`),
+        ),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1224,7 +1313,7 @@ describe("validateRecipeData", () => {
       expect(errors).toContain("A recipe cannot have more than 10 tags");
     });
 
-    test("should throw an error if there are too many holidays in the array", () => {
+    test("should throw an error if holidays are not JSON", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         holidays: Array.from({ length: 4 }, (_, i) => `Holiday${i + 1}`),
@@ -1232,13 +1321,39 @@ describe("validateRecipeData", () => {
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
 
+      expect(errors).toContain("Invalid holidays");
+    });
+
+    test("should throw an error if there are too many holidays in the array", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        holidays: JSON.stringify(
+          Array.from({ length: 4 }, (_, i) => `Holiday${i + 1}`),
+        ),
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
       expect(errors).toContain("A recipe cannot have more than 3 holidays");
+    });
+
+    test("should throw an error if seasons is not JSON", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        seasons: Array.from({ length: 4 }, (_, i) => `Season${i + 1}`),
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain("Invalid seasons");
     });
 
     test("should throw an error if there are too many seasons in the array", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        seasons: Array.from({ length: 4 }, (_, i) => `Season${i + 1}`),
+        seasons: JSON.stringify(
+          Array.from({ length: 4 }, (_, i) => `Season${i + 1}`),
+        ),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1249,7 +1364,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if an array item is not a valid string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        tags: ["   ", 123, null],
+        tags: JSON.stringify(["   ", 123, null]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1260,7 +1375,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if a tag is too short", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        tags: ["A"],
+        tags: JSON.stringify(["A"]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1284,10 +1399,10 @@ describe("validateRecipeData", () => {
     test("should throw an error if a source does not a name", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        source: {
+        source: JSON.stringify({
           url: "https://www.example.com",
           note: "This source has no name, which is not allowed.",
-        },
+        }),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1298,9 +1413,9 @@ describe("validateRecipeData", () => {
     test("should throw an error if the source url is not a string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        source: {
+        source: JSON.stringify({
           url: 123,
-        },
+        }),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1311,10 +1426,10 @@ describe("validateRecipeData", () => {
     test("should throw an error if the source url is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        source: {
+        source: JSON.stringify({
           name: "example source",
           url: "http://" + "a".repeat(2048) + ".com",
-        },
+        }),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1327,10 +1442,10 @@ describe("validateRecipeData", () => {
     test("should throw an error if the source url is not https", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        source: {
+        source: JSON.stringify({
           name: "example source",
           url: "http://www.example.com",
-        },
+        }),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1341,9 +1456,9 @@ describe("validateRecipeData", () => {
     test("should throw an error if the source name is not a string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        source: {
+        source: JSON.stringify({
           name: 123,
-        },
+        }),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1356,9 +1471,9 @@ describe("validateRecipeData", () => {
     test("should throw an error if the source name is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        source: {
+        source: JSON.stringify({
           name: "A".repeat(101),
-        },
+        }),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1371,10 +1486,10 @@ describe("validateRecipeData", () => {
     test("should throw an error if the source note is not a string", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        source: {
+        source: JSON.stringify({
           name: "example source",
           note: 123,
-        },
+        }),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1384,13 +1499,27 @@ describe("validateRecipeData", () => {
       );
     });
 
-    test("should throw an error if the source note is too long", () => {
+    test("should throw an error if the source note is not JSON", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         source: {
           name: "example source",
           note: "A".repeat(101),
         },
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain("Invalid source");
+    });
+
+    test("should throw an error if the source note is too long", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        source: JSON.stringify({
+          name: "example source",
+          note: "A".repeat(101),
+        }),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1403,7 +1532,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if a tag is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        tags: ["A".repeat(51)],
+        tags: JSON.stringify(["A".repeat(51)]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1411,10 +1540,21 @@ describe("validateRecipeData", () => {
       expect(errors).toContain("Tags must be between 2 and 50 characters long");
     });
 
-    test("should throw an error if a cuisine is too short", () => {
+    test("should throw an error if a cuisine is not JSON", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         cuisines: ["A"],
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain("Invalid cuisines");
+    });
+
+    test("should throw an error if a cuisine is too short", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        cuisines: JSON.stringify(["A"]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1427,7 +1567,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if a cuisine is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        cuisines: ["A".repeat(51)],
+        cuisines: JSON.stringify(["A".repeat(51)]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1437,10 +1577,21 @@ describe("validateRecipeData", () => {
       );
     });
 
-    test("should throw an error if a meal type is too short", () => {
+    test("should throw an error if a meal type is not JSON", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         meals: ["A"],
+      };
+
+      const errors = getValidationErrors(() => validateRecipeData(invalidData));
+
+      expect(errors).toContain("Invalid meals");
+    });
+
+    test("should throw an error if a meal type is too short", () => {
+      const invalidData = {
+        ...fullTestRecipeDataComplete,
+        meals: JSON.stringify(["A"]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1453,7 +1604,7 @@ describe("validateRecipeData", () => {
     test("should throw an error if a meal type is too long", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
-        meals: ["A".repeat(51)],
+        meals: JSON.stringify(["A".repeat(51)]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1470,27 +1621,27 @@ describe("validateRecipeData", () => {
       const invalidData = {
         ...fullTestRecipeDataComplete,
         title: "Hi",
-        ingredientSections: [
+        ingredientSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             ingredients: [],
           },
-        ],
-        stepSections: [
+        ]),
+        stepSections: JSON.stringify([
           {
             sectionTitle: "Test Section",
             steps: ["   "],
           },
-        ],
-        preptimeSeconds: -1,
-        cooktimeSeconds: 86401,
-        servings: 100,
+        ]),
+        preptimeSeconds: "-1",
+        cooktimeSeconds: "86401",
+        servings: "100",
         notes: "A".repeat(2001),
-        linkedRecipes: [
+        linkedRecipes: JSON.stringify([
           { recipeId: "60c72b2f9b1d8e5a5c8f9a1", role: "invalidrole" },
           { recipeId: "60c72b2f9b1d8e5a5c8f9a1", role: "component" },
-        ],
-        tags: ["A"],
+        ]),
+        tags: JSON.stringify(["A"]),
       };
 
       const errors = getValidationErrors(() => validateRecipeData(invalidData));
@@ -1558,6 +1709,36 @@ describe("saveNewCollection", () => {
     expect(savedIngredients.map((ingredient) => ingredient.title)).toEqual(
       expect.arrayContaining(ingredientNames),
     );
+  });
+
+  test("should save a new collection with duplicate ingredients while saving only unique but keeping duplicates in the mapped results", async () => {
+    const ingredientNames = [
+      "test ingredient 1",
+      "test ingredient 2",
+      "test ingredient 1",
+    ];
+
+    const savedIngredientsFull = await saveNewCollection({
+      newItems: ingredientNames,
+      collectionModel: Ingredient,
+      getName: (item) => item,
+      mapResults: (item, ingredientId) => ({
+        quantity: item.quantity || null,
+        measurement: item.measurement || null,
+        ingredient: ingredientId,
+      }),
+    });
+
+    const savedIngredients = await Ingredient.find({
+      title: { $in: ingredientNames },
+    });
+
+    expect(savedIngredients.length).toBe(ingredientNames.length - 1); // Only unique ingredients should be saved
+    expect(savedIngredients.map((ingredient) => ingredient.title)).toEqual(
+      expect.arrayContaining(ingredientNames.map((item) => item)),
+    );
+
+    expect(savedIngredientsFull.length).toBe(ingredientNames.length);
   });
 
   test("should normalize and save new collection items with extra whitespace", async () => {
@@ -1636,16 +1817,18 @@ describe("saveNewCollection", () => {
 describe("validateAndSaveNewRecipe", () => {
   test("should validate and save a new recipe with valid data", async () => {
     const result = await validateAndSaveNewRecipe({
-      ...fullTestRecipeDataComplete,
+      ...fullTestRecipeDataCompleteNonJSON,
       author: testUser._id,
     });
 
     expect(result).toHaveProperty("_id");
-    expect(result.title).toBe(fullTestRecipeDataComplete.title);
+    expect(result.title).toBe(fullTestRecipeDataCompleteNonJSON.title);
     expect(result.slug).toBe("full-test-recipe");
-    expect(result.description).toBe(fullTestRecipeDataComplete.description);
+    expect(result.description).toBe(
+      fullTestRecipeDataCompleteNonJSON.description,
+    );
     expect(result.ingredientSections).toHaveLength(
-      fullTestRecipeDataComplete.ingredientSections.length,
+      fullTestRecipeDataCompleteNonJSON.ingredientSections.length,
     );
     for (const section of result.ingredientSections) {
       section.ingredients.forEach((item) => {
@@ -1654,7 +1837,9 @@ describe("validateAndSaveNewRecipe", () => {
       });
     }
     expect(result.stepSections[0].steps).toEqual(
-      expect.arrayContaining(fullTestRecipeDataComplete.stepSections[0].steps),
+      expect.arrayContaining(
+        fullTestRecipeDataCompleteNonJSON.stepSections[0].steps,
+      ),
     );
     for (const section of result.stepSections) {
       section.steps.forEach((step) => {
@@ -1662,17 +1847,19 @@ describe("validateAndSaveNewRecipe", () => {
         expect(step.trim()).toBe(step);
       });
     }
-    expect(result.preptimeSeconds).toBe(
-      fullTestRecipeDataComplete.preptimeSeconds,
+    expect(result.preptimeSeconds.toString()).toBe(
+      fullTestRecipeDataCompleteNonJSON.preptimeSeconds,
     );
-    expect(result.cooktimeSeconds).toBe(
-      fullTestRecipeDataComplete.cooktimeSeconds,
+    expect(result.cooktimeSeconds.toString()).toBe(
+      fullTestRecipeDataCompleteNonJSON.cooktimeSeconds,
     );
-    expect(result.servings).toBe(fullTestRecipeDataComplete.servings);
-    expect(result.image).toBe(fullTestRecipeDataComplete.image);
-    expect(result.notes).toBe(fullTestRecipeDataComplete.notes);
+    expect(result.servings.toString()).toBe(
+      fullTestRecipeDataCompleteNonJSON.servings,
+    );
+    expect(result.image).toBe(fullTestRecipeDataCompleteNonJSON.image);
+    expect(result.notes).toBe(fullTestRecipeDataCompleteNonJSON.notes);
     expect(result.linkedRecipes).toEqual(
-      expect.arrayContaining(fullTestRecipeDataComplete.linkedRecipes),
+      expect.arrayContaining(fullTestRecipeDataCompleteNonJSON.linkedRecipes),
     );
     expect(result.author.toString()).toBe(testUser._id.toString());
     expect(result.source).toEqual(expect.any(Object));
@@ -1714,9 +1901,9 @@ describe("validateAndSaveNewRecipe", () => {
           steps: ["Test step 1"],
         },
       ],
-      preptimeSeconds: 600,
-      cooktimeSeconds: 1200,
-      servings: 4,
+      preptimeSeconds: "600",
+      cooktimeSeconds: "1200",
+      servings: "4",
     };
 
     const result = await validateAndSaveNewRecipe({
@@ -1750,7 +1937,7 @@ describe("validateAndSaveNewRecipe", () => {
     });
 
     const recipeDataWithLinkedRecipe = {
-      ...fullTestRecipeDataComplete,
+      ...fullTestRecipeDataCompleteNonJSON,
       linkedRecipes: [{ recipeId: linkedRecipe._id, role: "component" }],
     };
 
@@ -1782,7 +1969,7 @@ describe("validateAndSaveNewRecipe", () => {
     });
 
     const result = await validateAndSaveNewRecipe({
-      ...fullTestRecipeDataComplete,
+      ...fullTestRecipeDataCompleteNonJSON,
       title: "Duplicate Title Test Recipe",
       author: otherUser._id,
     });
@@ -1819,7 +2006,7 @@ describe("validateAndSaveNewRecipe", () => {
     const recipeId = new mongoose.Types.ObjectId();
 
     const recipeDataWithInvalidLinkedRecipe = {
-      ...fullTestRecipeDataComplete,
+      ...fullTestRecipeDataCompleteNonJSON,
       linkedRecipes: [{ recipeId: recipeId, role: "component" }],
     };
 
@@ -1849,7 +2036,7 @@ describe("validateAndSaveNewRecipe", () => {
     });
 
     const recipeDataWithUnpublishedLinkedRecipe = {
-      ...fullTestRecipeDataComplete,
+      ...fullTestRecipeDataCompleteNonJSON,
       linkedRecipes: [
         { recipeId: unpublishedLinkedRecipe._id, role: "component" },
       ],
@@ -1883,7 +2070,7 @@ describe("validateAndUpdateRecipe", () => {
     });
 
     const updatedData = {
-      ...fullTestRecipeDataComplete,
+      ...fullTestRecipeDataCompleteNonJSON,
     };
 
     const result = await validateAndUpdateRecipe({
@@ -1893,39 +2080,46 @@ describe("validateAndUpdateRecipe", () => {
     });
 
     expect(result._id.toString()).toBe(existingRecipe._id.toString());
-    expect(result.title).toBe(fullTestRecipeDataComplete.title);
+    expect(result.title).toBe(fullTestRecipeDataCompleteNonJSON.title);
     expect(result.slug).toBe("full-test-recipe");
-    expect(result.description).toBe(fullTestRecipeDataComplete.description);
+    expect(result.description).toBe(
+      fullTestRecipeDataCompleteNonJSON.description,
+    );
     expect(result.ingredientSections).toHaveLength(
-      fullTestRecipeDataComplete.ingredientSections.length,
+      fullTestRecipeDataCompleteNonJSON.ingredientSections.length,
     );
     expect(result.ingredientSections[0].ingredients).toHaveLength(
-      fullTestRecipeDataComplete.ingredientSections[0].ingredients.length,
+      fullTestRecipeDataCompleteNonJSON.ingredientSections[0].ingredients
+        .length,
     );
     result.ingredientSections[0].ingredients.forEach((item) => {
       expect(item.measurement).toBeNull();
       expect(typeof item.quantity).toBe("string");
     });
-    for (const section of result.stepSections) {
+    for (const [sectionIndex, section] of result.stepSections.entries()) {
       section.steps.forEach((step, index) => {
         expect(typeof step).toBe("string");
         expect(step.trim()).toBe(step);
         expect(step).toBe(
-          fullTestRecipeDataComplete.stepSections[0].steps[index],
+          fullTestRecipeDataCompleteNonJSON.stepSections[sectionIndex].steps[
+            index
+          ],
         );
       });
     }
-    expect(result.preptimeSeconds).toBe(
-      fullTestRecipeDataComplete.preptimeSeconds,
+    expect(result.preptimeSeconds.toString()).toBe(
+      fullTestRecipeDataCompleteNonJSON.preptimeSeconds,
     );
-    expect(result.cooktimeSeconds).toBe(
-      fullTestRecipeDataComplete.cooktimeSeconds,
+    expect(result.cooktimeSeconds.toString()).toBe(
+      fullTestRecipeDataCompleteNonJSON.cooktimeSeconds,
     );
-    expect(result.servings).toBe(fullTestRecipeDataComplete.servings);
-    expect(result.image).toBe(fullTestRecipeDataComplete.image);
-    expect(result.notes).toBe(fullTestRecipeDataComplete.notes);
+    expect(result.servings.toString()).toBe(
+      fullTestRecipeDataCompleteNonJSON.servings,
+    );
+    expect(result.image).toBe(fullTestRecipeDataCompleteNonJSON.image);
+    expect(result.notes).toBe(fullTestRecipeDataCompleteNonJSON.notes);
     expect(result.linkedRecipes).toEqual(
-      expect.arrayContaining(fullTestRecipeDataComplete.linkedRecipes),
+      expect.arrayContaining(fullTestRecipeDataCompleteNonJSON.linkedRecipes),
     );
     expect(result.author.toString()).toBe(testUser._id.toString());
     expect(result.source).toEqual(expect.any(Object));
@@ -1968,7 +2162,7 @@ describe("validateAndUpdateRecipe", () => {
     expect(result.preptimeSeconds).toBe(existingRecipe.preptimeSeconds);
     expect(result.cooktimeSeconds).toBe(existingRecipe.cooktimeSeconds);
     expect(result.servings).toBe(existingRecipe.servings);
-    expect(result.image).toBe("");
+    expect(result.image).toBe(null);
     expect(result.notes).toBe(existingRecipe.notes);
     expect(result.linkedRecipes).toEqual(existingRecipe.linkedRecipes);
   });
@@ -2085,7 +2279,7 @@ describe("validateAndUpdateRecipe", () => {
     expect(result.preptimeSeconds).toBe(existingRecipe.preptimeSeconds);
     expect(result.cooktimeSeconds).toBe(existingRecipe.cooktimeSeconds);
     expect(result.servings).toBe(existingRecipe.servings);
-    expect(result.image).toBe("");
+    expect(result.image).toBe(null);
     expect(result.notes).toBe(existingRecipe.notes);
     expect(result.linkedRecipes).toEqual(existingRecipe.linkedRecipes);
   });
@@ -2130,7 +2324,7 @@ describe("validateAndUpdateRecipe", () => {
     expect(result.preptimeSeconds).toBe(existingRecipe.preptimeSeconds);
     expect(result.cooktimeSeconds).toBe(existingRecipe.cooktimeSeconds);
     expect(result.servings).toBe(existingRecipe.servings);
-    expect(result.image).toBe("");
+    expect(result.image).toBe(null);
     expect(result.notes).toBe(existingRecipe.notes);
     expect(result.linkedRecipes).toEqual(existingRecipe.linkedRecipes);
   });
@@ -2172,7 +2366,7 @@ describe("validateAndUpdateRecipe", () => {
     expect(result.preptimeSeconds).toBe(existingRecipe.preptimeSeconds);
     expect(result.cooktimeSeconds).toBe(existingRecipe.cooktimeSeconds);
     expect(result.servings).toBe(existingRecipe.servings);
-    expect(result.image).toBe("");
+    expect(result.image).toBe(null);
     expect(result.notes).toBe(existingRecipe.notes);
     expect(result.linkedRecipes).toEqual(existingRecipe.linkedRecipes);
   });

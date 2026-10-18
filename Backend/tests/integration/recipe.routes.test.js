@@ -388,11 +388,11 @@ describe("POST /api/v1/recipes", () => {
     const newRecipeData = {
       title: "New Test Recipe",
       description: "This is a new test recipe",
-      image: "",
-      preptimeSeconds: 300,
-      cooktimeSeconds: 600,
-      servings: 4,
-      ingredientSections: [
+      image: null,
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
         {
           sectionTitle: "Test Section",
           ingredients: [
@@ -403,24 +403,26 @@ describe("POST /api/v1/recipes", () => {
             },
           ],
         },
-      ],
-      stepSections: [
+      ]),
+      stepSections: JSON.stringify([
         {
           sectionTitle: "Test Steps",
           steps: ["Step 1", "Step 2"],
         },
-      ],
-      source: {
+      ]),
+      source: JSON.stringify({
         name: "Test Source",
         note: "Test source note",
-      },
-      tags: ["tag1", "tag2"],
-      meals: ["meal1", "meal2"],
-      cuisines: ["cuisine1", "cuisine2"],
-      seasons: ["season1", "season2"],
-      holidays: ["holiday1"],
+      }),
+      tags: JSON.stringify(["tag1", "tag2"]),
+      meals: JSON.stringify(["meal1", "meal2"]),
+      cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+      seasons: JSON.stringify(["season1", "season2"]),
+      holidays: JSON.stringify(["holiday1"]),
       notes: "These are test notes.",
-      linkedRecipes: [{ recipeId: testRecipe._id, role: "component" }],
+      linkedRecipes: JSON.stringify([
+        { recipeId: testRecipe._id, role: "component" },
+      ]),
       isApproved: true,
     };
 
@@ -437,12 +439,12 @@ describe("POST /api/v1/recipes", () => {
     expect(response.body.recipe.description).toBe(newRecipeData.description);
     expect(response.body.recipe.image).toBe(newRecipeData.image);
     expect(response.body.recipe.preptimeSeconds).toBe(
-      newRecipeData.preptimeSeconds,
+      Number(newRecipeData.preptimeSeconds),
     );
     expect(response.body.recipe.cooktimeSeconds).toBe(
-      newRecipeData.cooktimeSeconds,
+      Number(newRecipeData.cooktimeSeconds),
     );
-    expect(response.body.recipe.servings).toBe(newRecipeData.servings);
+    expect(response.body.recipe.servings).toBe(Number(newRecipeData.servings));
     expect(response.body.recipe.ingredientSections).toBeDefined();
     expect(Array.isArray(response.body.recipe.ingredientSections)).toBe(true);
     for (const ingredientSection of response.body.recipe.ingredientSections) {
@@ -459,11 +461,11 @@ describe("POST /api/v1/recipes", () => {
     ).toBe(testIngredient._id.toString());
     expect(
       response.body.recipe.ingredientSections[0].ingredients[0].quantity,
-    ).toBe(newRecipeData.ingredientSections[0].ingredients[0].quantity);
+    ).toBe("2");
     expect(
       response.body.recipe.ingredientSections[0].ingredients[0].measurement
         .title,
-    ).toBe(testMeasurement.title);
+    ).toBe("tablespoon");
     for (const stepSection of response.body.recipe.stepSections) {
       expect(stepSection.sectionTitle).toBeDefined();
       expect(Array.isArray(stepSection.steps)).toBe(true);
@@ -477,8 +479,8 @@ describe("POST /api/v1/recipes", () => {
       testUser1.profileImage,
     );
     expect(response.body.recipe.source).toBeDefined();
-    expect(response.body.recipe.source.name).toBe(newRecipeData.source.name);
-    expect(response.body.recipe.source.note).toBe(newRecipeData.source.note);
+    expect(response.body.recipe.source.name).toBe("Test Source");
+    expect(response.body.recipe.source.note).toBe("Test source note");
     expect(response.body.recipe.tags).toBeDefined();
     expect(Array.isArray(response.body.recipe.tags)).toBe(true);
     expect(response.body.recipe.tags.length).toBe(2);
@@ -705,25 +707,25 @@ describe("POST /api/v1/recipes", () => {
     const newRecipeData = {
       title: "Flagged Test Recipe",
       description: "Flagged test description",
-      ingredientSections: [
+      ingredientSections: JSON.stringify([
         {
           sectionTitle: "Test Section",
           ingredients: [{ ingredient: "flagged" }],
         },
-      ],
-      stepSections: [
+      ]),
+      stepSections: JSON.stringify([
         {
           sectionTitle: "Test Section",
           steps: ["Flagged test step"],
         },
-      ],
+      ]),
       notes: "Flagged test note",
-      tags: ["flagged"],
-      holidays: ["flagged"],
-      seasons: ["flagged"],
-      preptimeSeconds: 10,
-      cooktimeSeconds: 20,
-      servings: 2,
+      tags: JSON.stringify(["flagged"]),
+      holidays: JSON.stringify(["flagged"]),
+      seasons: JSON.stringify(["flagged"]),
+      preptimeSeconds: "10",
+      cooktimeSeconds: "20",
+      servings: "2",
     };
 
     const response = await loginAgent1
@@ -1726,11 +1728,11 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     const updatedRecipeData = {
       title: "Updated Test Recipe",
       description: "This is an updated test recipe",
-      image: "",
-      preptimeSeconds: 400,
-      cooktimeSeconds: 800,
-      servings: 6,
-      ingredientSections: [
+      image: null,
+      preptimeSeconds: "400",
+      cooktimeSeconds: "800",
+      servings: "6",
+      ingredientSections: JSON.stringify([
         {
           sectionTitle: "Updated Test Section",
           ingredients: [
@@ -1741,22 +1743,22 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
             },
           ],
         },
-      ],
-      stepSections: [
+      ]),
+      stepSections: JSON.stringify([
         {
           sectionTitle: "Updated Test Steps",
           steps: ["Updated Step 1", "Updated Step 2"],
         },
-      ],
-      source: {
+      ]),
+      source: JSON.stringify({
         name: "Updated Test Source",
         note: "This is an updated test source note",
-      },
-      tags: ["updatedtag1", "updatedtag2"],
-      cuisines: ["updatedcuisine1", "updatedcuisine2"],
-      meals: ["updatedmeal1", "updatedmeal2"],
-      seasons: ["updatedseason1", "updatedseason2"],
-      holidays: ["updatedholiday1"],
+      }),
+      tags: JSON.stringify(["updatedtag1", "updatedtag2"]),
+      cuisines: JSON.stringify(["updatedcuisine1", "updatedcuisine2"]),
+      meals: JSON.stringify(["updatedmeal1", "updatedmeal2"]),
+      seasons: JSON.stringify(["updatedseason1", "updatedseason2"]),
+      holidays: JSON.stringify(["updatedholiday1"]),
       notes: "These are updated test notes.",
     };
 
@@ -1775,12 +1777,14 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     );
     expect(response.body.recipe.image).toBe(updatedRecipeData.image);
     expect(response.body.recipe.preptimeSeconds).toBe(
-      updatedRecipeData.preptimeSeconds,
+      Number(updatedRecipeData.preptimeSeconds),
     );
     expect(response.body.recipe.cooktimeSeconds).toBe(
-      updatedRecipeData.cooktimeSeconds,
+      Number(updatedRecipeData.cooktimeSeconds),
     );
-    expect(response.body.recipe.servings).toBe(updatedRecipeData.servings);
+    expect(response.body.recipe.servings).toBe(
+      Number(updatedRecipeData.servings),
+    );
     expect(response.body.recipe.ingredientSections).toBeDefined();
     expect(Array.isArray(response.body.recipe.ingredientSections)).toBe(true);
     for (const ingredientSection of response.body.recipe.ingredientSections) {
@@ -1797,11 +1801,9 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
       testUser1.profileImage,
     );
     expect(response.body.recipe.source).toBeDefined();
-    expect(response.body.recipe.source.name).toBe(
-      updatedRecipeData.source.name,
-    );
+    expect(response.body.recipe.source.name).toBe("Updated Test Source");
     expect(response.body.recipe.source.note).toBe(
-      updatedRecipeData.source.note,
+      "This is an updated test source note",
     );
     expect(response.body.recipe.tags).toBeDefined();
     expect(Array.isArray(response.body.recipe.tags)).toBe(true);
@@ -2086,25 +2088,25 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     const updatedRecipeData = {
       title: "Flagged Recipe Title",
       description: "Flagged recipe description",
-      ingredientSections: [
+      ingredientSections: JSON.stringify([
         {
           sectionTitle: "Updated Test Section",
           ingredients: [{ ingredient: "flagged" }],
         },
-      ],
-      stepSections: [
+      ]),
+      stepSections: JSON.stringify([
         {
           sectionTitle: "Updated Test Section",
           steps: ["Flagged test step"],
         },
-      ],
+      ]),
       notes: "Flagged",
-      tags: ["Flagged"],
-      holidays: ["Flagged"],
-      seasons: ["Flagged"],
-      preptimeSeconds: 10,
-      cooktimeSeconds: 20,
-      servings: 2,
+      tags: JSON.stringify(["Flagged"]),
+      holidays: JSON.stringify(["Flagged"]),
+      seasons: JSON.stringify(["Flagged"]),
+      preptimeSeconds: "10",
+      cooktimeSeconds: "20",
+      servings: "2",
     };
 
     const response = await loginAgent1
@@ -2164,21 +2166,21 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
 
     const updatedRecipeData = {
       title: "Updated Other User Recipe",
-      ingredientSections: [
+      ingredientSections: JSON.stringify([
         {
           sectionTitle: "Updated Test Section",
           ingredients: [{ ingredient: testIngredient.title }],
         },
-      ],
-      stepSections: [
+      ]),
+      stepSections: JSON.stringify([
         {
           sectionTitle: "Updated Test Steps",
           steps: ["Updated Step 1", "Updated Step 2"],
         },
-      ],
-      preptimeSeconds: 400,
-      cooktimeSeconds: 800,
-      servings: 6,
+      ]),
+      preptimeSeconds: "400",
+      cooktimeSeconds: "800",
+      servings: "6",
     };
 
     const response = await loginAgent1
