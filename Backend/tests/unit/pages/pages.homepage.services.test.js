@@ -1,7 +1,3 @@
-import { jest } from "@jest/globals";
-
-import mongoose, { get } from "mongoose";
-
 import User from "../../../src/models/user.model.js";
 import Recipe from "../../../src/models/recipe.model.js";
 import Ingredient from "../../../src/models/ingredient.model.js";
@@ -17,10 +13,7 @@ import {
   addRecipeToFavorites,
 } from "../../../src/utils/testFunctions.js";
 
-import {
-  getHomepageData,
-  getRandomRecipes,
-} from "../../../src/services/pages/pages.homepage.services.js";
+import { getHomepageData } from "../../../src/services/pages/pages.homepage.services.js";
 
 // Base test setup //
 
@@ -148,7 +141,10 @@ describe("getHomepageData", () => {
           title: expect.any(String),
           slug: expect.any(String),
           description: expect.any(String),
-          image: expect.any(String),
+          image: expect.objectContaining({
+            imageURL: null,
+            publicId: null,
+          }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
           aggregateRating: expect.any(Number),
@@ -182,7 +178,10 @@ describe("getHomepageData", () => {
           title: expect.any(String),
           slug: expect.any(String),
           description: expect.any(String),
-          image: expect.any(String),
+          image: expect.objectContaining({
+            imageURL: null,
+            publicId: null,
+          }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
           aggregateRating: expect.any(Number),
@@ -212,7 +211,10 @@ describe("getHomepageData", () => {
           title: expect.any(String),
           slug: expect.any(String),
           description: expect.any(String),
-          image: expect.any(String),
+          image: expect.objectContaining({
+            imageURL: null,
+            publicId: null,
+          }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
           aggregateRating: expect.any(Number),
@@ -237,7 +239,10 @@ describe("getHomepageData", () => {
           title: expect.any(String),
           slug: expect.any(String),
           description: expect.any(String),
-          image: expect.any(String),
+          image: expect.objectContaining({
+            imageURL: null,
+            publicId: null,
+          }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
           aggregateRating: expect.any(Number),
@@ -272,7 +277,10 @@ describe("getHomepageData", () => {
           title: expect.any(String),
           slug: expect.any(String),
           description: expect.any(String),
-          image: expect.any(String),
+          image: expect.objectContaining({
+            imageURL: null,
+            publicId: null,
+          }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
           aggregateRating: expect.any(Number),

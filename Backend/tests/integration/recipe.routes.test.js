@@ -1,5 +1,39 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { jest } from "@jest/globals";
+import fs from "fs";
+import sharp from "sharp";
+
+const mockUploadPhoto = jest.fn();
+const mockDeletePhoto = jest.fn();
+
+jest.unstable_mockModule(
+  new URL("../../src/utils/photoUpload.js", import.meta.url).href,
+  () => ({
+    uploadPhoto: mockUploadPhoto,
+    deletePhoto: mockDeletePhoto,
+  }),
+);
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const img1Path = path.join(__dirname, "../images/img1.jpg");
+const img2Path = path.join(__dirname, "../images/img2.jpg");
+const img3Path = path.join(__dirname, "../images/test.txt");
+
+const invalidImagePath = path.join(__dirname, "../images/invalid.jpg");
+
+const oversizedImageInMBPath = path.join(
+  __dirname,
+  "../images/oversizedmb.jpg",
+);
+
+const oversizedImageInPixelsPath = path.join(
+  __dirname,
+  "../images/oversizedpixels.jpg",
+);
+
 import request from "supertest";
-import app from "../../src/app.js";
+const { default: app } = await import("../../src/app.js");
 
 import User from "../../src/models/user.model.js";
 import Recipe from "../../src/models/recipe.model.js";
@@ -12,7 +46,7 @@ import Rating from "../../src/models/rating.model.js";
 import BannedWord from "../../src/models/bannedWord.model.js";
 import Report from "../../src/models/report.model.js";
 
-import {
+const {
   testUserData,
   createTestUser,
   createSecondaryTestUser,
@@ -24,7 +58,7 @@ import {
   createTestRating,
   createTestCommentVote,
   createTestBannedWord,
-} from "../../src/utils/testFunctions.js";
+} = await import("../../src/utils/testFunctions.js");
 import Meal from "../../src/models/meal.model.js";
 import Cuisine from "../../src/models/cuisine.model.js";
 
@@ -65,6 +99,19 @@ beforeAll(async () => {
     word: "flagged",
     severity: "flag",
   });
+
+  fs.writeFileSync(invalidImagePath, "This is not actually an image");
+  fs.writeFileSync(oversizedImageInMBPath, Buffer.alloc(11 * 1024 * 1024));
+  await sharp({
+    create: {
+      width: 2000,
+      height: 1000,
+      channels: 3,
+      background: { r: 0, g: 0, b: 0 },
+    },
+  })
+    .jpeg()
+    .toFile(oversizedImageInPixelsPath);
 });
 
 // Delete all recipes and notes before each test
@@ -74,6 +121,23 @@ beforeEach(async () => {
   await Note.deleteMany({});
   await Tag.deleteMany({});
   await Rating.deleteMany({});
+
+  jest.clearAllMocks();
+
+  mockUploadPhoto.mockResolvedValue(null);
+});
+
+// Delete all temp images after all tests
+afterAll(async () => {
+  for (const imagePath of [
+    invalidImagePath,
+    oversizedImageInMBPath,
+    oversizedImageInPixelsPath,
+  ]) {
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+    }
+  }
 });
 
 // Test cases: getAllRecipes //
@@ -539,6 +603,327 @@ describe("POST /api/v1/recipes", () => {
     expect(
       response.body.recipe.linkedRecipes[0].recipeId.author.displayName,
     ).toBe(testUser1.displayName);
+  });
+
+  it("should upload the image to Cloudinary and save the image data in the recipe", async () => {
+    const newRecipeData = {
+      title: "New Test Recipe",
+      description: "This is a new test recipe",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      source: JSON.stringify({
+        name: "Test Source",
+        note: "Test source note",
+      }),
+      tags: JSON.stringify(["tag1", "tag2"]),
+      meals: JSON.stringify(["meal1", "meal2"]),
+      cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+      seasons: JSON.stringify(["season1", "season2"]),
+      holidays: JSON.stringify(["holiday1"]),
+      notes: "These are test notes.",
+      linkedRecipes: JSON.stringify([]),
+      isApproved: true,
+    };
+
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+      publicId: "new-image",
+    });
+
+    const response = await loginAgent1
+      .post("/api/v1/recipes")
+      .field(newRecipeData)
+      .attach("image", img1Path);
+
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+
+    const uploadedPath = mockUploadPhoto.mock.calls[0][0];
+
+    expect(uploadedPath).toMatch(/^uploads[\\/]/);
+    expect(mockDeletePhoto).not.toHaveBeenCalled();
+
+    expect(response.body.recipe.image.imageURL).toBe(
+      "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+    );
+    expect(response.body.recipe.image.publicId).toBe("new-image");
+  });
+
+  it("should upload a recipe properly when a image is null", async () => {
+    const newRecipeData = {
+      title: "New Test Recipe",
+      description: "This is a new test recipe",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      source: JSON.stringify({
+        name: "Test Source",
+        note: "Test source note",
+      }),
+      tags: JSON.stringify(["tag1", "tag2"]),
+      meals: JSON.stringify(["meal1", "meal2"]),
+      cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+      seasons: JSON.stringify(["season1", "season2"]),
+      holidays: JSON.stringify(["holiday1"]),
+      notes: "These are test notes.",
+      linkedRecipes: JSON.stringify([]),
+      isApproved: true,
+    };
+
+    const response = await loginAgent1
+      .post("/api/v1/recipes")
+      .field(newRecipeData);
+
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+    expect(response.body.recipe.image).toBeNull();
+    expect(mockUploadPhoto).not.toHaveBeenCalled();
+    expect(mockDeletePhoto).not.toHaveBeenCalled();
+  });
+
+  it("should reject an unsupported image file type", async () => {
+    const newRecipeData = {
+      title: "New Test Recipe",
+      description: "This is a new test recipe",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      source: JSON.stringify({
+        name: "Test Source",
+        note: "Test source note",
+      }),
+      tags: JSON.stringify(["tag1", "tag2"]),
+      meals: JSON.stringify(["meal1", "meal2"]),
+      cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+      seasons: JSON.stringify(["season1", "season2"]),
+      holidays: JSON.stringify(["holiday1"]),
+      notes: "These are test notes.",
+      linkedRecipes: JSON.stringify([]),
+      isApproved: true,
+    };
+
+    const response = await loginAgent1
+      .post("/api/v1/recipes")
+      .field(newRecipeData)
+      .attach("image", img3Path);
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe(
+      "Invalid file type. Please upload a JPEG or PNG image",
+    );
+    expect(mockUploadPhoto).not.toHaveBeenCalled();
+  });
+
+  it("should return an error when creating a recipe with a corrupted image", async () => {
+    const newRecipeData = {
+      title: "New Test Recipe",
+      description: "This is a new test recipe",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      source: JSON.stringify({
+        name: "Test Source",
+        note: "Test source note",
+      }),
+      tags: JSON.stringify(["tag1", "tag2"]),
+      meals: JSON.stringify(["meal1", "meal2"]),
+      cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+      seasons: JSON.stringify(["season1", "season2"]),
+      holidays: JSON.stringify(["holiday1"]),
+      notes: "These are test notes.",
+      linkedRecipes: JSON.stringify([]),
+      isApproved: true,
+    };
+
+    const response = await loginAgent1
+      .post("/api/v1/recipes")
+      .field(newRecipeData)
+      .attach("image", invalidImagePath, {
+        contentType: "image/jpeg",
+      });
+
+    expect(response.status).toBe(400);
+    expect(mockUploadPhoto).not.toHaveBeenCalled();
+  });
+
+  it("should reject an uploaded file exceeding the 10MB limit", async () => {
+    const newRecipeData = {
+      title: "New Test Recipe",
+      description: "This is a new test recipe",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      source: JSON.stringify({
+        name: "Test Source",
+        note: "Test source note",
+      }),
+      tags: JSON.stringify(["tag1", "tag2"]),
+      meals: JSON.stringify(["meal1", "meal2"]),
+      cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+      seasons: JSON.stringify(["season1", "season2"]),
+      holidays: JSON.stringify(["holiday1"]),
+      notes: "These are test notes.",
+      linkedRecipes: JSON.stringify([]),
+      isApproved: true,
+    };
+
+    const response = await loginAgent1
+      .post("/api/v1/recipes")
+      .field(newRecipeData)
+      .attach("image", oversizedImageInMBPath, {
+        contentType: "image/jpeg",
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe("Image size cannot exceed 10MB");
+    expect(mockUploadPhoto).not.toHaveBeenCalled();
+  });
+
+  it("should reject an upload file exceeding the 1920x1920 limit", async () => {
+    const newRecipeData = {
+      title: "New Test Recipe",
+      description: "This is a new test recipe",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      source: JSON.stringify({
+        name: "Test Source",
+        note: "Test source note",
+      }),
+      tags: JSON.stringify(["tag1", "tag2"]),
+      meals: JSON.stringify(["meal1", "meal2"]),
+      cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+      seasons: JSON.stringify(["season1", "season2"]),
+      holidays: JSON.stringify(["holiday1"]),
+      notes: "These are test notes.",
+      linkedRecipes: JSON.stringify([]),
+      isApproved: true,
+    };
+
+    const response = await loginAgent1
+      .post("/api/v1/recipes")
+      .field(newRecipeData)
+      .attach("image", oversizedImageInPixelsPath, {
+        contentType: "image/jpeg",
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe(
+      "Image dimensions cannot exceed 1920 × 1920 pixels. Please resize your image",
+    );
+    expect(mockUploadPhoto).not.toHaveBeenCalled();
   });
 
   it("should return an error when creating a recipe with invalid data", async () => {
@@ -1829,6 +2214,250 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     expect(Array.isArray(response.body.recipe.holidays)).toBe(true);
     expect(response.body.recipe.holidays.length).toBe(1);
     expect(response.body.recipe.holidays[0].title).toBe("updatedholiday1");
+  });
+
+  it("should update the recipe's image, upload it to cloudinary and delete the old image", async () => {
+    const existingRecipe = await createTestRecipe(testUser1._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+      },
+    });
+
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+      publicId: "new-image",
+    });
+
+    const updatedRecipeData = {
+      title: existingRecipe.title,
+      description: "Updated description",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      linkedRecipes: JSON.stringify([]),
+    };
+
+    const response = await loginAgent1
+      .put(`/api/v1/recipes/${existingRecipe.slug}`)
+      .field(updatedRecipeData)
+      .attach("image", img2Path);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+    expect(mockUploadPhoto).toHaveBeenCalledWith(expect.any(String));
+
+    expect(mockDeletePhoto).toHaveBeenCalledTimes(1);
+    expect(mockDeletePhoto).toHaveBeenCalledWith("test-image");
+
+    expect(response.body.recipe.image.imageURL).toBe(
+      "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+    );
+    expect(response.body.recipe.image.publicId).toBe("new-image");
+  });
+
+  it("should update the recipe's image, upload it to cloudinary and not delete the old image if there was not one", async () => {
+    const existingRecipe = await createTestRecipe(testUser1._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    });
+
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+      publicId: "new-image",
+    });
+
+    const updatedRecipeData = {
+      title: existingRecipe.title,
+      description: "Updated description",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      linkedRecipes: JSON.stringify([]),
+    };
+
+    const response = await loginAgent1
+      .put(`/api/v1/recipes/${existingRecipe.slug}`)
+      .field(updatedRecipeData)
+      .attach("image", img2Path);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+    expect(mockUploadPhoto).toHaveBeenCalledWith(expect.any(String));
+
+    expect(mockDeletePhoto).not.toHaveBeenCalled();
+
+    expect(response.body.recipe.image.imageURL).toBe(
+      "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+    );
+    expect(response.body.recipe.image.publicId).toBe("new-image");
+  });
+
+  it("should delete the recipe's old image and not upload a new one if the image is set to null", async () => {
+    const existingRecipe = await createTestRecipe(testUser1._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+      },
+    });
+
+    const updatedRecipeData = {
+      title: existingRecipe.title,
+      description: "Updated description",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      linkedRecipes: JSON.stringify([]),
+    };
+
+    const response = await loginAgent1
+      .put(`/api/v1/recipes/${existingRecipe.slug}`)
+      .field(updatedRecipeData);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+
+    expect(mockUploadPhoto).not.toHaveBeenCalled();
+    expect(mockDeletePhoto).toHaveBeenCalledTimes(1);
+    expect(mockDeletePhoto).toHaveBeenCalledWith("test-image");
+
+    expect(response.body.recipe.image).toBe(null);
+  });
+
+  it("should not delete the recipe's old image or upload a new one if neither the old recipe nor the updated recipe have an image", async () => {
+    const existingRecipe = await createTestRecipe(testUser1._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    });
+
+    const updatedRecipeData = {
+      title: existingRecipe.title,
+      description: "Updated description",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      linkedRecipes: JSON.stringify([]),
+    };
+
+    const response = await loginAgent1
+      .put(`/api/v1/recipes/${existingRecipe.slug}`)
+      .field(updatedRecipeData);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+
+    expect(mockUploadPhoto).not.toHaveBeenCalled();
+    expect(mockDeletePhoto).not.toHaveBeenCalled();
+
+    expect(response.body.recipe.image).toBe(null);
   });
 
   it("should return an error when updating a recipe with invalid data", async () => {

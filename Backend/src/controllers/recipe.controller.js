@@ -1,3 +1,4 @@
+import fs from "node:fs/promises";
 import { getPagination } from "../utils/getPagination.js";
 import {
   buildRecipeFilters,
@@ -65,6 +66,7 @@ export async function createRecipe(req, res) {
     // Confirm the request body has valid fields and save the new recipe to the database
     const recipe = await validateAndSaveNewRecipe({
       ...validatedRecipe,
+      imagePath: req.file?.path,
       author: req.user._id,
     });
 
@@ -79,8 +81,18 @@ export async function createRecipe(req, res) {
   } catch (error) {
     res.status(error.statusCode || 500).json({
       success: false,
-      message: error.message ? error.message : "Internal server error",
+      message: error.message || "Internal server error",
     });
+  } finally {
+    if (req.file?.path) {
+      try {
+        await fs.unlink(req.file.path);
+      } catch (error) {
+        if (error.code !== "ENOENT") {
+          console.error("Error deleting temporary file:", error);
+        }
+      }
+    }
   }
 }
 
@@ -111,6 +123,7 @@ export async function updateRecipe(req, res) {
     const recipe = await validateAndUpdateRecipe({
       updatedRecipeData: validatedRecipe,
       oldRecipe: req.recipe,
+      imagePath: req.file?.path,
       userId: req.user._id,
     });
 
@@ -126,6 +139,16 @@ export async function updateRecipe(req, res) {
       success: false,
       message: error.message || "Internal server error",
     });
+  } finally {
+    if (req.file?.path) {
+      try {
+        await fs.unlink(req.file.path);
+      } catch (error) {
+        if (error.code !== "ENOENT") {
+          console.error("Error deleting temporary file:", error);
+        }
+      }
+    }
   }
 }
 

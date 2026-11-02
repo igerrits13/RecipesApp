@@ -19,6 +19,7 @@ import {
   createCommentByRecipeId,
 } from "../controllers/recipe.controller.js";
 import { checkBannedWord } from "../middleware/bannedWord.middleware.js";
+import { validateRecipeImage } from "../utils/validateImage.js";
 
 // Create the router using express
 const router = express.Router();
@@ -30,6 +31,7 @@ router.get("/", optionalProtectRoute, getAllRecipes);
 router.post(
   "/",
   upload.single("image"),
+  validateRecipeImage,
   checkBannedWord(
     [
       "title",
@@ -58,6 +60,8 @@ router.get(
 // Create a route for updating a user's specified recipe
 router.put(
   "/:recipeSlug",
+  upload.single("image"),
+  validateRecipeImage,
   checkBannedWord(
     [
       "title",

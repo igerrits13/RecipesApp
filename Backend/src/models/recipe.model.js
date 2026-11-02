@@ -154,9 +154,20 @@ const recipeSchema = mongoose.Schema(
       max: 99,
     },
     image: {
-      type: String,
-      trim: true,
-      maxlength: 2048,
+      type: {
+        imageURL: {
+          type: String,
+          trim: true,
+          maxLength: 2048,
+          required: true,
+        },
+        publicId: {
+          type: String,
+          trim: true,
+          required: true,
+        },
+      },
+      default: null,
     },
     notes: {
       type: String,

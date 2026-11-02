@@ -1882,7 +1882,8 @@ describe("getOtherUserRecipesByUsername", () => {
     expect(recipes.recipeList[0]).toHaveProperty("title", publicRecipe.title);
     expect(recipes.recipeList[0]).toHaveProperty("slug", publicRecipe.slug);
     expect(recipes.recipeList[0]).toHaveProperty("description", "");
-    expect(recipes.recipeList[0]).toHaveProperty("image", "");
+    expect(recipes.recipeList[0]).toHaveProperty("image.imageURL", null);
+    expect(recipes.recipeList[0]).toHaveProperty("image.publicId", null);
     expect(recipes.recipeList[0]).toHaveProperty(
       "preptimeSeconds",
       publicRecipe.preptimeSeconds,

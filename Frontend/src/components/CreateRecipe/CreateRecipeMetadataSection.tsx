@@ -43,7 +43,7 @@ export default function CreateRecipeMetadataSection({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 text-center text-olive-500 bg-antique-parchment-500 rounded-4xl overflow-hidden">
+    <div className="flex flex-col gap-4 p-4 h-min text-center text-olive-500 bg-antique-parchment-500 rounded-4xl overflow-hidden">
       {displayName} ({maxItems} Max)
       {values.map((value: string, index: number) => (
         <CreateRecipeMetadataSingle

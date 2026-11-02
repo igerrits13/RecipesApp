@@ -50,7 +50,10 @@ export function populateRecipePreview(recipes) {
     title: recipe.title,
     slug: recipe.slug,
     description: recipe.description || "",
-    image: recipe.image || "",
+    image: {
+      imageURL: recipe.image?.imageURL || null,
+      publicId: recipe.image?.publicId || null,
+    },
     preptimeSeconds: recipe.preptimeSeconds,
     cooktimeSeconds: recipe.cooktimeSeconds,
     aggregateRating: recipe.aggregateRating,

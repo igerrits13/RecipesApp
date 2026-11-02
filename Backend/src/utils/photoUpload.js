@@ -1,18 +1,39 @@
 import cloudinary from "../lib/cloudinary.js";
+import "dotenv/config";
 
-// Upload the image to cloudinary if provided and return the image URL
-export async function uploadPhoto(image) {
-  var imageURL = "";
-  if (image && image.trim() !== "") {
-    const uploadResponse = await cloudinary.uploader.upload(image);
-    imageURL = uploadResponse.secure_url;
-  }
+const filePath = {
+  test: "test",
+  development: "development",
+  production: "production",
+};
 
-  return imageURL;
+const currentEnv = process.env.NODE_ENV || "development";
+const defaultPath = filePath[currentEnv];
+
+if (!defaultPath) {
+  throw new Error(`Invalid NODE_ENV: ${currentEnv}`);
 }
 
-// Delete photo from cloudinary given its URL
-export async function deletePhoto(imageURL) {
-  const publicId = imageURL.split("/").pop().split(".")[0];
-  await cloudinary.uploader.destroy(publicId);
+// Upload the image to cloudinary if provided
+export async function uploadPhoto(imagePath) {
+  if (!imagePath) return null;
+
+  const uploadResponse = await cloudinary.uploader.upload(imagePath, {
+    folder: defaultPath,
+    resource_type: "image",
+  });
+
+  return {
+    imageURL: uploadResponse.secure_url,
+    publicId: uploadResponse.public_id,
+  };
+}
+
+// Delete photo from cloudinary given its public ID
+export async function deletePhoto(publicId) {
+  if (!publicId) return null;
+
+  await cloudinary.uploader.destroy(publicId, {
+    resource_type: "image",
+  });
 }

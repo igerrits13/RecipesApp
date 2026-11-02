@@ -580,14 +580,39 @@ function validateLinkedRecipesArray(linkedRecipes, recipeId, errors) {
 
 // Helper function to validate recipe image
 function validateRecipeImage(image, errors) {
-  if (image && (typeof image !== "string" || image.trim().length > 2048)) {
+  if (!image) return null;
+
+  if (typeof image !== "object" || Array.isArray(image)) {
+    pushUnique(errors, "Image must be an object or null");
+    return null;
+  }
+
+  if (
+    typeof image.imageURL !== "string" ||
+    image.imageURL.trim().length === 0 ||
+    image.imageURL.trim().length > 2048
+  ) {
     pushUnique(
       errors,
       "Image URL must be a string and cannot exceed 2048 characters",
     );
     return null;
   }
-  return image ? image.trim() : null;
+
+  if (
+    typeof image.publicId !== "string" ||
+    image.publicId.trim().length === 0
+  ) {
+    pushUnique(errors, "Public ID must be a string");
+    return null;
+  }
+
+  const returnImage = {
+    imageURL: image.imageURL.trim(),
+    publicId: image.publicId.trim(),
+  };
+
+  return returnImage;
 }
 
 // Helper function to validate recipe source
@@ -757,7 +782,6 @@ export async function validateAndSaveNewRecipe({
   preptimeSeconds,
   cooktimeSeconds,
   servings,
-  image,
   notes,
   linkedRecipes,
   source,
@@ -767,6 +791,7 @@ export async function validateAndSaveNewRecipe({
   holidays,
   seasons,
   isPublished,
+  imagePath,
   author,
 }) {
   // Ensure the user does not already have a recipe with the same title
@@ -780,16 +805,6 @@ export async function validateAndSaveNewRecipe({
     err.statusCode = 409;
     throw err;
   }
-
-  // Upload the image to cloudinary if one was provided and update all collections
-  // const imageURL = await uploadPhoto(image);
-
-  // Ensure the image url length is less than 2048 characters
-  // if (imageURL && imageURL.length > 2048) {
-  //   const err = new Error("Image URL is too long");
-  //   err.statusCode = 400;
-  //   throw err;
-  // }
 
   // Get all new measurements to prepare for saving ingredients
   const measurementNames = ingredientSections.flatMap((section) =>
@@ -877,43 +892,75 @@ export async function validateAndSaveNewRecipe({
   // Generate a unique slug
   const slug = await slugify(title, Recipe);
 
-  // If the new recipe is valid, create a new recipe object
-  const recipe = new Recipe({
-    title,
-    slug,
-    description,
-    ingredientSections: ingredientSectionIds,
-    stepSections,
-    preptimeSeconds,
-    cooktimeSeconds,
-    servings,
-    image: null,
-    notes,
-    linkedRecipes,
-    source,
-    tags: tagIds,
-    cuisines: cuisineIds,
-    meals: mealIds,
-    holidays: holidayIds,
-    seasons: seasonIds,
-    isPublished,
-    author,
-  });
+  // Upload the image to cloudinary if one was provided and and save the new recipe. If this fails, delete the uploaded image to avoid orphaned images in cloudinary
+  let uploadedImage = null;
+  try {
+    uploadedImage = imagePath ? await uploadPhoto(imagePath) : null;
 
-  // Save the newly created recipe
-  await recipe.save();
+    const image = uploadedImage
+      ? { imageURL: uploadedImage.imageURL, publicId: uploadedImage.publicId }
+      : null;
 
-  return recipe;
+    // Ensure the image url length is less than 2048 characters
+    if (image?.imageURL && image.imageURL.length > 2048) {
+      const err = new Error("Image URL is too long");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    // If the new recipe is valid, create a new recipe object
+    const recipe = new Recipe({
+      title,
+      slug,
+      description,
+      ingredientSections: ingredientSectionIds,
+      stepSections,
+      preptimeSeconds,
+      cooktimeSeconds,
+      servings,
+      image,
+      notes,
+      linkedRecipes,
+      source,
+      tags: tagIds,
+      cuisines: cuisineIds,
+      meals: mealIds,
+      holidays: holidayIds,
+      seasons: seasonIds,
+      isPublished,
+      author,
+    });
+
+    // Save the newly created recipe
+    await recipe.save();
+
+    return recipe;
+  } catch (error) {
+    // If the recipe save fails and an image was uploaded, delete the uploaded image to avoid orphaned images in cloudinary
+    if (uploadedImage?.publicId) {
+      try {
+        await deletePhoto(uploadedImage.publicId);
+      } catch (deleteError) {
+        console.error(
+          "Error deleting uploaded image after recipe save failure:",
+          deleteError,
+        );
+      }
+    }
+    throw error;
+  }
 }
 
 // Update an existing recipe with new data
 export async function validateAndUpdateRecipe({
   updatedRecipeData,
   oldRecipe,
+  imagePath,
   userId,
 }) {
   let newSlug = null;
-  let imageURL = oldRecipe.image || null;
+  let imageURL = null;
+  let publicId = null;
 
   // Confirm the user is the author of the recipe
   if (oldRecipe.author._id.toString() !== userId.toString()) {
@@ -937,26 +984,6 @@ export async function validateAndUpdateRecipe({
       const err = new Error("You already have a recipe with this title");
       err.statusCode = 409;
       throw err;
-    }
-  }
-
-  // Update the image if a new one is provided
-  if (updatedRecipeData.image && updatedRecipeData.image !== oldRecipe.image) {
-    try {
-      imageURL = await uploadPhoto(updatedRecipeData.image);
-    } catch (uploadError) {
-      const err = new Error("Error uploading new recipe image");
-      err.statusCode = 500;
-      throw err;
-    }
-    if (oldRecipe.image && oldRecipe.image.includes("cloudinary")) {
-      try {
-        await deletePhoto(oldRecipe.image);
-      } catch (deleteError) {
-        const err = new Error("Error deleting old recipe image");
-        err.statusCode = 500;
-        throw err;
-      }
     }
   }
 
@@ -1052,64 +1079,126 @@ export async function validateAndUpdateRecipe({
         })
       : oldRecipe.seasons;
 
+  // Upload the new image to cloudinary if one was provided
+  if (imagePath) {
+    try {
+      ({ imageURL, publicId } = imagePath
+        ? await uploadPhoto(imagePath)
+        : null);
+    } catch (uploadError) {
+      const err = new Error("Error uploading new recipe image");
+      err.statusCode = 500;
+      throw err;
+    }
+  }
+
+  // If no new image was provided, remove the old one if it exists
+  if (!imagePath && oldRecipe.image?.publicId) {
+    try {
+      await deletePhoto(oldRecipe.image?.publicId);
+    } catch (deleteError) {
+      const err = new Error("Error deleting old recipe image");
+      err.statusCode = 500;
+      throw err;
+    }
+  }
+
   // Update all applicable fields in the recipe object
-  const recipe = await Recipe.findByIdAndUpdate(
-    oldRecipe._id,
-    {
-      title:
-        updatedRecipeData.title !== undefined
-          ? updatedRecipeData.title
-          : oldRecipe.title,
-      slug: newSlug ? newSlug : oldRecipe.slug,
-      description:
-        updatedRecipeData.description !== undefined
-          ? updatedRecipeData.description
-          : oldRecipe.description,
-      ingredientSections:
-        ingredientSectionIds.length > 0
-          ? ingredientSectionIds
-          : oldRecipe.ingredientSections,
-      stepSections:
-        updatedRecipeData.stepSections !== undefined
-          ? updatedRecipeData.stepSections
-          : oldRecipe.stepSections,
-      preptimeSeconds:
-        updatedRecipeData.preptimeSeconds !== undefined
-          ? Number(updatedRecipeData.preptimeSeconds)
-          : oldRecipe.preptimeSeconds,
-      cooktimeSeconds:
-        updatedRecipeData.cooktimeSeconds !== undefined
-          ? Number(updatedRecipeData.cooktimeSeconds)
-          : oldRecipe.cooktimeSeconds,
-      servings:
-        updatedRecipeData.servings !== undefined
-          ? Number(updatedRecipeData.servings)
-          : oldRecipe.servings,
-      image: imageURL,
-      notes:
-        updatedRecipeData.notes !== undefined
-          ? updatedRecipeData.notes
-          : oldRecipe.notes,
-      linkedRecipes:
-        updatedRecipeData.linkedRecipes !== undefined
-          ? updatedRecipeData.linkedRecipes
-          : oldRecipe.linkedRecipes,
-      source:
-        updatedRecipeData.source !== undefined
-          ? updatedRecipeData.source
-          : oldRecipe.source,
-      tags: tagIds,
-      cuisines: cuisineIds,
-      meals: mealIds,
-      holidays: holidayIds,
-      seasons: seasonIds,
-      isPublished:
-        updatedRecipeData.isPublished !== undefined
-          ? updatedRecipeData.isPublished
-          : oldRecipe.isPublished,
-    },
-    { new: true },
-  );
+  let recipe;
+  try {
+    recipe = await Recipe.findByIdAndUpdate(
+      oldRecipe._id,
+      {
+        title:
+          updatedRecipeData.title !== undefined
+            ? updatedRecipeData.title
+            : oldRecipe.title,
+        slug: newSlug ? newSlug : oldRecipe.slug,
+        description:
+          updatedRecipeData.description !== undefined
+            ? updatedRecipeData.description
+            : oldRecipe.description,
+        ingredientSections:
+          ingredientSectionIds.length > 0
+            ? ingredientSectionIds
+            : oldRecipe.ingredientSections,
+        stepSections:
+          updatedRecipeData.stepSections !== undefined
+            ? updatedRecipeData.stepSections
+            : oldRecipe.stepSections,
+        preptimeSeconds:
+          updatedRecipeData.preptimeSeconds !== undefined
+            ? Number(updatedRecipeData.preptimeSeconds)
+            : oldRecipe.preptimeSeconds,
+        cooktimeSeconds:
+          updatedRecipeData.cooktimeSeconds !== undefined
+            ? Number(updatedRecipeData.cooktimeSeconds)
+            : oldRecipe.cooktimeSeconds,
+        servings:
+          updatedRecipeData.servings !== undefined
+            ? Number(updatedRecipeData.servings)
+            : oldRecipe.servings,
+        image: imageURL ? { imageURL, publicId } : null,
+        notes:
+          updatedRecipeData.notes !== undefined
+            ? updatedRecipeData.notes
+            : oldRecipe.notes,
+        linkedRecipes:
+          updatedRecipeData.linkedRecipes !== undefined
+            ? updatedRecipeData.linkedRecipes
+            : oldRecipe.linkedRecipes,
+        source:
+          updatedRecipeData.source !== undefined
+            ? updatedRecipeData.source
+            : oldRecipe.source,
+        tags: tagIds,
+        cuisines: cuisineIds,
+        meals: mealIds,
+        holidays: holidayIds,
+        seasons: seasonIds,
+        isPublished:
+          updatedRecipeData.isPublished !== undefined
+            ? updatedRecipeData.isPublished
+            : oldRecipe.isPublished,
+      },
+      { new: true, runValidators: true },
+    );
+  } catch (error) {
+    // If there was an error updating the recipe, delete the new image if one was uploaded
+    if (imagePath && publicId) {
+      try {
+        await deletePhoto(publicId);
+      } catch (deleteError) {
+        const err = new Error(
+          "Error deleting new recipe image after failed update:" +
+            deleteError.message,
+        );
+        err.statusCode = 500;
+        throw err;
+      }
+    }
+
+    const err = new Error("Error updating recipe");
+    err.statusCode = 500;
+    throw err;
+  }
+
+  // Delete the old recipe image if it exists
+  if (
+    imagePath &&
+    oldRecipe.image?.publicId &&
+    oldRecipe.image.publicId !== publicId
+  ) {
+    try {
+      await deletePhoto(oldRecipe.image.publicId);
+    } catch (deleteError) {
+      const err = new Error(
+        "Error deleting old recipe image" + deleteError.message,
+      );
+      err.statusCode = 500;
+      throw err;
+    }
+  }
 
   return recipe;
 }

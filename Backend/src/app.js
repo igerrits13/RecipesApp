@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import "dotenv/config";
+import multer from "multer";
 
 import authRoutes from "./routes/auth.route.js";
 import homePageRoutes from "./routes/pages/pages.homePage.route.js";
@@ -42,5 +43,28 @@ app.use("/api/v1/admin/comments", adminCommentRoutes);
 app.use("/api/v1/admin/metadata", adminMetadataRoutes);
 app.use("/api/v1/admin/recipes", adminRecipeRoutes);
 app.use("/api/v1/admin/users", adminUserRoutes);
+
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        success: false,
+        message: "Image size cannot exceed 10MB",
+      });
+    }
+  }
+
+  const statusCode = err.statusCode || 500;
+
+  // Only log unexpected server errors
+  if (statusCode >= 500) {
+    console.error(err.stack);
+  }
+
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
 
 export default app;

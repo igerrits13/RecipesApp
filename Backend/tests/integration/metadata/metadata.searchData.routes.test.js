@@ -74,7 +74,6 @@ beforeAll(async () => {
     title: "Test recipe 1",
     slug: "test-recipe-1",
     isPublished: true,
-    image: "",
     ingredientSections: [
       {
         ingredients: [{ ingredient: testIngredient1._id }],
@@ -85,7 +84,6 @@ beforeAll(async () => {
     title: "Test recipe 2",
     slug: "test-recipe-2",
     isPublished: false,
-    image: "",
     ingredientSections: [
       {
         ingredients: [{ ingredient: testIngredient2._id }],
@@ -97,7 +95,6 @@ beforeAll(async () => {
     slug: "test-recipe-3",
     isPublished: true,
     isDeleted: true,
-    image: "",
     ingredientSections: [
       {
         ingredients: [{ ingredient: testIngredient1._id }],

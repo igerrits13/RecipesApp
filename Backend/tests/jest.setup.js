@@ -19,4 +19,4 @@ beforeAll(async () => {
 afterAll(async () => {
   await clearDatabase();
   await mongoose.connection.close();
-});
+}, 30000); // Increase timeout to 30 seconds for closing the connection
