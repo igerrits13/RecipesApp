@@ -20,40 +20,56 @@ export function validateObjectId(paramName) {
 // Verify that a user with the given username exists
 export function validateUserExists(username) {
   return async (req, res, next) => {
-    const user = await User.findOne({ username: req.params[username] })
-      .select("+isDeleted")
-      .lean();
+    try {
+      const user = await User.findOne({ username: req.params[username] })
+        .select("+isDeleted")
+        .lean();
 
-    if (!user || user.isDeleted) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+      if (!user || user.isDeleted) {
+        // return res.status(404).json({
+        //   success: false,
+        //   message: "User not found",
+        // });
+        const err = new Error("User not found");
+        err.statusCode = 404;
+        return next(err);
+      }
+
+      next();
+    } catch (error) {
+      error.statusCode = error.statusCode || 500;
+      return next(error);
     }
-
-    next();
   };
 }
 
 // Verity that a recipe with the given slug exists and is either authored by the current user or is published
 export function validateRecipeExists(recipeSlug) {
   return async (req, res, next) => {
-    const recipe = await Recipe.findOne({
-      slug: req.params[recipeSlug],
-      isDeleted: false,
-      isApproved: true,
-      $or: [{ author: req.user?._id }, { isPublished: true }],
-    });
-
-    if (!recipe) {
-      return res.status(404).json({
-        success: false,
-        message: "Recipe not found",
+    try {
+      const recipe = await Recipe.findOne({
+        slug: req.params[recipeSlug],
+        isDeleted: false,
+        isApproved: true,
+        $or: [{ author: req.user?._id }, { isPublished: true }],
       });
+
+      if (!recipe) {
+        // return res.status(404).json({
+        //   success: false,
+        //   message: "Recipe not found",
+        // });
+        const err = new Error("Recipe not found");
+        err.statusCode = 404;
+        return next(err);
+      }
+
+      req.recipe = recipe;
+
+      next();
+    } catch (error) {
+      error.statusCode = error.statusCode || 500;
+      return next(error);
     }
-
-    req.recipe = recipe;
-
-    next();
   };
 }

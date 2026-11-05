@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import "dotenv/config";
 import multer from "multer";
+import fs from "fs/promises";
 
 import authRoutes from "./routes/auth.route.js";
 import homePageRoutes from "./routes/pages/pages.homePage.route.js";
@@ -44,7 +45,18 @@ app.use("/api/v1/admin/metadata", adminMetadataRoutes);
 app.use("/api/v1/admin/recipes", adminRecipeRoutes);
 app.use("/api/v1/admin/users", adminUserRoutes);
 
-app.use((err, req, res, next) => {
+app.use(async (err, req, res, next) => {
+  // Delete the temp file if the file exists
+  if (req.file?.path) {
+    try {
+      await fs.unlink(req.file.path);
+    } catch (cleanupError) {
+      if (cleanupError.code !== "ENOENT") {
+        console.error("Error cleaning up temp file:", cleanupError);
+      }
+    }
+  }
+
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
@@ -61,7 +73,7 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
   }
 
-  res.status(statusCode).json({
+  return res.status(statusCode).json({
     success: false,
     message: err.message || "Internal Server Error",
   });

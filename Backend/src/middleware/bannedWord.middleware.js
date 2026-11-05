@@ -41,40 +41,45 @@ export function checkBannedWord(
   collectionName = null,
 ) {
   return async (req, res, next) => {
-    // Get all the banned words
-    const bannedWords = await BannedWord.find().lean();
-    const content = input
-      // .map((field) => req.body[field])
-      .map((field) => getBaseContent(req.body[field]))
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+    try {
+      // Get all the banned words
+      const bannedWords = await BannedWord.find().lean();
+      const content = input
+        // .map((field) => req.body[field])
+        .map((field) => getBaseContent(req.body[field]))
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
-    // Check if the content contains any banned words
-    const bannedWordFound = bannedWords.find((word) => {
-      const regex = new RegExp(`\\b${word.word}\\b`, "i");
-      return regex.test(content);
-    });
+      // Check if the content contains any banned words
+      const bannedWordFound = bannedWords.find((word) => {
+        const regex = new RegExp(`\\b${word.word}\\b`, "i");
+        return regex.test(content);
+      });
 
-    // If the content contains a banned word, return an error if the severity is "block", otherwise create a log
-    if (bannedWordFound) {
-      if (bannedWordFound.severity === "block") {
-        return res.status(400).json({
-          success: false,
-          message: `Content contains banned word: ${bannedWordFound.word}`,
-        });
+      // If the content contains a banned word, return an error if the severity is "block", otherwise create a log
+      if (bannedWordFound) {
+        if (bannedWordFound.severity === "block") {
+          const error = new Error(
+            `Content contains banned word: ${bannedWordFound.word}`,
+          );
+          error.statusCode = 400;
+          return next(error);
+        }
+        if (!ignoreFlags && bannedWordFound.severity === "flag") {
+          await generateReport({
+            reportingUserId,
+            reportType: "report_banned_word",
+            targetId: targetId ? req.params[targetId] : null,
+            description: `Content contains banned word: ${bannedWordFound.word}`,
+            collectionName,
+          });
+        }
       }
-      if (!ignoreFlags && bannedWordFound.severity === "flag") {
-        await generateReport({
-          reportingUserId,
-          reportType: "report_banned_word",
-          targetId: targetId ? req.params[targetId] : null,
-          description: `Content contains banned word: ${bannedWordFound.word}`,
-          collectionName,
-        });
-      }
+
+      next();
+    } catch (error) {
+      next(error);
     }
-
-    next();
   };
 }

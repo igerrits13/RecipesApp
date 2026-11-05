@@ -97,6 +97,17 @@ beforeEach(async () => {
   await CommentVote.deleteMany({});
 
   jest.clearAllMocks();
+
+  mockUploadPhoto.mockReset();
+  mockDeletePhoto.mockReset();
+
+  mockUploadPhoto.mockResolvedValue(null);
+  mockDeletePhoto.mockResolvedValue(undefined);
+});
+
+// Restore all mocks after each test
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 // Test cases: validateRecipeData //
@@ -2070,6 +2081,53 @@ describe("validateAndSaveNewRecipe", () => {
     expect(recipeDataWithoutImage.image).toBe(null);
   });
 
+  test("should delete the uploaded image from Cloudinary if saving the recipe fails", async () => {
+    const databaseError = new Error("Database error");
+
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+      publicId: "test-image",
+    });
+
+    jest.spyOn(Recipe.prototype, "save").mockRejectedValue(databaseError);
+
+    await expect(
+      validateAndSaveNewRecipe({
+        ...fullTestRecipeDataCompleteNonJSON,
+        imagePath: "tmp/test-image.jpg",
+        author: testUser._id,
+      }),
+    ).rejects.toThrow(databaseError);
+
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+    expect(mockUploadPhoto).toHaveBeenCalledWith("tmp/test-image.jpg");
+    expect(Recipe.prototype.save).toHaveBeenCalledTimes(1);
+    expect(mockDeletePhoto).toHaveBeenCalledTimes(1);
+    expect(mockDeletePhoto).toHaveBeenCalledWith("test-image");
+  });
+
+  test("should throw an error and not upload a recipe if the image fails to upload to Cloudinary", async () => {
+    const uploadError = new Error("Image upload failed");
+
+    mockUploadPhoto.mockRejectedValue(uploadError);
+
+    await expect(
+      validateAndSaveNewRecipe({
+        ...fullTestRecipeDataCompleteNonJSON,
+        imagePath: "tmp/test-image.jpg",
+        author: testUser._id,
+      }),
+    ).rejects.toThrow(uploadError);
+
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+    expect(mockUploadPhoto).toHaveBeenCalledWith("tmp/test-image.jpg");
+    expect(mockDeletePhoto).not.toHaveBeenCalled();
+
+    const recipes = await Recipe.find();
+    expect(recipes).toHaveLength(0);
+  });
+
   test("should throw an error if the user already has a recipe with the same title", async () => {
     testIngredient = await createTestIngredient();
 
@@ -2601,6 +2659,157 @@ describe("validateAndUpdateRecipe", () => {
     expect(mockUploadPhoto).not.toHaveBeenCalled();
     expect(mockDeletePhoto).not.toHaveBeenCalled();
     expect(result.get("image")).toBe(null);
+  });
+
+  test("should delete the uploaded image from cloudinary and keep the original image if saving the updated recipe fails", async () => {
+    const databaseError = new Error("Database error");
+
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/test-image2.jpg",
+      publicId: "test-image2",
+    });
+
+    testIngredient = await createTestIngredient();
+
+    const existingRecipe = await createTestRecipe(testUser._id, {
+      title: "Existing Test Recipe",
+      slug: "existing-test-recipe",
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+      },
+    });
+
+    const updatedData = {
+      ...fullTestRecipeDataCompleteNonJSON,
+    };
+
+    jest.spyOn(Recipe, "findByIdAndUpdate").mockRejectedValue(databaseError);
+
+    await expect(
+      validateAndUpdateRecipe({
+        updatedRecipeData: updatedData,
+        oldRecipe: existingRecipe,
+        imagePath: "tmp/test-image2.jpg",
+        userId: testUser._id,
+      }),
+    ).rejects.toThrow(databaseError);
+
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+    expect(mockUploadPhoto).toHaveBeenCalledWith("tmp/test-image2.jpg");
+    expect(Recipe.findByIdAndUpdate).toHaveBeenCalledTimes(1);
+    expect(mockDeletePhoto).toHaveBeenCalledTimes(1);
+    expect(mockDeletePhoto).not.toHaveBeenCalledWith("test-image");
+    expect(mockDeletePhoto).toHaveBeenCalledWith("test-image2");
+  });
+
+  test("should throw an error and keep the original image if the new image fails to upload to Cloudinary", async () => {
+    const uploadError = new Error("Image upload failed");
+
+    mockUploadPhoto.mockRejectedValue(uploadError);
+
+    testIngredient = await createTestIngredient();
+
+    const existingRecipe = await createTestRecipe(testUser._id, {
+      title: "Existing Test Recipe",
+      slug: "existing-test-recipe",
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+      },
+    });
+
+    const updatedData = {
+      ...fullTestRecipeDataCompleteNonJSON,
+    };
+
+    await expect(
+      validateAndUpdateRecipe({
+        updatedRecipeData: updatedData,
+        oldRecipe: existingRecipe,
+        imagePath: "tmp/test-image2.jpg",
+        userId: testUser._id,
+      }),
+    ).rejects.toThrow(uploadError);
+
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+    expect(mockUploadPhoto).toHaveBeenCalledWith("tmp/test-image2.jpg");
+    expect(mockDeletePhoto).not.toHaveBeenCalled();
+
+    const recipeAfterFailedUpdate = await Recipe.findById(existingRecipe._id);
+    expect(recipeAfterFailedUpdate.image.imageURL).toBe(
+      "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+    );
+    expect(recipeAfterFailedUpdate.image.publicId).toBe("test-image");
+  });
+
+  test("should throw an error but still keep the updated recipe image if the old image fails to delete from Cloudinary after a successful update", async () => {
+    const deleteError = new Error("Image deletion failed");
+
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/test-image2.jpg",
+      publicId: "test-image2",
+    });
+
+    mockDeletePhoto.mockRejectedValue(deleteError);
+
+    testIngredient = await createTestIngredient();
+
+    const existingRecipe = await createTestRecipe(testUser._id, {
+      title: "Existing Test Recipe",
+      slug: "existing-test-recipe",
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+      },
+    });
+
+    const updatedData = {
+      ...fullTestRecipeDataCompleteNonJSON,
+    };
+
+    await expect(
+      validateAndUpdateRecipe({
+        updatedRecipeData: updatedData,
+        oldRecipe: existingRecipe,
+        imagePath: "tmp/test-image2.jpg",
+        userId: testUser._id,
+      }),
+    ).rejects.toThrow(deleteError);
+
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+    expect(mockUploadPhoto).toHaveBeenCalledWith("tmp/test-image2.jpg");
+    expect(mockDeletePhoto).toHaveBeenCalledTimes(1);
+    expect(mockDeletePhoto).toHaveBeenCalledWith("test-image");
+
+    const recipeAfterFailedUpdate = await Recipe.findById(existingRecipe._id);
+    expect(recipeAfterFailedUpdate.image.imageURL).toBe(
+      "https://res.cloudinary.com/test/image/upload/v1234567891/test-image2.jpg",
+    );
+    expect(recipeAfterFailedUpdate.image.publicId).toBe("test-image2");
   });
 
   test("should throw an error if the user is not the author of the recipe", async () => {

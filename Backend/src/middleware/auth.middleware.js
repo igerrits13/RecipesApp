@@ -12,11 +12,11 @@ export const protectRoute = async (req, res, next) => {
     const token = req.cookies["jwt-token"];
 
     // Verify the provided web token exists and is valid
-    if (!token)
-      return res.status(401).json({
-        success: false,
-        message: "No authentication token found, access denied",
-      });
+    if (!token) {
+      const err = new Error("No authentication token found, access denied");
+      err.statusCode = 401;
+      throw err;
+    }
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
     // Find the user information excluding password and verify the token matches
@@ -24,11 +24,11 @@ export const protectRoute = async (req, res, next) => {
       "+password +role +previousDisplayName +lastDisplayNameChange +previousEmail +lastEmailChange +emailChangeCount +lastPasswordChange +isDeleted",
     );
 
-    if (!user || user.isDeleted)
-      return res.status(401).json({
-        success: false,
-        message: "Web token is not valid, access denied",
-      });
+    if (!user || user.isDeleted) {
+      const err = new Error("User does not exist or has been deleted");
+      err.statusCode = 401;
+      throw err;
+    }
 
     // Check if the email or password was changed after the token was issued
     const tokenIssuedAt = decodedToken.iat * 1000;
@@ -38,20 +38,20 @@ export const protectRoute = async (req, res, next) => {
       (user.lastPasswordChange &&
         user.lastPasswordChange.getTime() > tokenIssuedAt)
     ) {
-      return res.status(401).json({
-        success: false,
-        message: "Login information was changed. Please log in again",
-      });
+      const err = new Error(
+        "Login information was changed. Please log in again",
+      );
+      err.statusCode = 401;
+      throw err;
     }
 
     // Return the user and move on to the next method
     req.user = user;
     next();
   } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message || "Authentication failed",
-    });
+    const err = new Error(error.message || "Authentication failed");
+    err.statusCode = 401;
+    next(err);
   }
 };
 
@@ -72,19 +72,17 @@ export const optionalProtectRoute = async (req, res, next) => {
     const user = await User.findById(decodedToken.userID).select("+isDeleted");
 
     if (!user || user.isDeleted) {
-      return res.status(401).json({
-        success: false,
-        message: "Web token is not valid, access denied",
-      });
+      const err = new Error("User does not exist or has been deleted");
+      err.statusCode = 401;
+      throw err;
     }
 
     req.user = user;
     next();
   } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: "Web token is not valid, access denied",
-    });
+    const err = new Error(error.message || "Authentication failed");
+    err.statusCode = 401;
+    next(err);
   }
 };
 
@@ -121,12 +119,19 @@ export const loginLimiter =
 // Verify the user has the required role(s) for accessing a route
 export const requireRole = (requiredRoles) => {
   return (req, res, next) => {
-    if (!requiredRoles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to perform this action",
-      });
+    try {
+      if (!requiredRoles.includes(req.user.role)) {
+        const err = new Error(
+          "You do not have permission to perform this action",
+        );
+        err.statusCode = 403;
+        throw err;
+      }
+      next();
+    } catch (error) {
+      const err = new Error(error.message || "Authorization failed");
+      err.statusCode = 403;
+      next(err);
     }
-    next();
   };
 };

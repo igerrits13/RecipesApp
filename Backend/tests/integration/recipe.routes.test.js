@@ -2,10 +2,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { jest } from "@jest/globals";
 import fs from "fs";
+import fsPromises from "fs/promises";
 import sharp from "sharp";
 
 const mockUploadPhoto = jest.fn();
 const mockDeletePhoto = jest.fn();
+let unlinkSpy;
 
 jest.unstable_mockModule(
   new URL("../../src/utils/photoUpload.js", import.meta.url).href,
@@ -125,6 +127,14 @@ beforeEach(async () => {
   jest.clearAllMocks();
 
   mockUploadPhoto.mockResolvedValue(null);
+  mockDeletePhoto.mockResolvedValue(null);
+
+  unlinkSpy = jest.spyOn(fsPromises, "unlink");
+});
+
+// Restore all mocks after each test
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 // Delete all temp images after all tests
@@ -606,6 +616,8 @@ describe("POST /api/v1/recipes", () => {
   });
 
   it("should upload the image to Cloudinary and save the image data in the recipe", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
     const newRecipeData = {
       title: "New Test Recipe",
       description: "This is a new test recipe",
@@ -669,6 +681,7 @@ describe("POST /api/v1/recipes", () => {
       "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
     );
     expect(response.body.recipe.image.publicId).toBe("new-image");
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
   });
 
   it("should upload a recipe properly when a image is null", async () => {
@@ -722,6 +735,8 @@ describe("POST /api/v1/recipes", () => {
   });
 
   it("should reject an unsupported image file type", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
     const newRecipeData = {
       title: "New Test Recipe",
       description: "This is a new test recipe",
@@ -770,9 +785,12 @@ describe("POST /api/v1/recipes", () => {
       "Invalid file type. Please upload a JPEG or PNG image",
     );
     expect(mockUploadPhoto).not.toHaveBeenCalled();
+    expect(unlinkSpy).not.toHaveBeenCalled();
   });
 
   it("should return an error when creating a recipe with a corrupted image", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
     const newRecipeData = {
       title: "New Test Recipe",
       description: "This is a new test recipe",
@@ -820,9 +838,12 @@ describe("POST /api/v1/recipes", () => {
 
     expect(response.status).toBe(400);
     expect(mockUploadPhoto).not.toHaveBeenCalled();
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
   });
 
   it("should reject an uploaded file exceeding the 10MB limit", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
     const newRecipeData = {
       title: "New Test Recipe",
       description: "This is a new test recipe",
@@ -871,9 +892,12 @@ describe("POST /api/v1/recipes", () => {
     expect(response.status).toBe(400);
     expect(response.body.message).toBe("Image size cannot exceed 10MB");
     expect(mockUploadPhoto).not.toHaveBeenCalled();
+    expect(unlinkSpy).not.toHaveBeenCalled();
   });
 
   it("should reject an upload file exceeding the 1920x1920 limit", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
     const newRecipeData = {
       title: "New Test Recipe",
       description: "This is a new test recipe",
@@ -924,6 +948,7 @@ describe("POST /api/v1/recipes", () => {
       "Image dimensions cannot exceed 1920 × 1920 pixels. Please resize your image",
     );
     expect(mockUploadPhoto).not.toHaveBeenCalled();
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
   });
 
   it("should return an error when creating a recipe with invalid data", async () => {
@@ -1088,6 +1113,34 @@ describe("POST /api/v1/recipes", () => {
     expect(response.body.message).toBe(`Content contains banned word: banned`);
   });
 
+  it("should delete the temporary image file when trying to create a recipe with a banned word in the title", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
+    const newRecipeData = {
+      title: "Banned Test Recipe",
+      description: "Test description",
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient.title }],
+        },
+      ],
+    };
+
+    const response = await loginAgent1
+      .post("/api/v1/recipes")
+      .field({
+        ...newRecipeData,
+        ingredientSections: JSON.stringify(newRecipeData.ingredientSections),
+      })
+      .attach("image", img1Path);
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe(`Content contains banned word: banned`);
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("should create a recipe successfully when any field has a flagged word", async () => {
     const newRecipeData = {
       title: "Flagged Test Recipe",
@@ -1143,6 +1196,37 @@ describe("POST /api/v1/recipes", () => {
     expect(response.body.message).toBe(
       "No authentication token found, access denied",
     );
+  });
+
+  it("should delete the temporary image file when trying to create a recipe as an unauthenticated user", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
+    const newRecipeData = {
+      title: "New Test Recipe",
+      slug: "new-test-recipe",
+      description: "Test description",
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient.title }],
+        },
+      ],
+    };
+
+    const response = await request(app)
+      .post("/api/v1/recipes")
+      .field({
+        ...newRecipeData,
+        ingredientSections: JSON.stringify(newRecipeData.ingredientSections),
+      })
+      .attach("image", img1Path);
+
+    expect(response.status).toBe(401);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe(
+      "No authentication token found, access denied",
+    );
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -2217,6 +2301,8 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
   });
 
   it("should update the recipe's image, upload it to cloudinary and delete the old image", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
     const existingRecipe = await createTestRecipe(testUser1._id, {
       title: `Test Recipe ${testRecipeSlugIndex}`,
       slug: `test-recipe-${testRecipeSlugIndex++}`,
@@ -2284,9 +2370,12 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
       "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
     );
     expect(response.body.recipe.image.publicId).toBe("new-image");
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
   });
 
   it("should update the recipe's image, upload it to cloudinary and not delete the old image if there was not one", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
     const existingRecipe = await createTestRecipe(testUser1._id, {
       title: `Test Recipe ${testRecipeSlugIndex}`,
       slug: `test-recipe-${testRecipeSlugIndex++}`,
@@ -2348,6 +2437,7 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
       "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
     );
     expect(response.body.recipe.image.publicId).toBe("new-image");
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
   });
 
   it("should delete the recipe's old image and not upload a new one if the image is set to null", async () => {
@@ -2702,6 +2792,35 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     expect(response.body.message).toBe(`Content contains banned word: banned`);
   });
 
+  it("should delete the temporary image file when trying to update a recipe with a banned word in the title", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
+    const testRecipe = await createTestRecipe(testUser1._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    });
+
+    const updatedRecipeData = {
+      title: "Banned Title",
+    };
+
+    const response = await loginAgent1
+      .put(`/api/v1/recipes/${testRecipe.slug}`)
+      .field(updatedRecipeData)
+      .attach("image", img2Path);
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe(`Content contains banned word: banned`);
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("should update a recipe when updated with flagged words", async () => {
     const testRecipe = await createTestRecipe(testUser1._id, {
       title: `Test Recipe ${testRecipeSlugIndex}`,
@@ -2781,6 +2900,49 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     );
   });
 
+  it("should delete the temporary image file when trying to update a recipe as an unauthenticated user", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
+    const testRecipe = await createTestRecipe(testUser1._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    });
+
+    const updatedRecipeData = {
+      title: "Updated Test Recipe",
+      slug: "updated-test-recipe",
+      ingredientSections: [
+        {
+          sectionTitle: "Updated Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    };
+
+    const response = await request(app)
+      .put(`/api/v1/recipes/${testRecipe.slug}`)
+      .field({
+        ...updatedRecipeData,
+        ingredientSections: JSON.stringify(
+          updatedRecipeData.ingredientSections,
+        ),
+      })
+      .attach("image", img2Path);
+
+    expect(response.status).toBe(401);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe(
+      "No authentication token found, access denied",
+    );
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("should return an error when updating a recipe that does not belong to the user", async () => {
     const testRecipe = await createTestRecipe(otherUser._id, {
       title: `Other User Recipe`,
@@ -2842,6 +3004,36 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     expect(response.status).toBe(404);
     expect(response.body.success).toBe(false);
     expect(response.body.message).toBe("Recipe not found");
+  });
+
+  it("should delete the temporary image file when trying to update a non-existent recipe", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
+    const updatedRecipeData = {
+      title: "Updated Non-Existent Recipe",
+      slug: "updated-non-existent-recipe",
+      ingredientSections: [
+        {
+          sectionTitle: "Updated Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    };
+
+    const response = await loginAgent1
+      .put(`/api/v1/recipes/nonexistent-slug`)
+      .field({
+        ...updatedRecipeData,
+        ingredientSections: JSON.stringify(
+          updatedRecipeData.ingredientSections,
+        ),
+      })
+      .attach("image", img2Path);
+
+    expect(response.status).toBe(404);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe("Recipe not found");
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
   });
 });
 

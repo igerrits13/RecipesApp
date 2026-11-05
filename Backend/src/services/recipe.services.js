@@ -1086,9 +1086,7 @@ export async function validateAndUpdateRecipe({
         ? await uploadPhoto(imagePath)
         : null);
     } catch (uploadError) {
-      const err = new Error("Error uploading new recipe image");
-      err.statusCode = 500;
-      throw err;
+      throw uploadError;
     }
   }
 
@@ -1097,9 +1095,7 @@ export async function validateAndUpdateRecipe({
     try {
       await deletePhoto(oldRecipe.image?.publicId);
     } catch (deleteError) {
-      const err = new Error("Error deleting old recipe image");
-      err.statusCode = 500;
-      throw err;
+      throw deleteError;
     }
   }
 
@@ -1169,18 +1165,11 @@ export async function validateAndUpdateRecipe({
       try {
         await deletePhoto(publicId);
       } catch (deleteError) {
-        const err = new Error(
-          "Error deleting new recipe image after failed update:" +
-            deleteError.message,
-        );
-        err.statusCode = 500;
-        throw err;
+        console.error("Failed to clean up uploaded image:", deleteError);
       }
     }
 
-    const err = new Error("Error updating recipe");
-    err.statusCode = 500;
-    throw err;
+    throw error;
   }
 
   // Delete the old recipe image if it exists
@@ -1192,11 +1181,7 @@ export async function validateAndUpdateRecipe({
     try {
       await deletePhoto(oldRecipe.image.publicId);
     } catch (deleteError) {
-      const err = new Error(
-        "Error deleting old recipe image" + deleteError.message,
-      );
-      err.statusCode = 500;
-      throw err;
+      throw deleteError;
     }
   }
 
