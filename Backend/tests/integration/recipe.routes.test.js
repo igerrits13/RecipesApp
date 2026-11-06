@@ -951,6 +951,137 @@ describe("POST /api/v1/recipes", () => {
     expect(unlinkSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("should delete the temporary image file when cloudinary upload fails", async () => {
+    mockUploadPhoto.mockRejectedValueOnce(
+      new Error("Cloudinary upload failed"),
+    );
+
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
+    const newRecipeData = {
+      title: "Upload Fail Test Recipe",
+      description: "This is a new test recipe",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      source: JSON.stringify({
+        name: "Test Source",
+        note: "Test source note",
+      }),
+      tags: JSON.stringify(["tag1", "tag2"]),
+      meals: JSON.stringify(["meal1", "meal2"]),
+      cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+      seasons: JSON.stringify(["season1", "season2"]),
+      holidays: JSON.stringify(["holiday1"]),
+      notes: "These are test notes.",
+      linkedRecipes: JSON.stringify([]),
+      isApproved: true,
+    };
+
+    const response = await loginAgent1
+      .post("/api/v1/recipes")
+      .field(newRecipeData)
+      .attach("image", img1Path);
+
+    expect(response.status).toBe(500);
+    expect(response.body.success).toBe(false);
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+    expect(mockDeletePhoto).not.toHaveBeenCalled();
+    expect(response.body.message).toBe("Cloudinary upload failed");
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+
+    const recipe = await Recipe.findOne({ title: "Upload Fail Test Recipe" });
+    expect(recipe).toBeNull();
+  });
+
+  it("should delete the temporary image file when mongoose save fails", async () => {
+    mockUploadPhoto.mockResolvedValueOnce({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+      publicId: "new-image",
+    });
+
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
+    const saveSpy = jest
+      .spyOn(Recipe.prototype, "save")
+      .mockRejectedValueOnce(new Error("Mongoose save failed"));
+
+    const newRecipeData = {
+      title: "Mongoose Save Fail Test Recipe",
+      description: "This is a new test recipe",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      source: JSON.stringify({
+        name: "Test Source",
+        note: "Test source note",
+      }),
+      tags: JSON.stringify(["tag1", "tag2"]),
+      meals: JSON.stringify(["meal1", "meal2"]),
+      cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+      seasons: JSON.stringify(["season1", "season2"]),
+      holidays: JSON.stringify(["holiday1"]),
+      notes: "These are test notes.",
+      linkedRecipes: JSON.stringify([]),
+      isApproved: true,
+    };
+
+    const response = await loginAgent1
+      .post("/api/v1/recipes")
+      .field(newRecipeData)
+      .attach("image", img1Path);
+
+    expect(response.status).toBe(500);
+    expect(response.body.success).toBe(false);
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+    expect(saveSpy).toHaveBeenCalledTimes(1);
+    expect(mockDeletePhoto).toHaveBeenCalledWith("new-image");
+    expect(response.body.message).toBe("Mongoose save failed");
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+
+    const recipe = await Recipe.findOne({
+      title: "Mongoose Save Fail Test Recipe",
+    });
+    expect(recipe).toBeNull();
+  });
+
   it("should return an error when creating a recipe with invalid data", async () => {
     const newRecipeData = {
       title: "",
