@@ -84,6 +84,12 @@ beforeAll(async () => {
           ingredients: [{ ingredient: testIngredient._id }],
         },
       ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+        isApproved: true,
+      },
       seasons: [season._id],
       holidays: [holiday._id],
       aggregateRating: aggregateRating === 0 ? 5 : aggregateRating,
@@ -142,8 +148,8 @@ describe("getHomepageData", () => {
           slug: expect.any(String),
           description: expect.any(String),
           image: expect.objectContaining({
-            imageURL: null,
-            publicId: null,
+            imageURL: expect.any(String),
+            publicId: expect.any(String),
           }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
@@ -179,8 +185,8 @@ describe("getHomepageData", () => {
           slug: expect.any(String),
           description: expect.any(String),
           image: expect.objectContaining({
-            imageURL: null,
-            publicId: null,
+            imageURL: expect.any(String),
+            publicId: expect.any(String),
           }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
@@ -212,8 +218,8 @@ describe("getHomepageData", () => {
           slug: expect.any(String),
           description: expect.any(String),
           image: expect.objectContaining({
-            imageURL: null,
-            publicId: null,
+            imageURL: expect.any(String),
+            publicId: expect.any(String),
           }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
@@ -240,8 +246,8 @@ describe("getHomepageData", () => {
           slug: expect.any(String),
           description: expect.any(String),
           image: expect.objectContaining({
-            imageURL: null,
-            publicId: null,
+            imageURL: expect.any(String),
+            publicId: expect.any(String),
           }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
@@ -278,8 +284,8 @@ describe("getHomepageData", () => {
           slug: expect.any(String),
           description: expect.any(String),
           image: expect.objectContaining({
-            imageURL: null,
-            publicId: null,
+            imageURL: expect.any(String),
+            publicId: expect.any(String),
           }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),

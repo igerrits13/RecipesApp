@@ -1860,6 +1860,12 @@ describe("getOtherUserRecipesByUsername", () => {
           ingredients: [{ ingredient: testIngredient._id }],
         },
       ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+        isApproved: true,
+      },
     });
 
     await createTestRecipe(otherUser._id, {
@@ -1882,8 +1888,14 @@ describe("getOtherUserRecipesByUsername", () => {
     expect(recipes.recipeList[0]).toHaveProperty("title", publicRecipe.title);
     expect(recipes.recipeList[0]).toHaveProperty("slug", publicRecipe.slug);
     expect(recipes.recipeList[0]).toHaveProperty("description", "");
-    expect(recipes.recipeList[0]).toHaveProperty("image.imageURL", null);
-    expect(recipes.recipeList[0]).toHaveProperty("image.publicId", null);
+    expect(recipes.recipeList[0]).toHaveProperty(
+      "image.imageURL",
+      "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+    );
+    expect(recipes.recipeList[0]).toHaveProperty(
+      "image.publicId",
+      "test-image",
+    );
     expect(recipes.recipeList[0]).toHaveProperty(
       "preptimeSeconds",
       publicRecipe.preptimeSeconds,

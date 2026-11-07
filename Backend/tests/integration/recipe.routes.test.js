@@ -63,6 +63,7 @@ const {
 } = await import("../../src/utils/testFunctions.js");
 import Meal from "../../src/models/meal.model.js";
 import Cuisine from "../../src/models/cuisine.model.js";
+import { populateRecipe } from "../../src/queries/recipe.queries.js";
 
 // Base test setup //
 
@@ -207,6 +208,38 @@ describe("GET /api/v1/recipes", () => {
     expect(response.body.totalRecipes).toBe(15);
     expect(response.body.totalPages).toBe(2);
     expect(response.body.currentPage).toBe(1);
+  });
+
+  it("should not return an image of a recipe where the image has not been approved", async () => {
+    mockUploadPhoto.mockResolvedValueOnce({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+      publicId: "new-image",
+    });
+
+    const testRecipe = await createTestRecipe(testUser1._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+      },
+    });
+
+    const response = await loginAgent1.get("/api/v1/recipes");
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.recipeList).toBeDefined();
+    expect(Array.isArray(response.body.recipeList)).toBe(true);
+    expect(response.body.recipeList[0].image).toBeNull();
   });
 
   it("should show deleted user's name as 'Deleted User'", async () => {
@@ -615,6 +648,62 @@ describe("POST /api/v1/recipes", () => {
     ).toBe(testUser1.displayName);
   });
 
+  it("should not return an image on a new recipe as the image has not been approved yet", async () => {
+    const newRecipeData = {
+      title: "New Test Recipe",
+      description: "This is a new test recipe",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      source: JSON.stringify({
+        name: "Test Source",
+        note: "Test source note",
+      }),
+      tags: JSON.stringify(["tag1", "tag2"]),
+      meals: JSON.stringify(["meal1", "meal2"]),
+      cuisines: JSON.stringify(["cuisine1", "cuisine2"]),
+      seasons: JSON.stringify(["season1", "season2"]),
+      holidays: JSON.stringify(["holiday1"]),
+      notes: "These are test notes.",
+      linkedRecipes: JSON.stringify([]),
+      isApproved: true,
+    };
+
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+      publicId: "new-image",
+    });
+
+    const response = await loginAgent1
+      .post("/api/v1/recipes")
+      .field(newRecipeData)
+      .attach("image", img1Path);
+
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+    expect(response.body.recipe).toBeDefined();
+    expect(response.body.recipe.image).toBeNull();
+  });
+
   it("should upload the image to Cloudinary and save the image data in the recipe", async () => {
     unlinkSpy = jest.spyOn(fsPromises, "unlink");
 
@@ -676,12 +765,19 @@ describe("POST /api/v1/recipes", () => {
 
     expect(uploadedPath).toMatch(/^uploads[\\/]/);
     expect(mockDeletePhoto).not.toHaveBeenCalled();
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
 
-    expect(response.body.recipe.image.imageURL).toBe(
+    const updatedRecipe = await Recipe.findById(response.body.recipe._id);
+
+    updatedRecipe.image.isApproved = true;
+    await updatedRecipe.save();
+
+    const recipeWithImage = await populateRecipe(updatedRecipe._id);
+
+    expect(recipeWithImage.image.imageURL).toBe(
       "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
     );
-    expect(response.body.recipe.image.publicId).toBe("new-image");
-    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+    expect(recipeWithImage.image.publicId).toBe("new-image");
   });
 
   it("should upload a recipe properly when a image is null", async () => {
@@ -1415,6 +1511,40 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
     expect(response.body.recipe.author.profileImage).toBe(
       testUser1.profileImage,
     );
+  });
+
+  it("should not return an image of a recipe where the image has not been approved", async () => {
+    mockUploadPhoto.mockResolvedValueOnce({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+      publicId: "new-image",
+    });
+
+    const testRecipe = await createTestRecipe(testUser1._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+      },
+    });
+
+    const response = await loginAgent1.get(
+      `/api/v1/recipes/${testRecipe.slug}`,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.recipe).toBeDefined();
+    expect(response.body.recipe._id).toBe(testRecipe._id.toString());
+    expect(response.body.recipe.image).toBe(null);
   });
 
   it("should fetch an unpublished recipe for the author", async () => {
@@ -2431,6 +2561,77 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     expect(response.body.recipe.holidays[0].title).toBe("updatedholiday1");
   });
 
+  it("should not return an image on a newly updated recipe as the image has not been approved yet", async () => {
+    unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
+    const existingRecipe = await createTestRecipe(testUser1._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+        isApproved: true,
+      },
+    });
+
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+      publicId: "new-image",
+    });
+
+    const updatedRecipeData = {
+      title: existingRecipe.title,
+      description: "Updated description",
+      preptimeSeconds: "300",
+      cooktimeSeconds: "600",
+      servings: "4",
+      ingredientSections: JSON.stringify([
+        {
+          sectionTitle: "Test Section",
+          ingredients: [
+            {
+              ingredient: testIngredient.title,
+              quantity: "2",
+              measurement: "tablespoon",
+            },
+          ],
+        },
+      ]),
+      stepSections: JSON.stringify([
+        {
+          sectionTitle: "Test Steps",
+          steps: ["Step 1", "Step 2"],
+        },
+      ]),
+      linkedRecipes: JSON.stringify([]),
+    };
+
+    const response = await loginAgent1
+      .put(`/api/v1/recipes/${existingRecipe.slug}`)
+      .field(updatedRecipeData)
+      .attach("image", img2Path);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.recipe.image).toBeNull();
+
+    expect(mockUploadPhoto).toHaveBeenCalledTimes(1);
+    expect(mockUploadPhoto).toHaveBeenCalledWith(expect.any(String));
+
+    expect(mockDeletePhoto).toHaveBeenCalledTimes(1);
+    expect(mockDeletePhoto).toHaveBeenCalledWith("test-image");
+
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("should update the recipe's image, upload it to cloudinary and delete the old image", async () => {
     unlinkSpy = jest.spyOn(fsPromises, "unlink");
 
@@ -2497,15 +2698,29 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     expect(mockDeletePhoto).toHaveBeenCalledTimes(1);
     expect(mockDeletePhoto).toHaveBeenCalledWith("test-image");
 
-    expect(response.body.recipe.image.imageURL).toBe(
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+
+    const updatedRecipe = await Recipe.findById(existingRecipe._id);
+
+    updatedRecipe.image.isApproved = true;
+    await updatedRecipe.save();
+
+    const recipeWithImage = await populateRecipe(updatedRecipe._id);
+
+    expect(recipeWithImage.image.imageURL).toBe(
       "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
     );
-    expect(response.body.recipe.image.publicId).toBe("new-image");
-    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+    expect(recipeWithImage.image.publicId).toBe("new-image");
   });
 
   it("should update the recipe's image, upload it to cloudinary and not delete the old image if there was not one", async () => {
     unlinkSpy = jest.spyOn(fsPromises, "unlink");
+
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
+      publicId: "new-image",
+    });
 
     const existingRecipe = await createTestRecipe(testUser1._id, {
       title: `Test Recipe ${testRecipeSlugIndex}`,
@@ -2516,12 +2731,6 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
           ingredients: [{ ingredient: testIngredient._id }],
         },
       ],
-    });
-
-    mockUploadPhoto.mockResolvedValue({
-      imageURL:
-        "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
-      publicId: "new-image",
     });
 
     const updatedRecipeData = {
@@ -2564,11 +2773,18 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
 
     expect(mockDeletePhoto).not.toHaveBeenCalled();
 
-    expect(response.body.recipe.image.imageURL).toBe(
+    const updatedRecipe = await Recipe.findById(existingRecipe._id);
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+
+    updatedRecipe.image.isApproved = true;
+    await updatedRecipe.save();
+
+    const recipeWithImage = await populateRecipe(updatedRecipe._id);
+
+    expect(recipeWithImage.image.imageURL).toBe(
       "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
     );
-    expect(response.body.recipe.image.publicId).toBe("new-image");
-    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+    expect(recipeWithImage.image.publicId).toBe("new-image");
   });
 
   it("should delete the recipe's old image and not upload a new one if the image is set to null", async () => {

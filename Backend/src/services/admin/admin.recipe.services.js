@@ -68,6 +68,53 @@ export async function approveRecipeById(recipeId) {
   await recipe.save();
 }
 
+// Get all recipes that have not had their images approved with pagination
+export async function getAllUnapprovedRecipeImages(page, limit, offset) {
+  const totalRecipes = await Recipe.countDocuments({
+    "image.isApproved": false,
+    isDeleted: false,
+  });
+
+  // Get the unapproved recipe images with pagination, showing the oldest unapproved recipe images first
+  const unapprovedRecipeImages = await Recipe.find({
+    "image.isApproved": false,
+    isDeleted: false,
+  })
+    .select("+reportCount")
+    .populate("author", "displayName profileImage")
+    .sort({ createdAt: 1 })
+    .skip(offset)
+    .limit(limit)
+    .lean();
+
+  return {
+    unapprovedRecipeImages,
+    currentPage: page,
+    totalRecipes,
+    totalPages: Math.ceil(totalRecipes / limit),
+  };
+}
+
+// Approve the recipe image by setting isApproved to true
+export async function approveRecipeImageById(recipeId) {
+  // Ensure the recipe exists and is not already approved or deleted
+  const recipe = await Recipe.findById(recipeId).select("image isDeleted");
+
+  if (!recipe || recipe.isDeleted) {
+    const error = new Error("Recipe not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (recipe.image?.isApproved || !recipe.image) {
+    return; // Recipe image is already approved or there is no image, no action needed
+  }
+
+  // Approve the recipe image
+  recipe.image.isApproved = true;
+  await recipe.save();
+}
+
 // Get all recipes that have been reported with pagination
 export async function getAllReportedRecipes(page, limit, offset) {
   const totalRecipes = await Recipe.countDocuments({

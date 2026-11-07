@@ -321,6 +321,242 @@ describe("PATCH /api/v1/admin/recipes/:id/approve", () => {
   });
 });
 
+// Test cases: getAllUnapprovedRecipeImages //
+describe("GET /api/v1/admin/recipes/unapproved-images", () => {
+  it("should return an array of recipes with unapproved images with pagination info with oldest first", async () => {
+    // Create 15 unapproved recipes
+    const unapprovedRecipes = [];
+    for (let i = 0; i < 15; i++) {
+      const recipe = await createTestRecipe(testUser._id, {
+        title: `Test Recipe ${i + 1}`,
+        slug: `test-recipe-${i + 1}`,
+        ingredientSections: [
+          {
+            sectionTitle: "Test Section",
+            ingredients: [{ ingredient: testIngredient._id }],
+          },
+        ],
+        image: {
+          imageURL:
+            "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+          publicId: "test-image",
+          isApproved: false,
+        },
+      });
+      unapprovedRecipes.push(recipe);
+    }
+
+    const res = await adminAgent.get("/api/v1/admin/recipes/unapproved-images");
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.recipes.unapprovedRecipeImages.length).toBe(10);
+    for (let i = 0; i < 10; i++) {
+      expect(res.body.recipes.unapprovedRecipeImages[i]._id).toBe(
+        unapprovedRecipes[i]._id.toString(),
+      );
+    }
+    expect(res.body.recipes.currentPage).toBe(1);
+    expect(res.body.recipes.totalRecipes).toBe(15);
+    expect(res.body.recipes.totalPages).toBe(2);
+  });
+
+  it("should return an error if the user is not authenticated for unnapproved image", async () => {
+    const res = await request(app).get(
+      "/api/v1/admin/recipes/unapproved-images",
+    );
+
+    expect(res.statusCode).toEqual(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe(
+      "No authentication token found, access denied",
+    );
+  });
+
+  it("should return an error if the user is a general user for unnapproved image", async () => {
+    const res = await loginAgent.get("/api/v1/admin/recipes/unapproved-images");
+
+    expect(res.statusCode).toEqual(403);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe(
+      "You do not have permission to perform this action",
+    );
+  });
+
+  it("should allow access if the user is a moderator for unnapproved image", async () => {
+    const res = await moderatorAgent.get(
+      "/api/v1/admin/recipes/unapproved-images",
+    );
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.success).toBe(true);
+  });
+
+  it("should allow access if the user is an admin for unnapproved image", async () => {
+    const res = await adminAgent.get("/api/v1/admin/recipes/unapproved-images");
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.success).toBe(true);
+  });
+});
+
+// Test cases: approveRecipeImageById //
+describe("PATCH /api/v1/admin/recipes/:id/approve-image", () => {
+  it("should approve the recipe image and return a success message", async () => {
+    const recipe = await createTestRecipe(testUser._id, {
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+        isApproved: false,
+      },
+    });
+
+    const res = await adminAgent.patch(
+      `/api/v1/admin/recipes/${recipe._id}/approve-image`,
+    );
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toBe("Recipe image approved successfully");
+
+    const updatedRecipe = await Recipe.findById(recipe._id);
+    expect(updatedRecipe.image.isApproved).toBe(true);
+    expect(updatedRecipe.image.imageURL).toBe(
+      "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+    );
+    expect(updatedRecipe.image.publicId).toBe("test-image");
+  });
+
+  it("should return an error if the recipe does not exist for unnapproved image", async () => {
+    const res = await adminAgent.patch(
+      `/api/v1/admin/recipes/${new mongoose.Types.ObjectId()}/approve-image`,
+    );
+
+    expect(res.statusCode).toEqual(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Recipe not found");
+  });
+
+  it("should return an error if the user is not authenticated for unnapproved image", async () => {
+    const recipe = await createTestRecipe(testUser._id, {
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+        isApproved: false,
+      },
+    });
+
+    const res = await request(app).patch(
+      `/api/v1/admin/recipes/${recipe._id}/approve-image`,
+    );
+
+    expect(res.statusCode).toEqual(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe(
+      "No authentication token found, access denied",
+    );
+  });
+
+  it("should return an error if the user is a general user for unnapproved image", async () => {
+    const recipe = await createTestRecipe(testUser._id, {
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+        isApproved: false,
+      },
+    });
+
+    const res = await loginAgent.patch(
+      `/api/v1/admin/recipes/${recipe._id}/approve-image`,
+    );
+
+    expect(res.statusCode).toEqual(403);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe(
+      "You do not have permission to perform this action",
+    );
+  });
+
+  it("should allow access if the user is a moderator", async () => {
+    const recipe = await createTestRecipe(testUser._id, {
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+        isApproved: false,
+      },
+    });
+
+    const res = await moderatorAgent.patch(
+      `/api/v1/admin/recipes/${recipe._id}/approve-image`,
+    );
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.success).toBe(true);
+  });
+
+  it("should allow access if the user is an admin", async () => {
+    const recipe = await createTestRecipe(testUser._id, {
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+        isApproved: false,
+      },
+    });
+
+    const res = await adminAgent.patch(
+      `/api/v1/admin/recipes/${recipe._id}/approve-image`,
+    );
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.success).toBe(true);
+  });
+
+  it("should throw an error if the id is invalid", async () => {
+    const res = await adminAgent.patch(
+      `/api/v1/admin/recipes/invalidid/approve-image`,
+    );
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Invalid id");
+  });
+});
+
 // Test cases: getReportedRecipes //
 describe("GET /api/v1/admin/recipes/reported", () => {
   it("should return an array of reported recipes with pagination info with oldest reported recipes first", async () => {

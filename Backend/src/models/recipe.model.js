@@ -166,6 +166,10 @@ const recipeSchema = mongoose.Schema(
           trim: true,
           required: true,
         },
+        isApproved: {
+          type: Boolean,
+          default: false,
+        },
       },
       default: null,
     },

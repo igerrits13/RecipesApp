@@ -4,9 +4,11 @@ import { validateObjectId } from "../../middleware/validation.middleware.js";
 
 import {
   approveRecipe,
+  approveRecipeImage,
   deleteRecipePermanently,
   getDeletedRecipes,
   getReportedRecipes,
+  getUnapprovedRecipeImages,
   getUnapprovedRecipes,
 } from "../../controllers/admin/admin.recipe.controller.js";
 
@@ -36,6 +38,23 @@ router.patch(
   requireRole(["moderator", "admin"]),
   validateObjectId("id"),
   approveRecipe,
+);
+
+// Create a route for getting all recipes with unapproved images
+router.get(
+  "/unapproved-images",
+  protectRoute,
+  requireRole(["moderator", "admin"]),
+  getUnapprovedRecipeImages,
+);
+
+// Create a route for approving a recipe image by the recipe id
+router.patch(
+  "/:id/approve-image",
+  protectRoute,
+  requireRole(["moderator", "admin"]),
+  validateObjectId("id"),
+  approveRecipeImage,
 );
 
 // Create a route for getting all reported recipes

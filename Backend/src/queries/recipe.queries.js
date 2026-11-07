@@ -50,10 +50,12 @@ export function populateRecipePreview(recipes) {
     title: recipe.title,
     slug: recipe.slug,
     description: recipe.description || "",
-    image: {
-      imageURL: recipe.image?.imageURL || null,
-      publicId: recipe.image?.publicId || null,
-    },
+    image: recipe.image?.isApproved
+      ? {
+          imageURL: recipe.image?.imageURL || null,
+          publicId: recipe.image?.publicId || null,
+        }
+      : null,
     preptimeSeconds: recipe.preptimeSeconds,
     cooktimeSeconds: recipe.cooktimeSeconds,
     aggregateRating: recipe.aggregateRating,
@@ -134,10 +136,29 @@ export async function populateRecipe(recipeId) {
       linked.recipeId.author.profileImage = null;
     }
 
+    // Remove any unapproved images from the linked recipes
+    linked.recipeId.image = linked.recipeId.image?.isApproved
+      ? {
+          imageURL: linked.recipeId.image.imageURL,
+          publicId: linked.recipeId.image.publicId,
+        }
+      : null;
+
     const { isDeleted, isBanned, ...authorWithoutIsDeleted } =
       linked.recipeId.author;
     linked.recipeId.author = authorWithoutIsDeleted;
   });
 
-  return recipe;
+  // Remove any unapproved images from the recipe
+  const returnRecipe = {
+    ...recipe,
+    image: recipe.image?.isApproved
+      ? {
+          imageURL: recipe.image.imageURL,
+          publicId: recipe.image.publicId,
+        }
+      : null,
+  };
+
+  return returnRecipe;
 }

@@ -898,7 +898,11 @@ export async function validateAndSaveNewRecipe({
     uploadedImage = imagePath ? await uploadPhoto(imagePath) : null;
 
     const image = uploadedImage
-      ? { imageURL: uploadedImage.imageURL, publicId: uploadedImage.publicId }
+      ? {
+          imageURL: uploadedImage.imageURL,
+          publicId: uploadedImage.publicId,
+          isApproved: false,
+        }
       : null;
 
     // Ensure the image url length is less than 2048 characters
@@ -1134,7 +1138,7 @@ export async function validateAndUpdateRecipe({
           updatedRecipeData.servings !== undefined
             ? Number(updatedRecipeData.servings)
             : oldRecipe.servings,
-        image: imageURL ? { imageURL, publicId } : null,
+        image: imageURL ? { imageURL, publicId, isApproved: false } : null,
         notes:
           updatedRecipeData.notes !== undefined
             ? updatedRecipeData.notes

@@ -2,8 +2,10 @@ import Recipe from "../../models/recipe.model.js";
 
 import {
   approveRecipeById,
+  approveRecipeImageById,
   getAllDeletedRecipes,
   getAllReportedRecipes,
+  getAllUnapprovedRecipeImages,
   getAllUnapprovedRecipes,
 } from "../../services/admin/admin.recipe.services.js";
 
@@ -53,6 +55,41 @@ export async function approveRecipe(req, res) {
     res
       .status(200)
       .json({ success: true, message: "Recipe approved successfully" });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+}
+
+// Create a route for getting all recipes with unapproved images
+export async function getUnapprovedRecipeImages(req, res) {
+  try {
+    // Get query information for recipes to send
+    const { page, limit, offset } = getPagination(req.query);
+
+    const recipes = await getAllUnapprovedRecipeImages(page, limit, offset);
+
+    res.status(200).json({ success: true, recipes });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+}
+
+// Create a route for approving a recipe image by the recipe id
+export async function approveRecipeImage(req, res) {
+  try {
+    const { id } = req.params;
+
+    await approveRecipeImageById(id);
+
+    res
+      .status(200)
+      .json({ success: true, message: "Recipe image approved successfully" });
   } catch (error) {
     res.status(error.statusCode || 500).json({
       success: false,

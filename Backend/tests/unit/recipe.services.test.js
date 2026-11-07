@@ -2046,6 +2046,22 @@ describe("validateAndSaveNewRecipe", () => {
     expect(result.slug).toBe("duplicate-title-test-recipe-1");
   });
 
+  test("should default to recipe image to not approved", async () => {
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+      publicId: "test-image",
+    });
+
+    const result = await validateAndSaveNewRecipe({
+      ...fullTestRecipeDataCompleteNonJSON,
+      imagePath: "tmp/test-image.jpg",
+      author: testUser._id,
+    });
+
+    expect(result.get("image").isApproved).toBe(false);
+  });
+
   test("should upload the image to Cloudinary and save the image data in the recipe", async () => {
     mockUploadPhoto.mockResolvedValue({
       imageURL:
@@ -2594,6 +2610,45 @@ describe("validateAndUpdateRecipe", () => {
       "https://res.cloudinary.com/test/image/upload/v1234567891/test-image2.jpg",
     );
     expect(result.get("image").publicId).toBe("test-image2");
+  });
+
+  test("should default updated recipe image to not approved", async () => {
+    mockUploadPhoto.mockResolvedValue({
+      imageURL:
+        "https://res.cloudinary.com/test/image/upload/v1234567891/test-image2.jpg",
+      publicId: "test-image2",
+    });
+
+    testIngredient = await createTestIngredient();
+
+    const existingRecipe = await createTestRecipe(testUser._id, {
+      title: "Existing Test Recipe",
+      slug: "existing-test-recipe",
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+      image: {
+        imageURL:
+          "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
+        publicId: "test-image",
+      },
+    });
+
+    const updatedData = {
+      ...fullTestRecipeDataCompleteNonJSON,
+    };
+
+    const result = await validateAndUpdateRecipe({
+      updatedRecipeData: updatedData,
+      oldRecipe: existingRecipe,
+      imagePath: "tmp/test-image2.jpg",
+      userId: testUser._id,
+    });
+
+    expect(result.get("image").isApproved).toBe(false);
   });
 
   test("should remove the existing image when no new image is uploaded", async () => {
