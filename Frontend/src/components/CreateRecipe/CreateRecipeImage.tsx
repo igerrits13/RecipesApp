@@ -65,6 +65,15 @@ export default function CreateRecipeImage() {
           </div>
         )}
       </div>
+      {selectedImage && (
+        <div className="text-rosewood-500 text-[14px]">
+          <div className="flex items-center gap-1 p-2 text-center">
+            Images require approval before they appear on the website. Your
+            recipe can be viewed immediately upon successful submission, but
+            your photo may take a while to show up.
+          </div>
+        </div>
+      )}
       {errors.image?.message && (
         <ValidationError message={errors.image.message} />
       )}

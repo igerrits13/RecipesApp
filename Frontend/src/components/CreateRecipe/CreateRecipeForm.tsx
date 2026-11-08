@@ -12,8 +12,17 @@ import CreateRecipeSteps from "./CreateRecipeSteps";
 import CreateRecipeChefNotes from "./CreateRecipeChefNotes";
 import CreateRecipeLinkedRecipes from "./CreateRecipeLinkedRecipes";
 import CreateRecipeMetadata from "./CreateRecipeMetadata";
+import { useNavigate } from "react-router-dom";
+import { useRecipeStore } from "../../store/RecipeStore";
+import ValidationError from "../ValidationError";
 
 export default function CreateRecipeForm() {
+  // Alow navigation
+  const navigate = useNavigate();
+
+  // Access the create recipe function from the recipe store
+  const { createRecipe, createRecipeError } = useRecipeStore();
+
   // Type for the form values
   type CreateRecipeData = z.infer<typeof createRecipeSchema>;
 
@@ -69,8 +78,6 @@ export default function CreateRecipeForm() {
 
   // Function to handle form submission
   const onSubmit: SubmitHandler<CreateRecipeData> = async (data) => {
-    console.log("Submitting");
-
     try {
       // Convert all data into a formData object to send to the backend
       const formData = new FormData();
@@ -100,18 +107,6 @@ export default function CreateRecipeForm() {
       // Add the image if one is provided
       if (data.image) {
         const compressedImage = await compressRecipeImage(data.image);
-
-        console.log("Original:", {
-          name: data.image.name,
-          sizeMB: (data.image.size / 1024 / 1024).toFixed(2),
-          type: data.image.type,
-        });
-
-        console.log("Compressed:", {
-          name: compressedImage.name,
-          sizeMB: (compressedImage.size / 1024 / 1024).toFixed(2),
-          type: compressedImage.type,
-        });
 
         formData.append("image", compressedImage);
       }
@@ -150,30 +145,17 @@ export default function CreateRecipeForm() {
 
       formData.append("isPublished", data.isPublished.toString());
 
-      // Temp debugging
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-      }
-    } catch (error) {
-      console.error(error);
+      const response = await createRecipe(formData);
+      console.log(response);
+      navigate("/");
+    } catch {
+      // Error is handled in the recipe store and displayed to the user
     }
   };
 
   return (
     <FormProvider {...methods}>
-      <form
-        className="flex flex-col"
-        onSubmit={methods.handleSubmit(
-          (data) => {
-            console.log("SUBMIT SUCCESS - data:", data);
-            onSubmit(data);
-          },
-          (errors) => {
-            console.log("SUBMIT FAILED - validation errors:", errors);
-          },
-        )}
-        encType="multipart/form-data"
-      >
+      <form className="flex flex-col" onSubmit={methods.handleSubmit(onSubmit)}>
         <div className="md:grid md:grid-cols-[1fr_4fr]">
           <CreateRecipeTitle width={width} />
           {width <= 768 ? (
@@ -192,6 +174,9 @@ export default function CreateRecipeForm() {
           <CreateRecipeChefNotes />
           <CreateRecipeLinkedRecipes />
           <CreateRecipeMetadata />
+        </div>
+        <div className="flex justify-center">
+          {createRecipeError && <ValidationError message={createRecipeError} />}
         </div>
         <button
           className={`place-self-center w-1/2 sm:w-1/3 lg:w-1/4 2xl:w-1/6 mt-4 text-center rounded-full ${methods.formState.isSubmitting ? "bg-rosewood-300" : "bg-rosewood-500"} text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300`}
