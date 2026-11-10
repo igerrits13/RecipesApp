@@ -91,6 +91,7 @@ describe("GET /api/v1/admin/users/deleted", () => {
     for (let i = 0; i < 5; i++) {
       const user = await createTestUser({
         username: `${testUserData.username}${i}`,
+        slug: `${testUserData.slug}${i}`,
         displayName: `${testUserData.displayName}${i}`,
         password: "Password123",
         email: `${testUserData.email}${i}`,

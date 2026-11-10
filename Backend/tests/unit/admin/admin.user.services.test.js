@@ -36,6 +36,7 @@ describe("getAllUsersWithRoleStatus", () => {
       await createTestUser({
         displayName: `Test User ${i}`,
         username: `testuser${i}`,
+        slug: `testuser${i}`,
         email: `testuser${i}@example.com`,
         password: "Password123",
         role: i % 3 === 0 ? "admin" : i % 3 === 1 ? "moderator" : "user",
@@ -86,6 +87,7 @@ describe("getAllDeletedUsers", () => {
       await createTestUser({
         displayName: `Test User ${i}`,
         username: `testuser${i}`,
+        slug: `testuser${i}`,
         email: `testuser${i}@example.com`,
         password: "Password123",
         role: i % 3 === 0 ? "admin" : i % 3 === 1 ? "moderator" : "user",
@@ -126,6 +128,7 @@ describe("getUserDetailsById", () => {
     const testUser = await createTestUser({
       displayName: "Test User",
       username: "testuser",
+      slug: "testuser",
       email: "testuser@example.com",
       password: "Password123",
       role: "user",
@@ -169,6 +172,7 @@ describe("updateUserRole", () => {
     const testUser = await createTestUser({
       displayName: "Test User",
       username: "testuser",
+      slug: "testuser",
       email: "testuser@example.com",
       password: "Password123",
       role: "user",
@@ -195,6 +199,7 @@ describe("updateUserRole", () => {
     const testUser = await createTestUser({
       displayName: "Test User",
       username: "testuser",
+      slug: "testuser",
       email: "testuser@example.com",
       password: "Password123",
       role: "user",
@@ -214,6 +219,7 @@ describe("updateUserBanStatus", () => {
     const testUser = await createTestUser({
       displayName: "Test User",
       username: "testuser",
+      slug: "testuser",
       email: "testuser@example.com",
       password: "Password123",
       role: "user",
@@ -234,6 +240,7 @@ describe("updateUserBanStatus", () => {
     const testUser = await createTestUser({
       displayName: "Test User",
       username: "testuser",
+      slug: "testuser",
       email: "testuser@example.com",
       password: "Password123",
       role: "user",

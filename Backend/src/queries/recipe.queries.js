@@ -28,7 +28,7 @@ export async function fetchRecipes({ query, page, limit, offset }) {
     .sort({ createdAt: -1 })
     .skip(offset)
     .limit(limit)
-    .populate({ path: "author", select: "displayName isDeleted" })
+    .populate({ path: "author", select: "displayName slug isDeleted" })
     .lean();
 
   // Map the recipes to the desired format
@@ -64,10 +64,10 @@ export function populateRecipePreview(recipes) {
       recipe.author?.displayName && !recipe.author.isDeleted
         ? {
             _id: recipe.author._id,
-            username: recipe.author.username,
+            slug: recipe.author.slug,
             displayName: recipe.author.displayName,
           }
-        : { _id: null, username: null, displayName: "Deleted User" },
+        : { _id: null, slug: null, displayName: "Deleted User" },
     isPublished: recipe.isPublished,
     isApproved: recipe.isApproved,
   }));
@@ -79,7 +79,7 @@ export async function populateRecipe(recipeId) {
   const recipe = await Recipe.findById(recipeId)
     .populate("ingredientSections.ingredients.measurement", "title")
     .populate("ingredientSections.ingredients.ingredient", "title")
-    .populate("author", "displayName profileImage isBanned isDeleted")
+    .populate("author", "displayName slug profileImage isBanned isDeleted")
     .populate("tags", "title")
     .populate("cuisines", "title")
     .populate("meals", "title")
@@ -91,7 +91,7 @@ export async function populateRecipe(recipeId) {
         "title slug description image preptimeSeconds cooktimeSeconds author aggregateRating ratingCount isPublished isApproved isDeleted",
       populate: {
         path: "author",
-        select: "displayName profileImage isBanned isDeleted",
+        select: "displayName slug profileImage isBanned isDeleted",
       },
     })
     .lean();

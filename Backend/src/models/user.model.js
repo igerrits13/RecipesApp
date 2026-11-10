@@ -12,6 +12,14 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: /^[a-z0-9_]+$/,
     },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    },
     displayName: {
       type: String,
       required: true,

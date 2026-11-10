@@ -25,11 +25,7 @@ export interface Recipe {
     role: "component" | "pairing" | "variation";
   }[];
   author: Author;
-  source?: {
-    url?: string;
-    name?: string;
-    note?: string;
-  } | null;
+  source: Source | null;
   tags: Tag[];
   cuisines: Cuisine[];
   meals: Meal[];
@@ -60,11 +56,7 @@ export interface CreateRecipeData {
     recipeId: string;
     role: "component" | "pairing" | "variation";
   }[];
-  source?: {
-    url?: string;
-    name: string;
-    note?: string;
-  } | null;
+  source: Source | null;
   tags: string[];
   cuisines: string[];
   meals: string[];
@@ -83,6 +75,13 @@ export interface IngredientSection {
     ingredient: Ingredient;
     additionalInfo?: string | null;
   }[];
+}
+
+// Interface for the recipe source
+export interface Source {
+  url?: string;
+  name: string;
+  note?: string;
 }
 
 // Interface for creating an ingredient section
@@ -129,6 +128,7 @@ export interface LinkedRecipe {
 // Interface for a recipe author
 export interface Author {
   _id: string;
+  slug: string;
   displayName: string;
   profileImage: string;
 }

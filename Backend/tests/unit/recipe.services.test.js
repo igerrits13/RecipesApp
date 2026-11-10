@@ -3800,6 +3800,7 @@ describe("getAllRecipeComments", () => {
 
     const deletedUser = await createTestUser({
       username: `deletedUser${testUserIndex}`,
+      slug: `deletedUser${testUserIndex}`,
       displayName: `deletedUser${testUserIndex++}`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -3833,6 +3834,7 @@ describe("getAllRecipeComments", () => {
 
     const bannedUser = await createTestUser({
       username: `bannedUser${testUserIndex}`,
+      slug: `bannedUser${testUserIndex}`,
       displayName: `bannedUser${testUserIndex++}`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -3871,6 +3873,7 @@ describe("getAllRecipeComments", () => {
     for (let i = 0; i < 10; i++) {
       const user = await createTestUser({
         username: `bannedTest${i}`,
+        slug: `bannedTest${i}`,
         displayName: `bannedTest${i}`,
         email: `${crypto.randomUUID()}@example.com`,
         password: "Password123",

@@ -185,6 +185,9 @@ describe("GET /api/v1/recipes", () => {
       expect(recipe).toHaveProperty("aggregateRating");
       expect(recipe).toHaveProperty("ratingCount");
       expect(recipe).toHaveProperty("author");
+      expect(recipe.author).toHaveProperty("_id");
+      expect(recipe.author).toHaveProperty("displayName");
+      expect(recipe.author).toHaveProperty("slug");
       expect(recipe).toHaveProperty("isPublished");
       expect(recipe).not.toHaveProperty("ingredientSections");
       expect(recipe).not.toHaveProperty("steps");
@@ -1508,6 +1511,7 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
     }
     expect(response.body.recipe.notes).toBe(testRecipe.notes);
     expect(response.body.recipe.author.displayName).toBe(testUser1.displayName);
+    expect(response.body.recipe.author.slug).toBe(testUser1.slug);
     expect(response.body.recipe.author.profileImage).toBe(
       testUser1.profileImage,
     );

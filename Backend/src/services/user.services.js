@@ -14,6 +14,7 @@ import CommentVote from "../models/commentVote.model.js";
 import {
   generateUniqueDeletedEmail,
   generateUniqueDeletedName,
+  generateUniqueDeletedSlug,
 } from "../utils/generateUnique.js";
 
 const NINETY_DAYS_IN_MS = 90 * 24 * 60 * 60 * 1000;
@@ -558,6 +559,7 @@ export async function deleteCurrentUserAccount(user) {
     user._id,
     "user",
   );
+  user.slug = await generateUniqueDeletedSlug(user.slug, user._id);
   user.email = await generateUniqueDeletedEmail(user.email, user._id);
   user.displayName = await generateUniqueDeletedName(
     user.displayName,

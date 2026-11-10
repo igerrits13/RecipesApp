@@ -26,6 +26,7 @@ describe("registerUser", () => {
       "username",
       testUserData.username.toLowerCase(),
     );
+    expect(user).toHaveProperty("slug", testUserData.displayName.toLowerCase());
     expect(user).toHaveProperty("displayName", testUserData.displayName);
     expect(user).toHaveProperty("email", testUserData.email);
     expect(user).toHaveProperty("profileImage");
@@ -340,6 +341,7 @@ describe("loginUser", () => {
       "username",
       testUserData.username.toLowerCase(),
     );
+    expect(user).toHaveProperty("slug", testUserData.displayName.toLowerCase());
     expect(user).toHaveProperty("displayName", testUserData.displayName);
     expect(user).toHaveProperty("email", testUserData.email);
     expect(user).toHaveProperty("profileImage");

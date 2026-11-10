@@ -29,7 +29,7 @@ import {
 } from "../../../src/utils/testFunctions.js";
 
 import User from "../../../src/models/user.model.js";
-import BannedWord from "../../../src/models/BannedWord.model.js";
+import BannedWord from "../../../src/models/bannedWord.model.js";
 import Log from "../../../src/models/log.model.js";
 import Report from "../../../src/models/report.model.js";
 import Holiday from "../../../src/models/holiday.model.js";

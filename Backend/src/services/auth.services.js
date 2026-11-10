@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import { AuthError, DuplicateError } from "../errors/auth.errors.js";
+import { slugify } from "../utils/slugify.js";
 
 // Ensure a unique email and username and save a new user
 export async function registerUser({ email, username, displayName, password }) {
@@ -11,8 +12,9 @@ export async function registerUser({ email, username, displayName, password }) {
     throw error;
   }
 
-  // Normalize email and displayName
+  // Normalize email and displayName and get a slug name
   const normalizedUsername = username.toLowerCase().trim();
+  const slugName = await slugify(displayName, User);
   const normalizedDisplayName = displayName.trim();
   const normalizedEmail = email.toLowerCase().trim();
 
@@ -93,6 +95,7 @@ export async function registerUser({ email, username, displayName, password }) {
   // Create the new user
   const user = new User({
     username: normalizedUsername,
+    slug: slugName,
     displayName: normalizedDisplayName,
     email,
     password: hashedPassword,

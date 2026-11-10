@@ -47,6 +47,7 @@ export function getNthWeekdayOfMonth(year, month, weekday, week) {
 export const testUserData = {
   email: `${crypto.randomUUID()}@example.com`,
   username: "TestUser",
+  slug: "testuser",
   displayName: "TestUser",
   password: await hashPassword("Password123!"),
 };
@@ -54,6 +55,7 @@ export const testUserData = {
 const moderatorTestUserData = {
   email: `${crypto.randomUUID()}@example.com`,
   username: "ModeratorUser",
+  slug: "moderatoruser",
   displayName: "ModeratorUser",
   password: await hashPassword("Password123!"),
   role: "moderator",
@@ -62,6 +64,7 @@ const moderatorTestUserData = {
 const adminTestUserData = {
   email: `${crypto.randomUUID()}@example.com`,
   username: "AdminUser",
+  slug: "adminuser",
   displayName: "AdminUser",
   password: await hashPassword("Password123!"),
   role: "admin",
@@ -70,6 +73,7 @@ const adminTestUserData = {
 export const testUserData2 = {
   email: `${crypto.randomUUID()}@example.com`,
   username: "testuser2",
+  slug: "testuser2",
   displayName: "TestUser2",
   password: await hashPassword("Password123!"),
 };
@@ -96,6 +100,7 @@ export async function createTestAdminUser(overrides = {}) {
 
 export async function createSecondaryTestUser({
   username,
+  slug,
   displayName,
   email,
   password,
@@ -103,6 +108,7 @@ export async function createSecondaryTestUser({
 }) {
   const user = await User.create({
     username: `${username}${++secondaryTestUserCounter}`,
+    slug: `${slug}${secondaryTestUserCounter}`,
     displayName: `${displayName}${secondaryTestUserCounter}`,
     email,
     password: await hashPassword(password),

@@ -49,6 +49,7 @@ beforeAll(async () => {
   testUser = await createTestUser();
   otherUser = await createSecondaryTestUser({
     username: "otheruser",
+    slug: "otheruser",
     displayName: "OtherUser",
     email: `${crypto.randomUUID()}@example.com`,
     password: "Password123",
@@ -143,6 +144,7 @@ describe("categorizeComments", () => {
   test("should not include comments created by banned users", async () => {
     const bannedUser = await createTestUser({
       username: `banneduser${testUserIndex}`,
+      slug: `banneduser${testUserIndex}`,
       displayName: `BannedUser${testUserIndex++}`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -183,6 +185,7 @@ describe("categorizeComments", () => {
   test("should not include replies to comments made by banned users", async () => {
     const bannedUser = await createTestUser({
       username: `banneduser${testUserIndex}`,
+      slug: `banneduser${testUserIndex}`,
       displayName: `BannedUser${testUserIndex++}`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -227,6 +230,7 @@ describe("categorizeComments", () => {
   test("should set display name to 'Deleted User' and profile image to null for comments made by deleted users", async () => {
     const deletedUser = await createTestUser({
       username: `deleteduser${testUserIndex}`,
+      slug: `deleteduser${testUserIndex}`,
       displayName: `DeletedUser${testUserIndex++}`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -256,6 +260,7 @@ describe("categorizeComments", () => {
   test("should set display name to 'Deleted User' and profile image to null for replies to comments made by deleted users", async () => {
     const deletedUser = await createTestUser({
       username: `deleteduser${testUserIndex}`,
+      slug: `deleteduser${testUserIndex}`,
       displayName: `DeletedUser${testUserIndex++}`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -294,6 +299,7 @@ describe("categorizeComments", () => {
   test("should not display a parent comment or its child comments if the parent comment's author is banned", async () => {
     const bannedUser = await createTestUser({
       username: `banneduser${testUserIndex}`,
+      slug: `banneduser${testUserIndex}`,
       displayName: `BannedUser${testUserIndex++}`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -324,6 +330,7 @@ describe("categorizeComments", () => {
   test("should not display child comments from a user that has been banned", async () => {
     const bannedUser = await createTestUser({
       username: `banneduser${testUserIndex}`,
+      slug: `banneduser${testUserIndex}`,
       displayName: `BannedUser${testUserIndex++}`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",

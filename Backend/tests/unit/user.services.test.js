@@ -65,6 +65,7 @@ beforeAll(async () => {
   testUser = await createTestUser();
   otherUser = await createSecondaryTestUser({
     username: "otheruser",
+    slug: "otheruser",
     displayName: "OtherUser",
     email: `${crypto.randomUUID()}@example.com`,
     password: "Password123",
@@ -269,6 +270,7 @@ describe("deleteAllUserCommentVotes", () => {
   test("should not delete comment votes made by other users", async () => {
     const otherTestUser = await createSecondaryTestUser({
       username: `otheruser`,
+      slug: `otheruser`,
       displayName: `OtherUser`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -538,6 +540,7 @@ describe("validateNewDisplayName", () => {
   test("should update the user's displayName and track previous displayName and change date", async () => {
     const newUser = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -599,6 +602,7 @@ describe("validateNewDisplayName", () => {
   test("should throw error if the new displayName is already taken by another user", async () => {
     const existingUser = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -612,6 +616,7 @@ describe("validateNewDisplayName", () => {
   test("should throw error if the displayName was changed within the last 90 days", async () => {
     const user = await createSecondaryTestUser({
       username: `testuser`,
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -631,6 +636,7 @@ describe("validateNewDisplayName", () => {
   test("should allow displayName change if the last change was more than 90 days ago", async () => {
     const user = await createSecondaryTestUser({
       username: `testuser`,
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -661,6 +667,7 @@ describe("validateNewEmail", () => {
   test("should update the user's email and track previous email and change date", async () => {
     const newUser = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -706,6 +713,7 @@ describe("validateNewEmail", () => {
   test("should throw error if the new email is already taken by another user", async () => {
     const existingUser = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -737,7 +745,7 @@ describe("validateNewEmail", () => {
   test("should throw error if last email change was within the last year", async () => {
     const user = await createSecondaryTestUser({
       username: `testuser`,
-
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -755,6 +763,7 @@ describe("validateNewEmail", () => {
   test("should allow email change if the last change was more than a year ago", async () => {
     const user = await createSecondaryTestUser({
       username: `testuser`,
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -780,6 +789,7 @@ describe("validateNewEmail", () => {
   test("should throw error if email change count exceeds 3", async () => {
     const user = await createSecondaryTestUser({
       username: `testuser`,
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -804,6 +814,7 @@ describe("validateNewPassword", () => {
   test("should update the user's password and track last password change date", async () => {
     const newUser = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -896,6 +907,7 @@ describe("addRecipeToCurrentUserCategory", () => {
   test("should not add a recipe to the user's specified category collection if it is already present", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -939,6 +951,7 @@ describe("removeRecipeFromCurrentUserCategory", () => {
   test("should remove a recipe from the user's specified category collection", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -958,6 +971,7 @@ describe("removeRecipeFromCurrentUserCategory", () => {
   test("should not remove a recipe from the user's specified category collection if it is not present", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -990,6 +1004,7 @@ describe("getSpecifiedUserCollection", () => {
   test("should return the user's specified category collection with populated data", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1029,6 +1044,7 @@ describe("getSpecifiedUserCollection", () => {
   test("should return an empty array if the user's specified category collection is empty", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1049,6 +1065,7 @@ describe("getSpecifiedUserCollection", () => {
   test("should throw an error if the specified category is invalid", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1069,6 +1086,7 @@ describe("addSpecifiedUserCollectionItems", () => {
   test("should update the user's specified category collection with new items", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1120,6 +1138,7 @@ describe("addSpecifiedUserCollectionItems", () => {
   test("should return all old and new items in the user's specified category collection after update", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1145,6 +1164,7 @@ describe("addSpecifiedUserCollectionItems", () => {
   test("should not add duplicate items or empty strings to the user's specified category collection", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1169,6 +1189,7 @@ describe("addSpecifiedUserCollectionItems", () => {
   test("should throw an error if the specified category is invalid", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1190,6 +1211,7 @@ describe("addSpecifiedUserCollectionItems", () => {
   test("should throw an error if no new items are provided", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1210,6 +1232,7 @@ describe("addSpecifiedUserCollectionItems", () => {
   test("should throw an error if new items are not in an array", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1231,6 +1254,7 @@ describe("addSpecifiedUserCollectionItems", () => {
   test("should throw an error if new items are an empty array", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1252,6 +1276,7 @@ describe("addSpecifiedUserCollectionItems", () => {
   test("should throw an error if any new item is less than the minimum length", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1273,6 +1298,7 @@ describe("addSpecifiedUserCollectionItems", () => {
   test("should throw an error if any new item is more than the maximum length", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1299,6 +1325,7 @@ describe("removeSpecifiedUserCollectionItems", () => {
   test("should remove specified items from the user's specified category collection", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1360,6 +1387,7 @@ describe("removeSpecifiedUserCollectionItems", () => {
   test("should return an empty array if all items are removed from the user's specified category collection", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1386,6 +1414,7 @@ describe("removeSpecifiedUserCollectionItems", () => {
   test("should return all old items that were not removed from the user's specified category collection", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1415,6 +1444,7 @@ describe("removeSpecifiedUserCollectionItems", () => {
   test("should not remove any empty strings or duplicate items from the user's specified category collection", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1443,6 +1473,7 @@ describe("removeSpecifiedUserCollectionItems", () => {
   test("should throw an error if the specified category is invalid", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1464,6 +1495,7 @@ describe("removeSpecifiedUserCollectionItems", () => {
   test("should throw an error if no old items are provided", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1484,6 +1516,7 @@ describe("removeSpecifiedUserCollectionItems", () => {
   test("should throw an error if old items are not in an array", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1505,6 +1538,7 @@ describe("removeSpecifiedUserCollectionItems", () => {
   test("should throw an error if old items are an empty array", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1526,6 +1560,7 @@ describe("removeSpecifiedUserCollectionItems", () => {
   test("should throw an error if any old item is less than the minimum length", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1547,6 +1582,7 @@ describe("removeSpecifiedUserCollectionItems", () => {
   test("should throw an error if any old item is more than the maximum length", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1573,6 +1609,7 @@ describe("deleteCurrentUserAccount", () => {
   test("should soft delete the user's account", async () => {
     const user = await createSecondaryTestUser({
       username: `testuser`,
+      slug: `testuser`,
       displayName: `testuser`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1606,12 +1643,14 @@ describe("deleteCurrentUserAccount", () => {
   test("should allow for a new user to register with the same information after deletion and avoid duplicates after deletion", async () => {
     const user = await createSecondaryTestUser({
       username: `testuser`,
+      slug: `testuser`,
       displayName: `testuser`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
     });
 
     const originalUsername = user.username;
+    const originalSlug = user.slug;
     const originalEmail = user.email;
     const originalDisplayName = user.displayName;
 
@@ -1622,6 +1661,9 @@ describe("deleteCurrentUserAccount", () => {
     expect(deletedUser.username).toBe(
       `deleted_${originalUsername}_${user._id.toString().slice(-6)}`,
     );
+    expect(deletedUser.slug).toBe(
+      `deleted-${originalSlug}-${user._id.toString().slice(-6)}`,
+    );
     expect(deletedUser.email).toBe(
       `deleted.${originalEmail}.${user._id.toString().slice(-6)}`,
     );
@@ -1631,6 +1673,7 @@ describe("deleteCurrentUserAccount", () => {
 
     const newUser = await User.create({
       username: originalUsername,
+      slug: originalSlug,
       displayName: originalDisplayName,
       email: originalEmail,
       password: "Password123",
@@ -1645,6 +1688,9 @@ describe("deleteCurrentUserAccount", () => {
     expect(deletedNewUser.username).toBe(
       `deleted_${originalUsername}_${newUser._id.toString().slice(-6)}`,
     );
+    expect(deletedNewUser.slug).toBe(
+      `deleted-${originalSlug}-${newUser._id.toString().slice(-6)}`,
+    );
     expect(deletedNewUser.email).toBe(
       `deleted.${originalEmail}.${newUser._id.toString().slice(-6)}`,
     );
@@ -1658,6 +1704,7 @@ describe("deleteCurrentUserAccount", () => {
 
     const user = await User.create({
       username: longUsername,
+      slug: longUsername,
       displayName: longUsername,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1678,6 +1725,7 @@ describe("deleteCurrentUserAccount", () => {
   test("should delete the user's recipe ratings upon account deletion", async () => {
     const user = await createSecondaryTestUser({
       username: `testuser`,
+      slug: `testuser`,
       displayName: `testuser`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1714,6 +1762,7 @@ describe("deleteCurrentUserAccount", () => {
   test("should delete the user's comment votes upon account deletion", async () => {
     const user = await createSecondaryTestUser({
       username: `testuser`,
+      slug: `testuser`,
       displayName: `testuser`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1754,6 +1803,7 @@ describe("deleteCurrentUserAccount", () => {
   test("should delete the users personal notes on recipes upon account deletion", async () => {
     const user = await createSecondaryTestUser({
       username: `testuser`,
+      slug: `testuser`,
       displayName: `testuser`,
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1790,6 +1840,7 @@ describe("getOtherUserProfileByUsername", () => {
   test("should return the public profile of another user by their username", async () => {
     const otherUser = await createSecondaryTestUser({
       username: "otheruser",
+      slug: "otheruser",
       displayName: "Other User",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1798,6 +1849,7 @@ describe("getOtherUserProfileByUsername", () => {
     const profile = await getOtherUserProfileByUsername(otherUser.username);
 
     expect(profile).toHaveProperty("displayName", otherUser.displayName);
+    expect(profile).toHaveProperty("slug", otherUser.slug);
     expect(profile).toHaveProperty("profileImage", otherUser.profileImage);
     expect(profile).toHaveProperty("lastLogin", otherUser.lastLogin);
     expect(profile).toHaveProperty("createdAt", otherUser.createdAt);
@@ -1814,6 +1866,7 @@ describe("getOtherUserProfileByUsername", () => {
   test("should throw an error if the specified user has deleted their account", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1831,6 +1884,7 @@ describe("getOtherUserRecipesByUsername", () => {
   test("should return a empty array if the user has no public recipes", async () => {
     const otherUser = await createSecondaryTestUser({
       username: "otheruser",
+      slug: "otheruser",
       displayName: "Other User",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1847,6 +1901,7 @@ describe("getOtherUserRecipesByUsername", () => {
   test("should return only the public recipes of another user by their username", async () => {
     const otherUser = await createSecondaryTestUser({
       username: "otheruser",
+      slug: "otheruser",
       displayName: "Other User",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1926,6 +1981,7 @@ describe("getOtherUserRecipesByUsername", () => {
   test("should only return recipes that are not deleted", async () => {
     const otherUser = await createSecondaryTestUser({
       username: "otheruser",
+      slug: "otheruser",
       displayName: "Other User",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",
@@ -1972,6 +2028,7 @@ describe("getOtherUserRecipesByUsername", () => {
   test("should throw an error if the specified user has deleted their account", async () => {
     const user = await createSecondaryTestUser({
       username: "testuser",
+      slug: "testuser",
       displayName: "testuser",
       email: `${crypto.randomUUID()}@example.com`,
       password: "Password123",

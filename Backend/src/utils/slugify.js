@@ -4,16 +4,21 @@ export async function slugify(text, Collection) {
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, "-") // Replace spaces with -
-    .replace(/[^\w\-]+/g, "") // Remove all non-word chars
-    .replace(/\-\-+/g, "-"); // Replace multiple - with single -
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 
   const existingSlug = await Collection.find({
     slug: new RegExp(`^${baseSlug}(-[0-9]+)?$`),
-  }).select("slug");
+  }).distinct("slug");
 
-  const slug =
-    existingSlug.length === 0 ? baseSlug : `${baseSlug}-${existingSlug.length}`;
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (existingSlug.includes(slug)) {
+    slug = `${baseSlug}-${counter++}`;
+  }
 
   return slug;
 }

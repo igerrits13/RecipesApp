@@ -46,6 +46,7 @@ beforeAll(async () => {
     email: "other@user.com",
     displayName: "Other user",
     username: "otheruser",
+    slug: "otheruser",
     password: "password",
   });
   await createTestUser({
@@ -53,6 +54,7 @@ beforeAll(async () => {
     email: "banned@user.com",
     displayName: "Banned user",
     username: "banneduser",
+    slug: "banneduser",
     password: "password",
     isBanned: true,
   });
@@ -61,6 +63,7 @@ beforeAll(async () => {
     email: "deleted@user.com",
     displayName: "Deleted user",
     username: "deleteduser",
+    slug: "deleteduser",
     password: "password",
     isDeleted: true,
   });

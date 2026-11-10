@@ -22,6 +22,14 @@ export async function generateUniqueDeletedName(baseName, userId, type) {
   return `${prefix}${truncatedBaseName}${suffix}`;
 }
 
+// Generate a unique slug for a deleted user by appending the last 6 characters of the user ID
+export async function generateUniqueDeletedSlug(baseSlug, userId) {
+  const prefix = "deleted-";
+  const suffix = `-${userId.toString().slice(-6)}`;
+
+  return `${prefix}${baseSlug}${suffix}`;
+}
+
 // Generate a unique email for a deleted user by appending the last 6 characters of the user ID
 export async function generateUniqueDeletedEmail(baseEmail, userId) {
   const prefix = "deleted.";

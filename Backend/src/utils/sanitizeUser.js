@@ -3,8 +3,9 @@ export function sanitizeUser(user) {
   if (!user) return null;
 
   return {
-    id: user._id.toString(),
+    _id: user._id.toString(),
     username: user.username,
+    slug: user.slug,
     displayName: user.displayName,
     email: user.email,
     profileImage: user.profileImage,
@@ -26,7 +27,8 @@ export function sanitizeUserForPublic(user) {
   if (!user) return null;
 
   return {
-    id: user._id.toString(),
+    _id: user._id.toString(),
+    slug: user.slug,
     displayName: user.displayName,
     profileImage: user.profileImage,
     profileBackgroundImage: user.profileBackgroundImage,

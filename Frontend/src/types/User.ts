@@ -2,6 +2,7 @@
 export interface User {
   _id: string;
   username: string;
+  slug: string;
   displayName: string;
   email: string;
   profileImage: string;

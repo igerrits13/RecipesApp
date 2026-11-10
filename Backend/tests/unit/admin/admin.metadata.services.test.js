@@ -50,6 +50,7 @@ beforeAll(async () => {
   testUser = await createTestUser();
   testUser2 = await createTestUser({
     username: "testuser2",
+    slug: "testuser2",
     displayName: "Test User 2",
     email: "testuser2@example.com",
     password: "password123",
