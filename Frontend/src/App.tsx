@@ -57,7 +57,7 @@ function App() {
             )
           }
         />
-        <Route path="*" element={<NotFoundView />} />
+        <Route path="/*" element={<NotFoundView />} />
       </Routes>
     </div>
   );

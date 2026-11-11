@@ -17,7 +17,7 @@ export interface Recipe {
   preptimeSeconds: number;
   cooktimeSeconds: number;
   servings: number;
-  image: string;
+  image: Image | null;
   notes: string;
   linkedRecipes: {
     _id: string;
@@ -82,6 +82,12 @@ export interface Source {
   url?: string;
   name: string;
   note?: string;
+}
+
+// Interface for a recipe image
+export interface Image {
+  imageURL: string;
+  isApproved: boolean;
 }
 
 // Interface for creating an ingredient section

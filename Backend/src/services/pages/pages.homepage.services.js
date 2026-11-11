@@ -54,7 +54,7 @@ async function getFavoriteRecipes(user) {
         isPublished: 1,
         author: {
           _id: "$authorData._id",
-          username: "$authorData.username",
+          slug: "$authorData.slug",
           displayName: "$authorData.displayName",
         },
       },
@@ -91,7 +91,7 @@ async function getMostRecentHighestRatedRecipes() {
         isPublished: 1,
         author: {
           _id: "$authorData._id",
-          username: "$authorData.username",
+          slug: "$authorData.slug",
           displayName: "$authorData.displayName",
         },
       },
@@ -142,7 +142,7 @@ async function getSeasonalRecipes(today) {
         isPublished: 1,
         author: {
           _id: "$authorData._id",
-          username: "$authorData.username",
+          slug: "$authorData.slug",
           displayName: "$authorData.displayName",
         },
       },
@@ -190,7 +190,7 @@ async function getHolidayRecipes(today) {
         isPublished: 1,
         author: {
           _id: "$authorData._id",
-          username: "$authorData.username",
+          slug: "$authorData.slug",
           displayName: "$authorData.displayName",
         },
       },
@@ -227,7 +227,7 @@ export async function getRandomRecipes() {
         isPublished: 1,
         author: {
           _id: "$authorData._id",
-          username: "$authorData.username",
+          slug: "$authorData.slug",
           displayName: "$authorData.displayName",
         },
       },

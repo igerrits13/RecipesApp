@@ -149,7 +149,7 @@ describe("getHomepageData", () => {
           description: expect.any(String),
           image: expect.objectContaining({
             imageURL: expect.any(String),
-            publicId: expect.any(String),
+            isApproved: expect.any(Boolean),
           }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
@@ -162,8 +162,8 @@ describe("getHomepageData", () => {
       expect(result.mostRecentHighestRatedCache[i].author._id.toString()).toBe(
         testUser._id.toString(),
       );
-      expect(result.mostRecentHighestRatedCache[i].author.username).toBe(
-        testUser.username,
+      expect(result.mostRecentHighestRatedCache[i].author.slug).toBe(
+        testUser.slug,
       );
       expect(result.mostRecentHighestRatedCache[i].author.displayName).toBe(
         testUser.displayName,
@@ -186,7 +186,7 @@ describe("getHomepageData", () => {
           description: expect.any(String),
           image: expect.objectContaining({
             imageURL: expect.any(String),
-            publicId: expect.any(String),
+            isApproved: expect.any(Boolean),
           }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
@@ -199,7 +199,7 @@ describe("getHomepageData", () => {
       expect(result.seasonalCache[i].author._id.toString()).toBe(
         testUser._id.toString(),
       );
-      expect(result.seasonalCache[i].author.username).toBe(testUser.username);
+      expect(result.seasonalCache[i].author.slug).toBe(testUser.slug);
       expect(result.seasonalCache[i].author.displayName).toBe(
         testUser.displayName,
       );
@@ -219,7 +219,7 @@ describe("getHomepageData", () => {
           description: expect.any(String),
           image: expect.objectContaining({
             imageURL: expect.any(String),
-            publicId: expect.any(String),
+            isApproved: expect.any(Boolean),
           }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
@@ -232,7 +232,7 @@ describe("getHomepageData", () => {
       expect(result.holidayCache[i].author._id.toString()).toBe(
         testUser._id.toString(),
       );
-      expect(result.holidayCache[i].author.username).toBe(testUser.username);
+      expect(result.holidayCache[i].author.slug).toBe(testUser.slug);
       expect(result.holidayCache[i].author.displayName).toBe(
         testUser.displayName,
       );
@@ -247,7 +247,7 @@ describe("getHomepageData", () => {
           description: expect.any(String),
           image: expect.objectContaining({
             imageURL: expect.any(String),
-            publicId: expect.any(String),
+            isApproved: expect.any(Boolean),
           }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
@@ -260,7 +260,7 @@ describe("getHomepageData", () => {
       expect(result.randomCache[i].author._id.toString()).toBe(
         testUser._id.toString(),
       );
-      expect(result.randomCache[i].author.username).toBe(testUser.username);
+      expect(result.randomCache[i].author.slug).toBe(testUser.slug);
       expect(result.randomCache[i].author.displayName).toBe(
         testUser.displayName,
       );
@@ -285,7 +285,7 @@ describe("getHomepageData", () => {
           description: expect.any(String),
           image: expect.objectContaining({
             imageURL: expect.any(String),
-            publicId: expect.any(String),
+            isApproved: expect.any(Boolean),
           }),
           preptimeSeconds: expect.any(Number),
           cooktimeSeconds: expect.any(Number),
@@ -298,7 +298,7 @@ describe("getHomepageData", () => {
       expect(result.favoriteRecipes[i].author._id.toString()).toBe(
         testUser._id.toString(),
       );
-      expect(result.favoriteRecipes[i].author.username).toBe(testUser.username);
+      expect(result.favoriteRecipes[i].author.slug).toBe(testUser.slug);
       expect(result.favoriteRecipes[i].author.displayName).toBe(
         testUser.displayName,
       );

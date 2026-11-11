@@ -1,8 +1,9 @@
-import { ChefHat, NutOff, Upload } from "lucide-react";
+import { ChefHat, NutOff, SquarePen, Upload } from "lucide-react";
 import { useRecipeStore } from "../../store/RecipeStore";
 import { useAuthStore } from "../../store/AuthStore";
 import { useState } from "react";
 
+// RecipeTitle component that displays the title and heading information of the recipe
 export default function RecipeTitle() {
   // Recipe and user stores
   const { recipe } = useRecipeStore();
@@ -23,16 +24,16 @@ export default function RecipeTitle() {
     ),
   );
 
-  console.log("Author slug: ", recipe.author.slug);
-
   // Recipe title component that displays the title and heading information of the recipe
   return (
     <div className="text-ink-black-500 sm:col-start-2 px-4 py-2 flex flex-col place-items-center">
+      {/* Recipe title */}
       <div className="flex justify-between w-full">
         <div className="grow w-full font-title focus:outline-none autofill-light text-2xl md:text-3xl lg:text-4xl">
           {recipe.title}
         </div>
       </div>
+      {/* Recipe source */}
       {recipe.source && (
         <div className="flex justify-between w-full">
           <div className="flex">
@@ -56,6 +57,7 @@ export default function RecipeTitle() {
             )}
             {recipe.source?.note && `: ${recipe.source.note}`}
           </div>
+          {/* Allergen, edit, and publish buttons */}
           {user &&
             user.allergies.some((allergen) => allIngredients.has(allergen)) && (
               <div className="relative inline-block group">
@@ -66,6 +68,16 @@ export default function RecipeTitle() {
                 </div>
               </div>
             )}
+          {user && user._id === recipe.author._id && (
+            <button className="relative inline-block group">
+              <SquarePen className="size-4 lg:size-6 text-rosewood-500 hover:text-rosewood-300 hover:cursor-pointer" />
+              <div className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                Edit this recipe
+                <div className="absolute top-full left-1/2 -mt-1 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900"></div>
+              </div>
+            </button>
+          )}
+          {/* TODO: Add publish route for button */}
           {user && user._id === recipe.author._id && !recipe.isPublished && (
             <button className="relative inline-block group">
               <Upload className="size-4 lg:size-6 text-rosewood-500 hover:text-rosewood-300 hover:cursor-pointer" />
@@ -77,6 +89,7 @@ export default function RecipeTitle() {
           )}
         </div>
       )}
+      {/* Rating */}
       <div className="flex justify-between w-full">
         <div className="flex" onMouseLeave={() => setHoverRating(null)}>
           {Array.from({ length: 5 }, (_, i) => {
@@ -108,14 +121,19 @@ export default function RecipeTitle() {
             {recipe.aggregateRating} ({recipe.ratingCount})
           </div>
         </div>
+        {/* Author */}
         <div className="flex gap-1">
           Shared by
-          <a
-            href={`/other-profile/${recipe.author.slug}`}
-            className="text-sage-olive-500 underline hover:text-sage-olive-300 hover:cursor-pointer"
-          >
-            {recipe.author.displayName}
-          </a>
+          {recipe.author.displayName === "Deleted User" ? (
+            <div>{recipe.author.displayName}</div>
+          ) : (
+            <a
+              href={`/other-profile/${recipe.author.slug}`}
+              className="text-sage-olive-500 underline hover:text-sage-olive-300 hover:cursor-pointer"
+            >
+              {recipe.author.displayName}
+            </a>
+          )}
         </div>
       </div>
     </div>

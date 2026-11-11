@@ -752,6 +752,7 @@ describe("POST /api/v1/recipes", () => {
       imageURL:
         "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
       publicId: "new-image",
+      isApproved: true,
     });
 
     const response = await loginAgent1
@@ -780,7 +781,8 @@ describe("POST /api/v1/recipes", () => {
     expect(recipeWithImage.image.imageURL).toBe(
       "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
     );
-    expect(recipeWithImage.image.publicId).toBe("new-image");
+    expect(recipeWithImage.image.publicId).toBeUndefined();
+    expect(recipeWithImage.image.isApproved).toBe(true);
   });
 
   it("should upload a recipe properly when a image is null", async () => {
@@ -2714,7 +2716,8 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     expect(recipeWithImage.image.imageURL).toBe(
       "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
     );
-    expect(recipeWithImage.image.publicId).toBe("new-image");
+    expect(recipeWithImage.image.publicId).toBeUndefined();
+    expect(recipeWithImage.image.isApproved).toBe(true);
   });
 
   it("should update the recipe's image, upload it to cloudinary and not delete the old image if there was not one", async () => {
@@ -2788,7 +2791,8 @@ describe("PUT /api/v1/recipes/:recipeSlug", () => {
     expect(recipeWithImage.image.imageURL).toBe(
       "https://res.cloudinary.com/test/image/upload/v1234567891/new-image.jpg",
     );
-    expect(recipeWithImage.image.publicId).toBe("new-image");
+    expect(recipeWithImage.image.publicId).toBeUndefined();
+    expect(recipeWithImage.image.isApproved).toBe(true);
   });
 
   it("should delete the recipe's old image and not upload a new one if the image is set to null", async () => {

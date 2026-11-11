@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useRecipeStore } from "../../store/RecipeStore";
 import RecipeTitle from "./RecipeTitle";
 import { useEffect, useState } from "react";
@@ -7,10 +7,10 @@ import RecipeDescription from "./RecipeDescription";
 
 export default function RecipeViewContainer() {
   // Allow navigation
-  //   const navigate = useNavigate();
+  const navigate = useNavigate();
 
   // Access the get recipe function from the recipe store
-  const { recipe, getRecipe, isLoading } = useRecipeStore();
+  const { getRecipe, isLoading, getRecipeError } = useRecipeStore();
   const { recipeSlug } = useParams();
 
   useEffect(() => {
@@ -34,13 +34,16 @@ export default function RecipeViewContainer() {
 
   if (isLoading) return <div>Loading...</div>;
 
-  console.log(recipe);
+  // If there is an error, navigate to the 404 page
+  if (getRecipeError) {
+    navigate("*");
+  }
 
   return (
     <div className="flex flex-col">
       <div className="md:grid md:grid-cols-[1fr_4fr]">
         <RecipeTitle />
-        {width > 768 ? (
+        {width <= 768 ? (
           <>
             <RecipeImage /> <RecipeDescription />
           </>

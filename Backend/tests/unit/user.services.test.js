@@ -1947,10 +1947,8 @@ describe("getOtherUserRecipesByUsername", () => {
       "image.imageURL",
       "https://res.cloudinary.com/test/image/upload/v1234567890/test-image.jpg",
     );
-    expect(recipes.recipeList[0]).toHaveProperty(
-      "image.publicId",
-      "test-image",
-    );
+    expect(recipes.recipeList[0]).not.toHaveProperty("image.publicId");
+    expect(recipes.recipeList[0]).toHaveProperty("image.isApproved", true);
     expect(recipes.recipeList[0]).toHaveProperty(
       "preptimeSeconds",
       publicRecipe.preptimeSeconds,

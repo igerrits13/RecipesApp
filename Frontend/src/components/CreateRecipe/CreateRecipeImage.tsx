@@ -3,6 +3,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import type { CreateRecipeData } from "../../types/Recipe";
 import ValidationError from "../ValidationError";
 
+// CreateRecipeImage component takes in and stores the image information for a new recipe
 export default function CreateRecipeImage() {
   const {
     register,

@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import Recipe from "../models/recipe.model.js";
 
 // Build recipe filters based on query parameters
@@ -53,7 +52,7 @@ export function populateRecipePreview(recipes) {
     image: recipe.image?.isApproved
       ? {
           imageURL: recipe.image?.imageURL || null,
-          publicId: recipe.image?.publicId || null,
+          isApproved: true,
         }
       : null,
     preptimeSeconds: recipe.preptimeSeconds,
@@ -140,7 +139,7 @@ export async function populateRecipe(recipeId) {
     linked.recipeId.image = linked.recipeId.image?.isApproved
       ? {
           imageURL: linked.recipeId.image.imageURL,
-          publicId: linked.recipeId.image.publicId,
+          isApproved: true,
         }
       : null;
 
@@ -155,7 +154,7 @@ export async function populateRecipe(recipeId) {
     image: recipe.image?.isApproved
       ? {
           imageURL: recipe.image.imageURL,
-          publicId: recipe.image.publicId,
+          isApproved: true,
         }
       : null,
   };

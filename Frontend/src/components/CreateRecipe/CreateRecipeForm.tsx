@@ -145,8 +145,8 @@ export default function CreateRecipeForm() {
 
       formData.append("isPublished", data.isPublished.toString());
 
-      const response = await createRecipe(formData);
-      console.log(response);
+      await createRecipe(formData);
+
       navigate("/");
     } catch {
       // Error is handled in the recipe store and displayed to the user
