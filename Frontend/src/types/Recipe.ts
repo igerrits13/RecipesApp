@@ -69,12 +69,15 @@ export interface CreateRecipeData {
 export interface IngredientSection {
   _id: string;
   sectionTitle: string;
-  ingredients: {
-    quantity?: string | null;
-    measurement?: Measurement | null;
-    ingredient: Ingredient;
-    additionalInfo?: string | null;
-  }[];
+  ingredients: RecipeIngredient[];
+}
+
+// Interface for recipe ingredient
+export interface RecipeIngredient {
+  quantity: string | null;
+  measurement: Measurement | null;
+  ingredient: Ingredient;
+  additionalInfo: string | null;
 }
 
 // Interface for the recipe source
@@ -93,12 +96,15 @@ export interface Image {
 // Interface for creating an ingredient section
 export interface CreateIngredientSectionData {
   sectionTitle: string;
-  ingredients: {
-    quantity?: string | null;
-    measurement?: string | null;
-    ingredient: string;
-    additionalInfo?: string | null;
-  }[];
+  ingredients: [];
+}
+
+// Interface for creating a recipe ingredient
+export interface CreateRecipeIngredientData {
+  quantity?: string | null;
+  measurement?: string | null;
+  ingredient: string;
+  additionalInfo?: string | null;
 }
 
 // Interface for step section
