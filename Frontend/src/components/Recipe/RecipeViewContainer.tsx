@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import RecipeImage from "./RecipeImage";
 import RecipeDescription from "./RecipeDescription";
 import RecipeIngredients from "./RecipeIngredients";
+import RecipeSteps from "./RecipeSteps";
 
 export default function RecipeViewContainer() {
   // Allow navigation
@@ -54,6 +55,7 @@ export default function RecipeViewContainer() {
           </>
         )}
         <RecipeIngredients />
+        <RecipeSteps />
       </div>
     </div>
   );

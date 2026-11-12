@@ -14,7 +14,7 @@ export default function RecipeIngredientSection({
   return (
     <>
       <div className="flex flex-col px-4 pt-4">
-        <div className="flex justify-between font-bold">
+        <div className="font-bold">
           <div>{sectionTitle} Ingredients:</div>
         </div>
         {ingredients.map((field, ingredientIndex) => (
