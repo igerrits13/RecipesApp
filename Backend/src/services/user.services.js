@@ -121,11 +121,17 @@ export async function getCurrentUserComments(user, page, limit, offset) {
 }
 
 // Get all personal notes made by the user and return them
-export async function getCurrentUserNotes(user, page, limit, offset) {
+export async function getCurrentUserNotes(userId, page, limit, offset) {
   // Get the total number of notes made by the user for pagination
-  const totalNotes = await Note.countDocuments({ authorId: user._id });
+  const totalNotes = await Note.countDocuments({ authorId: userId });
 
-  const notes = await Note.find({ authorId: user._id })
+  const notes = await Note.find({ authorId: userId })
+    .populate({
+      path: "recipeId",
+      select: "title author",
+      populate: { path: "author", select: "displayName profileImage" },
+    })
+    .sort({ createdAt: -1 })
     .skip(offset)
     .limit(limit)
     .lean();
@@ -133,7 +139,7 @@ export async function getCurrentUserNotes(user, page, limit, offset) {
   return {
     notes,
     currentPage: page,
-    totalNotes: totalNotes,
+    totalNotes,
     totalPages: Math.ceil(totalNotes / limit),
   };
 }
@@ -605,7 +611,13 @@ export async function getOtherUserRecipesByUsername(username, queryParams) {
   };
 
   // Fetch the recipes using the built query and pagination info
-  const result = await fetchRecipes({ query, page, limit, offset });
+  const result = await fetchRecipes({
+    userId: req.user?._id,
+    query,
+    page,
+    limit,
+    offset,
+  });
 
   return result;
 }

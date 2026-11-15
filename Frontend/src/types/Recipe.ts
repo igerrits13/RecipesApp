@@ -39,6 +39,8 @@ export interface Recipe {
   deletedAt: Date;
   isPublished: boolean;
   isApproved: boolean;
+  userRating?: UserRating;
+  userNote?: UserNote;
 }
 
 // Interface for creating a recipe
@@ -135,6 +137,18 @@ export interface LinkedRecipe {
   isDeleted: boolean;
   isPublished: boolean;
   isApproved: boolean;
+}
+
+// Interface for a user rating
+export interface UserRating {
+  _id: string;
+  rating: number;
+}
+
+// Interface for a user note
+export interface UserNote {
+  _id: string;
+  content: string;
 }
 
 // Interface for a recipe author

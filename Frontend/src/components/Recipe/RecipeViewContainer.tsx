@@ -6,6 +6,8 @@ import RecipeImage from "./RecipeImage";
 import RecipeDescription from "./RecipeDescription";
 import RecipeIngredients from "./RecipeIngredients";
 import RecipeSteps from "./RecipeSteps";
+import RecipeChefNotes from "./RecipeChefNotes";
+import { useAuthStore } from "../../store/AuthStore";
 
 export default function RecipeViewContainer() {
   // Allow navigation
@@ -56,6 +58,10 @@ export default function RecipeViewContainer() {
         )}
         <RecipeIngredients />
         <RecipeSteps />
+      </div>
+      <div className="flex flex-col pt-8 gap-8">
+        <RecipeChefNotes />
+        {/* <CreateRecipeLinkedRecipes /> */}
       </div>
     </div>
   );

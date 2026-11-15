@@ -11,10 +11,8 @@ import {
   testUserData,
   createTestUser,
   getAuthenticatedAgent,
-  customRecipe,
   createTestRecipe,
   createTestIngredient,
-  customNote,
   createTestNote,
 } from "../../src/utils/testFunctions.js";
 
@@ -48,45 +46,6 @@ beforeEach(async () => {
         ingredients: [{ ingredient: testIngredient._id }],
       },
     ],
-  });
-});
-
-// Test cases: getUserNotes //
-describe("GET /api/notes", () => {
-  it("should fetch all notes for the authenticated user with no notes", async () => {
-    const res = await loginAgent1.get("/api/v1/notes");
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.notes.notes).toBeInstanceOf(Array);
-    expect(res.body.notes.totalNotes).toBe(0);
-  });
-
-  it("should fetch all notes for the authenticated user with multiple notes", async () => {
-    for (let i = 1; i <= 15; i++) {
-      const newRecipe = await createTestRecipe(
-        testUser1._id,
-        customRecipe(i, testIngredient),
-      );
-      await createTestNote(testUser1._id, newRecipe._id, customNote(i));
-    }
-
-    const res = await loginAgent1.get("/api/v1/notes");
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.notes.notes).toBeInstanceOf(Array);
-    expect(res.body.notes.totalNotes).toBe(15);
-  });
-
-  it("should not fetch notes for an unauthenticated user", async () => {
-    const res = await request(app).get("/api/v1/notes");
-
-    expect(res.statusCode).toEqual(401);
-    expect(res.body.success).toBe(false);
-    expect(res.body.message).toBe(
-      "No authentication token found, access denied",
-    );
   });
 });
 

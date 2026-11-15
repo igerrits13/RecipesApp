@@ -45,12 +45,14 @@ export async function getUserProfile(req, res) {
 
   // Fetch the recipes using the built query and pagination info
   const recipes = await fetchRecipes({
+    userId: req.user?._id,
     query: usersQuery,
     page,
     limit,
     offset,
   });
   const favoriteRecipes = await fetchRecipes({
+    userId: req.user?._id,
     query: favoritesQuery,
     page,
     limit,
@@ -129,10 +131,10 @@ export async function getUserComments(req, res) {
 // Create a route for getting the current user's personal notes with pagination
 export async function getUserNotes(req, res) {
   try {
-    const user = req.user;
+    const userId = req.user._id;
     const { page, limit, offset } = getPagination(req.query);
 
-    const notes = await getCurrentUserNotes(user, page, limit, offset);
+    const notes = await getCurrentUserNotes(userId, page, limit, offset);
 
     res.status(200).json({
       notes,
@@ -274,7 +276,13 @@ export async function getUserRecipes(req, res) {
     };
 
     // Fetch the recipes using the built query and pagination info
-    const result = await fetchRecipes({ query, page, limit, offset });
+    const result = await fetchRecipes({
+      userId: req.user?._id,
+      query,
+      page,
+      limit,
+      offset,
+    });
 
     res.status(200).json({
       ...result,
@@ -306,7 +314,13 @@ export async function getUserFavoriteRecipes(req, res) {
     };
 
     // Fetch the recipes using the built query and pagination info
-    const result = await fetchRecipes({ query, page, limit, offset });
+    const result = await fetchRecipes({
+      userId: req.user?._id,
+      query,
+      page,
+      limit,
+      offset,
+    });
 
     res.status(200).json({
       ...result,

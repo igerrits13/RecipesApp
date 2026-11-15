@@ -42,7 +42,13 @@ export async function getAllRecipes(req, res) {
     if (req.query.author) query.author = req.query.author;
 
     // Fetch the recipes using the built query and pagination info
-    const result = await fetchRecipes({ query, page, limit, offset });
+    const result = await fetchRecipes({
+      userId: req.user?._id,
+      query,
+      page,
+      limit,
+      offset,
+    });
 
     // Send the recipes and page information in a response
     res.status(200).json({
@@ -70,7 +76,7 @@ export async function createRecipe(req, res) {
       author: req.user._id,
     });
 
-    const returnRecipe = await populateRecipe(recipe._id);
+    const returnRecipe = await populateRecipe(recipe._id, req.user._id);
 
     // Send the recipe information
     res.status(201).json({
@@ -98,7 +104,7 @@ export async function createRecipe(req, res) {
 
 // Create a route for getting a specified recipe
 export async function getRecipe(req, res) {
-  const recipe = await populateRecipe(req.recipe._id);
+  const recipe = await populateRecipe(req.recipe._id, req.user?._id);
 
   try {
     res.status(200).json({
@@ -127,7 +133,7 @@ export async function updateRecipe(req, res) {
       userId: req.user._id,
     });
 
-    const returnRecipe = await populateRecipe(recipe._id);
+    const returnRecipe = await populateRecipe(recipe._id, req.user._id);
 
     res.status(200).json({
       recipe: returnRecipe,
@@ -160,7 +166,7 @@ export async function publishRecipe(req, res) {
       req.user._id,
     );
 
-    const returnRecipe = await populateRecipe(recipe);
+    const returnRecipe = await populateRecipe(recipe, req.user._id);
 
     res.status(200).json({
       recipe: returnRecipe,
@@ -198,7 +204,7 @@ export async function restoreRecipe(req, res) {
 
     const recipe = await restoreDeletedRecipe(recipeSlug, req.user._id);
 
-    const returnRecipe = await populateRecipe(recipe._id);
+    const returnRecipe = await populateRecipe(recipe._id, req.user._id);
 
     res.status(200).json({
       recipe: returnRecipe,
@@ -220,7 +226,7 @@ export async function rateRecipe(req, res) {
 
     const recipe = await rateSpecificRecipe(req.recipe, req.user._id, rating);
 
-    const returnRecipe = await populateRecipe(recipe._id);
+    const returnRecipe = await populateRecipe(recipe._id, req.user._id);
 
     res.status(200).json({
       recipe: returnRecipe,
@@ -243,7 +249,7 @@ export async function removeRatingFromRecipe(req, res) {
       req.user._id,
     );
 
-    const returnRecipe = await populateRecipe(recipe._id);
+    const returnRecipe = await populateRecipe(recipe._id, req.user._id);
 
     res.status(200).json({
       recipe: returnRecipe,

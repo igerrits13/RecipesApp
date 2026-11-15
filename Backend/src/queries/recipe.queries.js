@@ -1,4 +1,6 @@
 import Recipe from "../models/recipe.model.js";
+import Rating from "../models/rating.model.js";
+import Note from "../models/note.model.js";
 
 // Build recipe filters based on query parameters
 export function buildRecipeFilters(queryParams) {
@@ -15,7 +17,7 @@ export function buildRecipeFilters(queryParams) {
 }
 
 // Fetch basic information for recipe card views based on query and pagination
-export async function fetchRecipes({ query, page, limit, offset }) {
+export async function fetchRecipes({ userId, query, page, limit, offset }) {
   // Get the total number of recipes matching the query
   const totalRecipes = await Recipe.countDocuments(query);
 
@@ -32,6 +34,20 @@ export async function fetchRecipes({ query, page, limit, offset }) {
 
   // Map the recipes to the desired format
   const recipeList = populateRecipePreview(recipes);
+
+  // Add the current users rating if a user exists
+  if (userId) {
+    const userRatings = await Rating.find({
+      authorId: userId,
+      recipeId: { $in: recipeList.map((recipe) => recipe._id) },
+    }).lean();
+
+    recipeList.forEach((recipe) => {
+      recipe.userRating = userRatings.find(
+        (rating) => rating.recipeId.toString() === recipe._id.toString(),
+      );
+    });
+  }
 
   return {
     recipeList,
@@ -74,7 +90,7 @@ export function populateRecipePreview(recipes) {
 }
 
 // Helper function to populate all important fields of a recipe for full recipe views
-export async function populateRecipe(recipeId) {
+export async function populateRecipe(recipeId, userId) {
   const recipe = await Recipe.findById(recipeId)
     .populate("ingredientSections.ingredients.measurement", "title")
     .populate("ingredientSections.ingredients.ingredient", "title")
@@ -158,6 +174,21 @@ export async function populateRecipe(recipeId) {
         }
       : null,
   };
+
+  // Add the current user's rating and personal note if a user exists and has added either
+  if (userId) {
+    const userRating = await Rating.findOne({
+      authorId: userId,
+      recipeId: recipe._id,
+    }).lean();
+    if (userRating) returnRecipe.userRating = userRating;
+
+    const userNote = await Note.findOne({
+      authorId: userId,
+      recipeId: recipe._id,
+    }).lean();
+    if (userNote) returnRecipe.userNote = userNote;
+  }
 
   return returnRecipe;
 }

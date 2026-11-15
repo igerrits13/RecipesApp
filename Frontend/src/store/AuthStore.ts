@@ -3,8 +3,8 @@ import { create } from "zustand";
 import type { User } from "../types/User";
 import type { LoginCredentials, RegistrationCredentials } from "../types/Auth";
 
-// Types for user data
-interface UserState {
+// Types for Auth data
+interface AuthState {
   user: User | null;
   isRegistering: boolean;
   isLoggingIn: boolean;
@@ -14,8 +14,8 @@ interface UserState {
   logoutError: string | null;
 }
 
-// Types of user actions
-interface UserActions {
+// Types of Auth actions
+interface AuthActions {
   registerUser: (credentials: RegistrationCredentials) => Promise<void>;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
@@ -23,11 +23,11 @@ interface UserActions {
   clearAuthError: () => void;
 }
 
-// Combine user state and actions
-type UserStore = UserState & UserActions;
+// Combine Auth state and actions
+type AuthStore = AuthState & AuthActions;
 
 // Define the initial state
-const initialAuthState: UserState = {
+const initialAuthState: AuthState = {
   user: null,
   isRegistering: false,
   isLoggingIn: false,
@@ -38,7 +38,7 @@ const initialAuthState: UserState = {
 };
 
 // Create the user store
-export const useAuthStore = create<UserStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set) => ({
   // Initial state
   ...initialAuthState,
 

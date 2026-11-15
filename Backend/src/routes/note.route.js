@@ -1,7 +1,6 @@
 import express from "express";
 
 import {
-  getUserNotes,
   getNoteById,
   createNoteByRecipeId,
   updateNoteById,
@@ -11,9 +10,6 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 import { validateObjectId } from "../middleware/validation.middleware.js";
 
 const router = express.Router();
-
-// Create a route for getting all of the current user's notes
-router.get("/", protectRoute, getUserNotes);
 
 // Create a route for getting a specific note by its ID
 router.get("/:noteId", protectRoute, validateObjectId("noteId"), getNoteById);

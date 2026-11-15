@@ -3,7 +3,7 @@
 /* Define font faces */
 @font-face {
   font-family: "Merriweather";
-  src: url("./src/assets/fonts/merriweather/Merriweather-Regular.ttf")
+  src: url("./assets/fonts/merriweather/Merriweather-Regular.ttf")
     format("truetype");
   font-weight: normal;
   font-style: normal;
@@ -11,19 +11,19 @@
 
 @font-face {
   font-family: "Kalam";
-  src: url("./src/assets/fonts/kalam/Kalam-Light.ttf") format("truetype");
+  src: url("./assets/fonts/kalam/Kalam-Light.ttf") format("truetype");
   font-weight: 300;
 }
 
 @font-face {
   font-family: "Kalam";
-  src: url("./src/assets/fonts/kalam/Kalam-Regular.ttf") format("truetype");
+  src: url("./assets/fonts/kalam/Kalam-Regular.ttf") format("truetype");
   font-weight: 500;
 }
 
 @font-face {
   font-family: "Kalam";
-  src: url("./src/assets/fonts/kalam/Kalam-Bold.ttf") format("truetype");
+  src: url("./assets/fonts/kalam/Kalam-Bold.ttf") format("truetype");
   font-weight: 700;
 }
 

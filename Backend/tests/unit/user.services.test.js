@@ -517,6 +517,11 @@ describe("getCurrentUserNotes", () => {
     expect(notes.currentPage).toBe(1);
     expect(notes.totalNotes).toBe(12);
     expect(notes.totalPages).toBe(3);
+    expect(notes.notes[0].content).toBe(customNote(12).content);
+    expect(notes.notes[0].recipeId.title).toBe("Test Recipe for Note 12");
+    expect(notes.notes[0].recipeId.author.displayName.toString()).toBe(
+      testUser.displayName,
+    );
   });
 
   test("should only return notes for the specified user", async () => {

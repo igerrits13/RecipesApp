@@ -1,31 +1,9 @@
 import {
-  getAllUserNotes,
   getSpecificNoteById,
   validateAndAddNote,
   updateSpecificNoteById,
   deleteSpecificNoteById,
 } from "../services/note.services.js";
-import { getPagination } from "../utils/getPagination.js";
-
-// Create a route for getting all of the current user's notes
-export async function getUserNotes(req, res) {
-  try {
-    const userId = req.user._id;
-
-    // Get query information for notes to send
-    const { page, limit, offset } = getPagination(req.query);
-
-    const notes = await getAllUserNotes(userId, page, limit, offset);
-
-    res.status(200).json({
-      notes,
-      success: true,
-      message: "User notes fetched successfully",
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-}
 
 // Create a route for getting a specific note by its ID
 export async function getNoteById(req, res) {

@@ -1,35 +1,5 @@
 import Note from "../models/note.model.js";
 import Recipe from "../models/recipe.model.js";
-import Tag from "../models/tag.model.js";
-import Holiday from "../models/holiday.model.js";
-import Season from "../models/season.model.js";
-import Ingredient from "../models/ingredient.model.js";
-import Measurement from "../models/measurement.model.js";
-
-// Get all notes for a user with pagination
-export async function getAllUserNotes(userId, page, limit, offset) {
-  // Get the total number of notes for the user
-  const totalNotes = await Note.countDocuments({ authorId: userId });
-
-  // Create the array of notes with the given query guidelines, most recent first
-  const notes = await Note.find({ authorId: userId })
-    .populate({
-      path: "recipeId",
-      select: "title author",
-      populate: { path: "author", select: "displayName profileImage" },
-    })
-    .sort({ createdAt: -1 })
-    .skip(offset)
-    .limit(limit)
-    .lean();
-
-  return {
-    notes,
-    currentPage: page,
-    totalNotes,
-    totalPages: Math.ceil(totalNotes / limit),
-  };
-}
 
 // Get a specific note by its ID, ensuring it belongs to the current user
 export async function getSpecificNoteById(noteId, userId) {

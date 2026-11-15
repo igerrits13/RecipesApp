@@ -60,6 +60,7 @@ const {
   createTestRating,
   createTestCommentVote,
   createTestBannedWord,
+  createTestNote,
 } = await import("../../src/utils/testFunctions.js");
 import Meal from "../../src/models/meal.model.js";
 import Cuisine from "../../src/models/cuisine.model.js";
@@ -211,6 +212,47 @@ describe("GET /api/v1/recipes", () => {
     expect(response.body.totalRecipes).toBe(15);
     expect(response.body.totalPages).toBe(2);
     expect(response.body.currentPage).toBe(1);
+  });
+
+  it("should return recipes with the currently authenticated user's rating if it has been rated", async () => {
+    const testRecipe = await createTestRecipe(otherUser._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    });
+
+    const testRecipe2 = await createTestRecipe(otherUser._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    });
+
+    await createTestRating(testRecipe._id, testUser1._id, {
+      rating: 4,
+    });
+
+    const response = await loginAgent1.get("/api/v1/recipes");
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.recipeList).toBeDefined();
+    expect(response.body.recipeList.length).toBe(2);
+    expect(response.body.recipeList[0].userRating).toBeUndefined();
+    expect(response.body.recipeList[1].userRating).toBeDefined();
+    expect(response.body.recipeList[1].userRating.rating).toBe(4);
+    expect(response.body.recipeList[1].userRating.authorId).toBe(
+      testUser1._id.toString(),
+    );
   });
 
   it("should not return an image of a recipe where the image has not been approved", async () => {
@@ -1519,6 +1561,37 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
     );
   });
 
+  it("should return the current user's rating and personal note if the user has them", async () => {
+    const testRecipe = await createTestRecipe(otherUser._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    });
+
+    await createTestRating(testRecipe._id, testUser1._id, {
+      rating: 4,
+    });
+
+    await createTestNote(testUser1._id, testRecipe._id, {
+      content: "Test note",
+    });
+
+    const response = await loginAgent1.get(
+      `/api/v1/recipes/${testRecipe.slug}`,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.recipe).toBeDefined();
+    expect(response.body.recipe.userRating.rating).toBe(4);
+    expect(response.body.recipe.userNote.content).toBe("Test note");
+  });
+
   it("should not return an image of a recipe where the image has not been approved", async () => {
     mockUploadPhoto.mockResolvedValueOnce({
       imageURL:
@@ -2444,6 +2517,27 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
     expect(
       response.body.recipe.linkedRecipes[0].recipeId.author.isBanned,
     ).toBeUndefined();
+  });
+
+  it("should allow unauthenticated users to get a recipe", async () => {
+    const testRecipe = await createTestRecipe(testUser1._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    });
+
+    const response = await request(app).get(
+      `/api/v1/recipes/${testRecipe.slug}`,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.recipe).toBeDefined();
   });
 });
 

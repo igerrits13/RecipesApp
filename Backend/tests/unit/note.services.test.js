@@ -17,7 +17,6 @@ import {
 } from "../../src/utils/testFunctions.js";
 
 import {
-  getAllUserNotes,
   getSpecificNoteById,
   validateAndAddNote,
   updateSpecificNoteById,
@@ -58,56 +57,6 @@ beforeEach(async () => {
         ingredients: [{ ingredient: testIngredient._id }],
       },
     ],
-  });
-});
-
-// Test cases: getAllUserNotes //
-describe("getAllUserNotes", () => {
-  test("get user notes when none exist", async () => {
-    const result = await getAllUserNotes(testUser._id, 1, 10, 0);
-
-    expect(result.notes).toEqual([]);
-    expect(result.currentPage).toBe(1);
-    expect(result.totalNotes).toBe(0);
-    expect(result.totalPages).toBe(0);
-  });
-
-  test("get all user notes when some exist", async () => {
-    for (let i = 1; i <= 15; i++) {
-      const newRecipe = await createTestRecipe(
-        testUser._id,
-        customRecipe(i, testIngredient),
-      );
-      await createTestNote(testUser._id, newRecipe._id, customNote(i));
-    }
-
-    const result = await getAllUserNotes(testUser._id, 1, 10, 0);
-
-    expect(result.notes.length).toBe(10);
-    expect(result.currentPage).toBe(1);
-    expect(result.totalNotes).toBe(15);
-    expect(result.totalPages).toBe(2);
-    expect(result.notes[0].content).toBe(customNote(15).content);
-    expect(result.notes[0].recipeId.title).toBe(
-      customRecipe(15, testIngredient).title,
-    );
-    expect(result.notes[0].recipeId.author.displayName.toString()).toBe(
-      testUser.displayName,
-    );
-    expect(result.notes[0].recipeId.author.profileImage.toString()).toBe(
-      testUser.profileImage,
-    );
-  });
-
-  test("get only the current user's notes when multiple users have notes", async () => {
-    await createTestNote(testUser._id, testRecipe._id, customNote(1));
-
-    await createTestNote(otherUser._id, testRecipe._id, customNote(2));
-
-    const result = await getAllUserNotes(testUser._id, 1, 10, 0);
-
-    expect(result.notes.length).toBe(1);
-    expect(result.notes[0].content).toBe(customNote(1).content);
   });
 });
 
