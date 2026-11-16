@@ -14,6 +14,7 @@ import NotFoundView from "./pages/NotFoundView";
 import { useAuthStore } from "./store/AuthStore";
 import { useEffect } from "react";
 import Loading from "./components/Loading";
+import UpdateRecipeView from "./pages/UpdateRecipeView";
 
 function App() {
   // Check if there is an authenticated user
@@ -34,6 +35,10 @@ function App() {
         <Route
           path="/create-recipe"
           element={!user ? <Navigate to="/login" /> : <CreateRecipeView />}
+        />
+        <Route
+          path="/recipe/:recipeSlug/update"
+          element={<UpdateRecipeView />}
         />
         <Route path="/user-profile" element={<UserProfileView />} />
         <Route path="/other-profile/:username" element={<OtherProfileView />} />

@@ -28,7 +28,7 @@ export async function mapRecipeData(recipeArray) {
     recipeArray.map(async (recipe) => {
       const recipeData = await Recipe.findById(recipe._id).populate(
         "author",
-        "username",
+        "displayName",
       );
       const currRecipe = {
         _id: recipeData._id,
@@ -39,7 +39,7 @@ export async function mapRecipeData(recipeArray) {
         cooktimeSeconds: recipeData.cooktimeSeconds,
         aggregateRating: recipeData.aggregateRating,
         ratingCount: recipeData.ratingCount,
-        author: recipeData.author.username,
+        author: recipeData.author?.displayName ?? "Deleted User",
       };
       return currRecipe;
     }),
@@ -612,7 +612,7 @@ export async function getOtherUserRecipesByUsername(username, queryParams) {
 
   // Fetch the recipes using the built query and pagination info
   const result = await fetchRecipes({
-    userId: req.user?._id,
+    userId: user._id,
     query,
     page,
     limit,

@@ -1,28 +1,84 @@
-import { ChefHat, NutOff, SquarePen, Upload } from "lucide-react";
+import { NutOff, SquarePen, Upload } from "lucide-react";
 import { useRecipeStore } from "../../store/RecipeStore";
 import { useAuthStore } from "../../store/AuthStore";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { useDebounce } from "use-debounce";
+import RecipeRating from "./RecipeRating";
 
 // RecipeTitle component that displays the title and heading information of the recipe
 export default function RecipeTitle() {
   // Recipe and user stores
-  const { recipe } = useRecipeStore();
+  const { recipe, rateRecipe, removeRatingFromRecipe } = useRecipeStore();
   const { user } = useAuthStore();
 
   // State to keep track of the current rating to be displayed
-  const [rating, setRating] = useState<number | null>(null);
+  const [rating, setRating] = useState<number | undefined>(undefined);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
+
+  // Use debounce for rating and personal note changes
+  const [debouncedRating] = useDebounce(rating, 800);
+
+  // Handle rating changes
+  useEffect(() => {
+    if (!recipe || debouncedRating === undefined) return;
+
+    // const previousRating = recipe.userRating?.rating ?? null;
+
+    // If the user has deleted their rating, remove it
+    if (debouncedRating === 0) {
+      // if (previousRating !== null) {
+      removeRatingFromRecipe(recipe.slug).catch(() => {});
+      // }
+      return;
+    }
+
+    // If the rating has changed, update it
+    else {
+      rateRecipe(recipe.slug, debouncedRating).catch(() => {});
+    }
+  }, [debouncedRating, recipe, rateRecipe, removeRatingFromRecipe]);
+
+  // Get all ingredients to check for allergies
+  const allIngredients = useMemo(() => {
+    return new Set(
+      recipe?.ingredientSections.flatMap(({ ingredients }) =>
+        ingredients.map(({ ingredient }) => ingredient._id),
+      ),
+    );
+  }, [recipe?.ingredientSections]);
 
   if (!recipe) return <div>Loading...</div>;
 
-  const displayRating = hoverRating ?? rating ?? recipe?.aggregateRating ?? 0;
+  // Calculate the ratings variables
+  const previousRating = recipe.userRating?.rating ?? null;
 
-  // Get all ingredients to check for allergies
-  const allIngredients = new Set(
-    recipe.ingredientSections.flatMap(({ ingredients }) =>
-      ingredients.map(({ ingredient }) => ingredient._id),
-    ),
-  );
+  // null = no interaction yet
+  // 0 = user explicitly removed their rating
+  // 1-5 = user's selected rating
+
+  const currentRating =
+    rating === undefined ? previousRating : rating === 0 ? null : rating;
+
+  const newTotalRating =
+    recipe.totalRating - (previousRating ?? 0) + (currentRating ?? 0);
+
+  const newRatingCount =
+    recipe.ratingCount +
+    (previousRating === null && currentRating !== null ? 1 : 0) -
+    (previousRating !== null && currentRating === null ? 1 : 0);
+
+  const newAggregateRating =
+    newRatingCount > 0 ? newTotalRating / newRatingCount : 0;
+
+  const displayRating = hoverRating ?? currentRating ?? newAggregateRating;
+
+  // Helper function to update user's rating
+  const handleUpdateRating = () => {
+    if (hoverRating === null) return;
+
+    setRating(hoverRating === currentRating ? 0 : hoverRating);
+  };
 
   // Recipe title component that displays the title and heading information of the recipe
   return (
@@ -43,6 +99,7 @@ export default function RecipeTitle() {
                 <a
                   href={recipe.source.url}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="text-sage-olive-500 underline hover:text-sage-olive-300 hover:cursor-pointer ps-1"
                 >
                   {recipe.source.name}
@@ -58,81 +115,67 @@ export default function RecipeTitle() {
             {recipe.source?.note && `: ${recipe.source.note}`}
           </div>
           {/* Allergen, edit, and publish buttons */}
-          {user &&
-            user.allergies.some((allergen) => allIngredients.has(allergen)) && (
-              <div className="relative inline-block group">
-                <NutOff className="size-4 lg:size-6 text-rosewood-500" />
+          <div className="flex gap-2">
+            {user &&
+              user.allergies.some((allergen) =>
+                allIngredients.has(allergen),
+              ) && (
+                <div className="relative inline-block group">
+                  <NutOff className="size-4 lg:size-6 text-rosewood-500" />
+                  <div className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                    Contains allergens
+                    <div className="absolute top-full left-1/2 -mt-1 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900"></div>
+                  </div>
+                </div>
+              )}
+            {user && user._id === recipe.author._id && (
+              <Link
+                to={`/recipe/${recipe.slug}/edit`}
+                className="relative inline-block group"
+              >
+                <SquarePen className="size-4 lg:size-6 text-rosewood-500 hover:text-rosewood-300 hover:cursor-pointer" />
                 <div className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                  Contains allergens
+                  Edit this recipe
                   <div className="absolute top-full left-1/2 -mt-1 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900"></div>
                 </div>
-              </div>
+              </Link>
             )}
-          {user && user._id === recipe.author._id && (
-            <button className="relative inline-block group">
-              <SquarePen className="size-4 lg:size-6 text-rosewood-500 hover:text-rosewood-300 hover:cursor-pointer" />
-              <div className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                Edit this recipe
-                <div className="absolute top-full left-1/2 -mt-1 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900"></div>
-              </div>
-            </button>
-          )}
-          {/* TODO: Add publish route for button */}
-          {user && user._id === recipe.author._id && !recipe.isPublished && (
-            <button className="relative inline-block group">
-              <Upload className="size-4 lg:size-6 text-rosewood-500 hover:text-rosewood-300 hover:cursor-pointer" />
-              <div className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                Share this recipe
-                <div className="absolute top-full left-1/2 -mt-1 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900"></div>
-              </div>
-            </button>
-          )}
-        </div>
-      )}
-      {/* Rating */}
-      <div className="flex justify-between w-full">
-        <div className="flex" onMouseLeave={() => setHoverRating(null)}>
-          {Array.from({ length: 5 }, (_, i) => {
-            const fillAmount = Math.min(Math.max(displayRating - i, 0), 1);
-
-            return (
-              <div
-                key={i}
-                className="relative cursor-pointer"
-                onMouseMove={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const isLeftHalf = e.clientX - rect.left < rect.width / 2;
-                  setHoverRating(i + (isLeftHalf ? 0.5 : 1));
-                }}
-                onClick={() => setRating(hoverRating ?? rating)}
-              >
-                <ChefHat className="size-4 lg:size-6 text-rosewood-300" />
-                <div
-                  className="absolute inset-0 overflow-hidden pointer-events-none"
-                  style={{ width: `${fillAmount * 100}%` }}
-                >
-                  <ChefHat className="size-4 lg:size-6 text-rosewood-500 fill-rosewood-500 max-w-none" />
+            {user && user._id === recipe.author._id && !recipe.isPublished && (
+              <button className="relative inline-block group">
+                <Upload className="size-4 lg:size-6 text-rosewood-500 hover:text-rosewood-300 hover:cursor-pointer" />
+                <div className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  Share this recipe
+                  <div className="absolute top-full left-1/2 -mt-1 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900"></div>
                 </div>
-              </div>
-            );
-          })}
-          {/* TODO: Add a way to get the current users ratings and allow for rating other's recipes */}
-          <div className="ps-1">
-            {recipe.aggregateRating} ({recipe.ratingCount})
+              </button>
+            )}
           </div>
         </div>
+      )}
+      {/* Rating, users cannot rate their own recipes */}
+      <div className="flex justify-between w-full">
+        <RecipeRating
+          displayRating={displayRating}
+          hoverRating={hoverRating}
+          rating={rating}
+          interactive={user && user._id !== recipe.author._id}
+          setHoverRating={setHoverRating}
+          handleUpdateRating={handleUpdateRating}
+          newAggregateRating={newAggregateRating}
+          newRatingCount={newRatingCount}
+        />
         {/* Author */}
         <div className="flex gap-1">
           Shared by
           {recipe.author.displayName === "Deleted User" ? (
             <div>{recipe.author.displayName}</div>
           ) : (
-            <a
-              href={`/other-profile/${recipe.author.slug}`}
+            <Link
+              to={`/other-profile/${recipe.author.slug}`}
               className="text-sage-olive-500 underline hover:text-sage-olive-300 hover:cursor-pointer"
             >
               {recipe.author.displayName}
-            </a>
+            </Link>
           )}
         </div>
       </div>

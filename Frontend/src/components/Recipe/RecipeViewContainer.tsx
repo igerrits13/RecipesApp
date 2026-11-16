@@ -7,7 +7,6 @@ import RecipeDescription from "./RecipeDescription";
 import RecipeIngredients from "./RecipeIngredients";
 import RecipeSteps from "./RecipeSteps";
 import RecipeChefNotes from "./RecipeChefNotes";
-import { useAuthStore } from "../../store/AuthStore";
 
 export default function RecipeViewContainer() {
   // Allow navigation

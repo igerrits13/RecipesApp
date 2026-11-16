@@ -224,12 +224,9 @@ export async function rateRecipe(req, res) {
   try {
     const rating = req.body.rating;
 
-    const recipe = await rateSpecificRecipe(req.recipe, req.user._id, rating);
-
-    const returnRecipe = await populateRecipe(recipe._id, req.user._id);
+    await rateSpecificRecipe(req.recipe, req.user._id, rating);
 
     res.status(200).json({
-      recipe: returnRecipe,
       success: true,
       message: "Recipe rated successfully",
     });

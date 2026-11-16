@@ -1345,7 +1345,7 @@ export async function rateSpecificRecipe(recipe, userId, rating) {
     await recipe.save();
   }
 
-  return recipe;
+  return;
 }
 
 // Remove a user's rating from the recipe and adjust the recipe's ratings accordingly
