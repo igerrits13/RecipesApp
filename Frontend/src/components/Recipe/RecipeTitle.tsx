@@ -16,7 +16,7 @@ export default function RecipeTitle() {
   const [rating, setRating] = useState<number | undefined>(undefined);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
 
-  // Use debounce for rating and personal note changes
+  // Use debounce for rating
   const [debouncedRating] = useDebounce(rating, 800);
 
   // Handle rating changes
@@ -27,9 +27,7 @@ export default function RecipeTitle() {
 
     // If the user has deleted their rating, remove it
     if (debouncedRating === 0) {
-      // if (previousRating !== null) {
       removeRatingFromRecipe(recipe.slug).catch(() => {});
-      // }
       return;
     }
 

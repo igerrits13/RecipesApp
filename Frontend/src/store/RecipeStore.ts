@@ -5,20 +5,25 @@ import type { Recipe } from "../types/Recipe";
 // Types for creating recipes
 interface RecipeState {
   recipe: Recipe | null;
-  isSaving: boolean;
-  isLoading: boolean;
-  isRatingLoading: boolean;
+  isSavingRecipe: boolean;
+  isLoadingRecipe: boolean;
+  isLoadingRating: boolean;
+  isLoadingNote: boolean;
   getRecipeError: string | null;
   createRecipeError: string | null;
   rateRecipeError: string | null;
+  noteError: string | null;
 }
 
 // Types of recipe actions
 interface RecipeActions {
   getRecipe: (recipeSlug: string) => Promise<void>;
   createRecipe: (formData: FormData) => Promise<void>;
-  rateRecipe: (recipeSlug: string | undefined, rating: number) => Promise<void>;
-  removeRatingFromRecipe: (recipeSlug: string | undefined) => Promise<void>;
+  rateRecipe: (recipeSlug: string, rating: number) => Promise<void>;
+  removeRatingFromRecipe: (recipeSlug: string) => Promise<void>;
+  createNote: (recipeId: string, content: string) => Promise<void>;
+  updateNote: (content: string, noteId?: string) => Promise<void>;
+  deleteNote: (noteId?: string) => Promise<void>;
   clearCreateRecipeError: () => void;
   clearRateRecipeError: () => void;
 }
@@ -29,12 +34,14 @@ type RecipeStore = RecipeState & RecipeActions;
 // Define the initial state
 const initialRecipeState: RecipeState = {
   recipe: null,
-  isSaving: false,
-  isLoading: false,
-  isRatingLoading: false,
+  isSavingRecipe: false,
+  isLoadingRecipe: false,
+  isLoadingRating: false,
+  isLoadingNote: false,
   getRecipeError: null,
   createRecipeError: null,
   rateRecipeError: null,
+  noteError: null,
 };
 
 // Create the recipe store
@@ -44,12 +51,12 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
 
   // Get an existing recipe
   getRecipe: async (recipeSlug) => {
-    set({ getRecipeError: null, isLoading: true, recipe: null });
+    set({ getRecipeError: null, isLoadingRecipe: true, recipe: null });
     try {
       const response = await axios.get(`/api/v1/recipes/${recipeSlug}`);
       set({
         recipe: response.data.recipe,
-        isLoading: false,
+        isLoadingRecipe: false,
         getRecipeError: null,
       });
     } catch (error) {
@@ -57,13 +64,13 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
         set({
           getRecipeError:
             error.response?.data?.message || "Failed to get recipe",
-          isLoading: false,
+          isLoadingRecipe: false,
           recipe: null,
         });
       } else {
         set({
           getRecipeError: "Unable to get recipe. Please try again",
-          isLoading: false,
+          isLoadingRecipe: false,
           recipe: null,
         });
       }
@@ -73,26 +80,26 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
 
   // Create a new recipe
   createRecipe: async (formData) => {
-    set({ createRecipeError: null, isSaving: true, recipe: null });
+    set({ createRecipeError: null, isSavingRecipe: true, recipe: null });
     try {
       const response = await axios.post("/api/v1/recipes", formData);
       set({
         recipe: response.data.recipe,
         createRecipeError: null,
-        isSaving: false,
+        isSavingRecipe: false,
       });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         set({
           createRecipeError:
             error.response?.data?.message || "Failed to create recipe",
-          isSaving: false,
+          isSavingRecipe: false,
           recipe: null,
         });
       } else {
         set({
           createRecipeError: "Unable to create recipe. Please try again",
-          isSaving: false,
+          isSavingRecipe: false,
           recipe: null,
         });
       }
@@ -102,24 +109,24 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
 
   // Rate a recipe
   rateRecipe: async (recipeSlug, rating) => {
-    set({ rateRecipeError: null, isRatingLoading: true });
+    set({ rateRecipeError: null, isLoadingRating: true });
     try {
       await axios.post(`/api/v1/recipes/${recipeSlug}/rating`, { rating });
       set({
         rateRecipeError: null,
-        isRatingLoading: false,
+        isLoadingRating: false,
       });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         set({
           rateRecipeError:
             error.response?.data?.message || "Failed to rate recipe",
-          isRatingLoading: false,
+          isLoadingRating: false,
         });
       } else {
         set({
           rateRecipeError: "Unable to rate recipe. Please try again",
-          isRatingLoading: false,
+          isLoadingRating: false,
         });
       }
       throw error;
@@ -128,24 +135,108 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
 
   // Remove a rating from a recipe
   removeRatingFromRecipe: async (recipeSlug) => {
-    set({ rateRecipeError: null, isRatingLoading: true });
+    set({ rateRecipeError: null, isLoadingRating: true });
     try {
       await axios.delete(`/api/v1/recipes/${recipeSlug}/rating`);
       set({
         rateRecipeError: null,
-        isRatingLoading: false,
+        isLoadingRating: false,
       });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         set({
           rateRecipeError:
             error.response?.data?.message || "Failed to remove rating",
-          isRatingLoading: false,
+          isLoadingRating: false,
         });
       } else {
         set({
           rateRecipeError: "Unable to remove rating. Please try again",
-          isRatingLoading: false,
+          isLoadingRating: false,
+        });
+      }
+      throw error;
+    }
+  },
+
+  // Create a new user note for a recipe
+  createNote: async (recipeId, content) => {
+    set({ noteError: null, isLoadingNote: true });
+    try {
+      const response = await axios.post(`/api/v1/notes/recipe/${recipeId}`, {
+        content,
+      });
+      set((state) => ({
+        recipe: state.recipe
+          ? { ...state.recipe, userNote: response.data.note }
+          : null,
+        noteError: null,
+        isLoadingNote: false,
+      }));
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          noteError: error.response?.data?.message || "Failed to create note",
+          isLoadingNote: false,
+        });
+      } else {
+        set({
+          noteError: "Unable to create note. Please try again",
+          isLoadingNote: false,
+        });
+      }
+      throw error;
+    }
+  },
+
+  // Update an existing note
+  updateNote: async (content, noteId) => {
+    set({ noteError: null, isLoadingNote: true });
+    try {
+      const response = await axios.put(`/api/v1/notes/${noteId}`, { content });
+      set((state) => ({
+        recipe: state.recipe
+          ? { ...state.recipe, userNote: response.data.note }
+          : null,
+        noteError: null,
+        isLoadingNote: false,
+      }));
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          noteError: error.response?.data?.message || "Failed to update note",
+          isLoadingNote: false,
+        });
+      } else {
+        set({
+          noteError: "Unable to update note. Please try again",
+          isLoadingNote: false,
+        });
+      }
+      throw error;
+    }
+  },
+
+  // Delete an existing note
+  deleteNote: async (noteId) => {
+    set({ noteError: null, isLoadingNote: true });
+    try {
+      await axios.delete(`/api/v1/notes/${noteId}`);
+      set((state) => ({
+        recipe: state.recipe ? { ...state.recipe, userNote: undefined } : null,
+        noteError: null,
+        isLoadingNote: false,
+      }));
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          noteError: error.response?.data?.message || "Failed to delete note",
+          isLoadingNote: false,
+        });
+      } else {
+        set({
+          noteError: "Unable to delete note. Please try again",
+          isLoadingNote: false,
         });
       }
       throw error;

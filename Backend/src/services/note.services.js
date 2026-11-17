@@ -65,11 +65,9 @@ export async function validateAndAddNote({ userId, recipeId, content }) {
   });
 
   // Get the newly created note with populated recipe and author fields
-  newNote = await Note.findById(newNote._id).populate({
-    path: "recipeId",
-    select: "title author",
-    populate: { path: "author", select: "displayName profileImage" },
-  });
+  newNote = await Note.findById(newNote._id)
+    .select("-recipeId -authorId -__v -createdAt -updatedAt")
+    .lean();
 
   return newNote;
 }
@@ -77,11 +75,9 @@ export async function validateAndAddNote({ userId, recipeId, content }) {
 // Update a specific note by its ID, ensuring it belongs to the current user
 export async function updateSpecificNoteById(noteId, userId, content) {
   // Ensure user is the author of the note
-  const note = await Note.findOne({ _id: noteId, authorId: userId }).populate({
-    path: "recipeId",
-    select: "title author",
-    populate: { path: "author", select: "displayName profileImage" },
-  });
+  const note = await Note.findOne({ _id: noteId, authorId: userId }).select(
+    "-recipeId -authorId -__v -createdAt -updatedAt",
+  );
 
   if (!note) {
     const err = new Error("Note not found");

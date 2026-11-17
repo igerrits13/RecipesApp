@@ -103,16 +103,7 @@ describe("validateAndAddNote", () => {
     });
 
     expect(note).toBeDefined();
-    expect(note.authorId.toString()).toBe(testUser._id.toString());
-    expect(note.recipeId._id.toString()).toBe(testRecipe._id.toString());
     expect(note.content).toBe(testNoteData.content);
-    expect(note.recipeId.title).toBe(testRecipe.title);
-    expect(note.recipeId.author.displayName.toString()).toBe(
-      testUser.displayName.toString(),
-    );
-    expect(note.recipeId.author.profileImage.toString()).toBe(
-      testUser.profileImage.toString(),
-    );
   });
 
   test("validate and add note with missing content", async () => {

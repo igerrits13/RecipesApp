@@ -25,7 +25,7 @@ export default function RecipeRating({
   newRatingCount,
 }: RecipeRatingProps) {
   // Recipe store
-  const { recipe, isRatingLoading, rateRecipeError } = useRecipeStore();
+  const { recipe, isLoadingRating, rateRecipeError } = useRecipeStore();
 
   const hasPersonalRating =
     rating === undefined ? Boolean(recipe?.userRating?.rating) : rating > 0;
@@ -101,7 +101,7 @@ export default function RecipeRating({
             </div>
           );
         })}
-        {isRatingLoading ? (
+        {isLoadingRating ? (
           <div className="ps-1">Loading Rating...</div>
         ) : (
           <div className="ps-1">
