@@ -1,41 +1,15 @@
 import { NutOff, SquarePen, Upload } from "lucide-react";
 import { useRecipeStore } from "../../store/RecipeStore";
 import { useAuthStore } from "../../store/AuthStore";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useDebounce } from "use-debounce";
 import RecipeRating from "./RecipeRating";
 
 // RecipeTitle component that displays the title and heading information of the recipe
 export default function RecipeTitle() {
   // Recipe and user stores
-  const { recipe, rateRecipe, removeRatingFromRecipe } = useRecipeStore();
+  const { recipe } = useRecipeStore();
   const { user } = useAuthStore();
-
-  // State to keep track of the current rating to be displayed
-  const [rating, setRating] = useState<number | undefined>(undefined);
-  const [hoverRating, setHoverRating] = useState<number | null>(null);
-
-  // Use debounce for rating
-  const [debouncedRating] = useDebounce(rating, 800);
-
-  // Handle rating changes
-  useEffect(() => {
-    if (!recipe || debouncedRating === undefined) return;
-
-    // const previousRating = recipe.userRating?.rating ?? null;
-
-    // If the user has deleted their rating, remove it
-    if (debouncedRating === 0) {
-      removeRatingFromRecipe(recipe.slug).catch(() => {});
-      return;
-    }
-
-    // If the rating has changed, update it
-    else {
-      rateRecipe(recipe.slug, debouncedRating).catch(() => {});
-    }
-  }, [debouncedRating, recipe, rateRecipe, removeRatingFromRecipe]);
 
   // Get all ingredients to check for allergies
   const allIngredients = useMemo(() => {
@@ -46,37 +20,7 @@ export default function RecipeTitle() {
     );
   }, [recipe?.ingredientSections]);
 
-  if (!recipe) return <div>Loading...</div>;
-
-  // Calculate the ratings variables
-  const previousRating = recipe.userRating?.rating ?? null;
-
-  // null = no interaction yet
-  // 0 = user explicitly removed their rating
-  // 1-5 = user's selected rating
-
-  const currentRating =
-    rating === undefined ? previousRating : rating === 0 ? null : rating;
-
-  const newTotalRating =
-    recipe.totalRating - (previousRating ?? 0) + (currentRating ?? 0);
-
-  const newRatingCount =
-    recipe.ratingCount +
-    (previousRating === null && currentRating !== null ? 1 : 0) -
-    (previousRating !== null && currentRating === null ? 1 : 0);
-
-  const newAggregateRating =
-    newRatingCount > 0 ? newTotalRating / newRatingCount : 0;
-
-  const displayRating = hoverRating ?? currentRating ?? newAggregateRating;
-
-  // Helper function to update user's rating
-  const handleUpdateRating = () => {
-    if (hoverRating === null) return;
-
-    setRating(hoverRating === currentRating ? 0 : hoverRating);
-  };
+  if (!recipe) return <></>;
 
   // Recipe title component that displays the title and heading information of the recipe
   return (
@@ -152,16 +96,7 @@ export default function RecipeTitle() {
       )}
       {/* Rating, users cannot rate their own recipes */}
       <div className="flex justify-between w-full">
-        <RecipeRating
-          displayRating={displayRating}
-          hoverRating={hoverRating}
-          rating={rating}
-          interactive={user && user._id !== recipe.author._id}
-          setHoverRating={setHoverRating}
-          handleUpdateRating={handleUpdateRating}
-          newAggregateRating={newAggregateRating}
-          newRatingCount={newRatingCount}
-        />
+        <RecipeRating interactive={user && user._id !== recipe.author._id} />
         {/* Author */}
         <div className="flex gap-1">
           Shared by

@@ -247,12 +247,18 @@ describe("GET /api/v1/recipes", () => {
     expect(response.body.success).toBe(true);
     expect(response.body.recipeList).toBeDefined();
     expect(response.body.recipeList.length).toBe(2);
-    expect(response.body.recipeList[0].userRating).toBeUndefined();
-    expect(response.body.recipeList[1].userRating).toBeDefined();
-    expect(response.body.recipeList[1].userRating.rating).toBe(4);
-    expect(response.body.recipeList[1].userRating.authorId).toBe(
-      testUser1._id.toString(),
+    expect(
+      response.body.recipeList[0].userInteractions.userRating,
+    ).toBeUndefined();
+    expect(
+      response.body.recipeList[1].userInteractions.userRating,
+    ).toBeDefined();
+    expect(response.body.recipeList[1].userInteractions.userRating.rating).toBe(
+      4,
     );
+    expect(
+      response.body.recipeList[1].userInteractions.userRating.authorId,
+    ).toBe(testUser1._id.toString());
   });
 
   it("should not return an image of a recipe where the image has not been approved", async () => {
@@ -1588,8 +1594,10 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.recipe).toBeDefined();
-    expect(response.body.recipe.userRating.rating).toBe(4);
-    expect(response.body.recipe.userNote.content).toBe("Test note");
+    expect(response.body.recipe.userInteractions.userRating.rating).toBe(4);
+    expect(response.body.recipe.userInteractions.userNote.content).toBe(
+      "Test note",
+    );
   });
 
   it("should not return an image of a recipe where the image has not been approved", async () => {
@@ -3797,9 +3805,9 @@ describe("POST /api/v1/recipes/:recipeSlug/rating", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.message).toBe("Recipe rated successfully");
-    expect(response.body.recipe.aggregateRating).toBe(4);
-    expect(response.body.recipe.ratingCount).toBe(1);
-    expect(response.body.recipe.totalRating).toBe(4);
+    expect(response.body.aggregateRating).toBe(4);
+    expect(response.body.ratingCount).toBe(1);
+    expect(response.body.userRating.rating).toBe(4);
 
     const rating = await Rating.findOne({
       authorId: testUser1._id,
@@ -3832,9 +3840,15 @@ describe("POST /api/v1/recipes/:recipeSlug/rating", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.message).toBe("Recipe rated successfully");
-    expect(response.body.recipe.aggregateRating).toBeCloseTo(4.395, 2);
-    expect(response.body.recipe.ratingCount).toBe(24);
-    expect(response.body.recipe.totalRating).toBe(105.5);
+    expect(response.body.aggregateRating).toBeCloseTo(4.395, 2);
+    expect(response.body.ratingCount).toBe(24);
+    expect(response.body.userRating.rating).toBe(2);
+
+    const updatedRecipe = await Recipe.findById(testRecipe._id);
+
+    expect(updatedRecipe.ratingCount).toBe(24);
+    expect(updatedRecipe.aggregateRating).toBeCloseTo(4.395, 2);
+    expect(updatedRecipe.totalRating).toBeCloseTo(105.5);
   });
 
   it("should update an existing rating if the user has already rated the recipe", async () => {
@@ -3861,9 +3875,9 @@ describe("POST /api/v1/recipes/:recipeSlug/rating", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.message).toBe("Recipe rated successfully");
-    expect(response.body.recipe.aggregateRating).toBe(5);
-    expect(response.body.recipe.ratingCount).toBe(1);
-    expect(response.body.recipe.totalRating).toBe(5);
+    expect(response.body.aggregateRating).toBe(5);
+    expect(response.body.ratingCount).toBe(1);
+    expect(response.body.userRating.rating).toBe(5);
 
     const rating = await Rating.findOne({
       authorId: testUser1._id,
@@ -3955,9 +3969,8 @@ describe("DELETE /api/v1/recipes/:recipeSlug/rating", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.message).toBe("Rating removed successfully");
-    expect(response.body.recipe.aggregateRating).toBe(0);
-    expect(response.body.recipe.ratingCount).toBe(0);
-    expect(response.body.recipe.totalRating).toBe(0);
+    expect(response.body.aggregateRating).toBe(0);
+    expect(response.body.ratingCount).toBe(0);
 
     const rating = await Rating.findOne({
       authorId: testUser1._id,
@@ -3992,9 +4005,8 @@ describe("DELETE /api/v1/recipes/:recipeSlug/rating", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.message).toBe("Rating removed successfully");
-    expect(response.body.recipe.aggregateRating).toBe(2);
-    expect(response.body.recipe.ratingCount).toBe(1);
-    expect(response.body.recipe.totalRating).toBe(2);
+    expect(response.body.aggregateRating).toBe(2);
+    expect(response.body.ratingCount).toBe(1);
   });
 
   it("should throw an error if a user tries to remove a rating that does not exist", async () => {

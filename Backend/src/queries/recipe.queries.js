@@ -43,7 +43,7 @@ export async function fetchRecipes({ userId, query, page, limit, offset }) {
     }).lean();
 
     recipeList.forEach((recipe) => {
-      recipe.userRating = userRatings.find(
+      recipe.userInteractions.userRating = userRatings.find(
         (rating) => rating.recipeId.toString() === recipe._id.toString(),
       );
     });
@@ -83,6 +83,10 @@ export function populateRecipePreview(recipes) {
             displayName: recipe.author.displayName,
           }
         : { _id: null, slug: null, displayName: "Deleted User" },
+    userInteractions: {
+      userRating: null,
+      isFavorited: false,
+    },
     isPublished: recipe.isPublished,
     isApproved: recipe.isApproved,
   }));
@@ -181,13 +185,16 @@ export async function populateRecipe(recipeId, userId) {
       authorId: userId,
       recipeId: recipe._id,
     }).lean();
-    if (userRating) returnRecipe.userRating = userRating;
 
     const userNote = await Note.findOne({
       authorId: userId,
       recipeId: recipe._id,
     }).lean();
-    if (userNote) returnRecipe.userNote = userNote;
+
+    returnRecipe.userInteractions = {
+      userRating: userRating || null,
+      userNote: userNote || null,
+    };
   }
 
   return returnRecipe;

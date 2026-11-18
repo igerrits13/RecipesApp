@@ -13,11 +13,11 @@ export default function RecipeChefNotes() {
     noteError,
   } = useRecipeStore();
 
-  if (!recipe) return <div>Loading...</div>;
+  if (!recipe) return <></>;
 
   // Helper function to update user's personal note
   const handleNoteBlur = (newNote: string) => {
-    const originalUserNote = recipe?.userNote?.content ?? "";
+    const originalUserNote = recipe.userInteractions.userNote?.content ?? "";
     const trimmedNewNote = newNote.trim();
 
     // If the new note is too long or the new note and existing note are the same, do nothing
@@ -26,11 +26,11 @@ export default function RecipeChefNotes() {
 
     // If the new note is empty, delete the existing note. If there is an existing note, update it. Otherwise, create a new note
     if (!trimmedNewNote) {
-      if (recipe.userNote) {
-        deleteNote(recipe.userNote._id);
+      if (recipe.userInteractions.userNote) {
+        deleteNote(recipe.userInteractions.userNote._id);
       }
-    } else if (recipe.userNote) {
-      updateNote(trimmedNewNote, recipe.userNote._id);
+    } else if (recipe.userInteractions.userNote) {
+      updateNote(trimmedNewNote, recipe.userInteractions.userNote._id);
     } else {
       createNote(recipe._id, trimmedNewNote);
     }
@@ -45,7 +45,7 @@ export default function RecipeChefNotes() {
         <textarea
           className="resize-none p-2 content-center text-center h-50 w-50 bg-antique-parchment-500 font-title text-olive-500 focus:outline-none place-self-end rotate-345"
           placeholder="Add any personal notes here!"
-          defaultValue={recipe?.userNote?.content}
+          defaultValue={recipe?.userInteractions.userNote?.content}
           maxLength={500}
           disabled={isLoadingNote}
           onBlur={(e) => {

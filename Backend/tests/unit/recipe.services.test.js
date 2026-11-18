@@ -3379,12 +3379,15 @@ describe("rateSpecificRecipe", () => {
       ],
     });
 
-    const result = await rateSpecificRecipe(recipe, otherUser._id, 4);
+    const [userRating, aggregateRating, ratingCount] = await rateSpecificRecipe(
+      recipe,
+      otherUser._id,
+      4,
+    );
 
-    expect(result._id.toString()).toBe(recipe._id.toString());
-    expect(result.aggregateRating).toBe(4);
-    expect(result.ratingCount).toBe(1);
-    expect(result.totalRating).toBe(4);
+    expect(aggregateRating).toBe(4);
+    expect(ratingCount).toBe(1);
+    expect(userRating.rating).toBe(4);
   });
 
   test("should update rating fields correctly when recipe already has perfect ratings", async () => {
@@ -3402,12 +3405,15 @@ describe("rateSpecificRecipe", () => {
       totalRating: 150,
     });
 
-    const result = await rateSpecificRecipe(recipe, otherUser._id, 5);
+    const [userRating, aggregateRating, ratingCount] = await rateSpecificRecipe(
+      recipe,
+      otherUser._id,
+      5,
+    );
 
-    expect(result._id.toString()).toBe(recipe._id.toString());
-    expect(result.aggregateRating).toBe(5);
-    expect(result.ratingCount).toBe(31);
-    expect(result.totalRating).toBe(155);
+    expect(aggregateRating).toBe(5);
+    expect(ratingCount).toBe(31);
+    expect(userRating.rating).toBe(5);
   });
 
   test("should update rating fields correctly when recipe already has some ratings but not perfect", async () => {
@@ -3425,12 +3431,15 @@ describe("rateSpecificRecipe", () => {
       totalRating: 35,
     });
 
-    const result = await rateSpecificRecipe(recipe, otherUser._id, 4);
+    const [userRating, aggregateRating, ratingCount] = await rateSpecificRecipe(
+      recipe,
+      otherUser._id,
+      4,
+    );
 
-    expect(result._id.toString()).toBe(recipe._id.toString());
-    expect(result.aggregateRating).toBeCloseTo(3.545, 3);
-    expect(result.ratingCount).toBe(11);
-    expect(result.totalRating).toBe(39);
+    expect(aggregateRating).toBeCloseTo(3.545, 3);
+    expect(ratingCount).toBe(11);
+    expect(userRating.rating).toBe(4);
   });
 
   test("should update an existing lower rating for the same user and adjust the recipe's rating fields correctly", async () => {
@@ -3452,14 +3461,15 @@ describe("rateSpecificRecipe", () => {
       rating: 3,
     });
 
-    const result = await rateSpecificRecipe(recipe, otherUser._id, 5);
+    const [userRating, aggregateRating, ratingCount] = await rateSpecificRecipe(
+      recipe,
+      otherUser._id,
+      5,
+    );
 
-    expect(result._id.toString()).toBe(recipe._id.toString());
-    expect(result.aggregateRating).toBeCloseTo(3.7, 3);
-    expect(result.ratingCount).toBe(10);
-    expect(result.totalRating).toBe(37);
-    const updatedRating = await Rating.findById(existingRating._id);
-    expect(updatedRating.rating).toBe(5);
+    expect(aggregateRating).toBeCloseTo(3.7, 3);
+    expect(ratingCount).toBe(10);
+    expect(userRating.rating).toBe(5);
   });
 
   test("should update an existing higher rating for the same user and adjust the recipe's rating fields correctly", async () => {
@@ -3481,14 +3491,15 @@ describe("rateSpecificRecipe", () => {
       rating: 5,
     });
 
-    const result = await rateSpecificRecipe(recipe, otherUser._id, 1);
+    const [userRating, aggregateRating, ratingCount] = await rateSpecificRecipe(
+      recipe,
+      otherUser._id,
+      1,
+    );
 
-    expect(result._id.toString()).toBe(recipe._id.toString());
-    expect(result.aggregateRating).toBeCloseTo(4.3, 3);
-    expect(result.ratingCount).toBe(20);
-    expect(result.totalRating).toBe(86);
-    const updatedRating = await Rating.findById(existingRating._id);
-    expect(updatedRating.rating).toBe(1);
+    expect(aggregateRating).toBeCloseTo(4.3, 3);
+    expect(ratingCount).toBe(20);
+    expect(userRating.rating).toBe(1);
   });
 
   test("should throw an error if the user tries to rate their own recipe", async () => {
@@ -3562,12 +3573,12 @@ describe("removeRatingFromSpecificRecipe", () => {
 
     await createTestRating(recipe._id, otherUser._id, { rating: 4 });
 
-    const result = await removeRatingFromSpecificRecipe(recipe, otherUser._id);
+    const [userRating, aggregateRating, ratingCount] =
+      await removeRatingFromSpecificRecipe(recipe, otherUser._id);
 
-    expect(result._id.toString()).toBe(recipe._id.toString());
-    expect(result.aggregateRating).toBe(0);
-    expect(result.ratingCount).toBe(0);
-    expect(result.totalRating).toBe(0);
+    expect(aggregateRating).toBe(0);
+    expect(ratingCount).toBe(0);
+    expect(userRating).toBeNull();
     const deletedRating = await Rating.findOne({
       recipe: recipe._id,
       user: otherUser._id,
@@ -3592,12 +3603,16 @@ describe("removeRatingFromSpecificRecipe", () => {
 
     await createTestRating(recipe._id, otherUser._id, { rating: 4 });
 
-    const result = await removeRatingFromSpecificRecipe(recipe, otherUser._id);
+    const [userRating, aggregateRating, ratingCount] =
+      await removeRatingFromSpecificRecipe(recipe, otherUser._id);
 
-    expect(result._id.toString()).toBe(recipe._id.toString());
-    expect(result.aggregateRating).toBe(3);
-    expect(result.ratingCount).toBe(1);
-    expect(result.totalRating).toBe(3);
+    expect(aggregateRating).toBe(3);
+    expect(ratingCount).toBe(1);
+    expect(userRating).toBeNull();
+
+    const updatedRecipe = await Recipe.findById(recipe._id);
+    expect(updatedRecipe.ratingCount).toBe(1);
+    expect(updatedRecipe.aggregateRating).toBe(3);
   });
 
   test("should throw an error if the user tries to remove a rating that does not exist", async () => {

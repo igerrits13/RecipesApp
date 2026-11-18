@@ -39,8 +39,11 @@ export interface Recipe {
   deletedAt: Date;
   isPublished: boolean;
   isApproved: boolean;
-  userRating?: UserRating;
-  userNote?: UserNote;
+  userInteractions: {
+    userNote: UserNote | null;
+    userRating: UserRating | null;
+    isFavorited: boolean;
+  };
 }
 
 // Interface for creating a recipe

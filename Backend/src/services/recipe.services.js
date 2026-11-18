@@ -1345,7 +1345,12 @@ export async function rateSpecificRecipe(recipe, userId, rating) {
     await recipe.save();
   }
 
-  return;
+  // Return rating information
+  const userRating = { rating: rating };
+  const aggregateRating = recipe.aggregateRating;
+  const ratingCount = recipe.ratingCount;
+
+  return [userRating, aggregateRating, ratingCount];
 }
 
 // Remove a user's rating from the recipe and adjust the recipe's ratings accordingly
@@ -1370,7 +1375,11 @@ export async function removeRatingFromSpecificRecipe(recipe, userId) {
     recipe.ratingCount > 0 ? recipe.totalRating / recipe.ratingCount : 0;
   await recipe.save();
 
-  return recipe;
+  const userRating = null;
+  const aggregateRating = recipe.aggregateRating;
+  const ratingCount = recipe.ratingCount;
+
+  return [userRating, aggregateRating, ratingCount];
 }
 
 // Get all recipe comments with pagination

@@ -224,9 +224,16 @@ export async function rateRecipe(req, res) {
   try {
     const rating = req.body.rating;
 
-    await rateSpecificRecipe(req.recipe, req.user._id, rating);
+    const [userRating, aggregateRating, ratingCount] = await rateSpecificRecipe(
+      req.recipe,
+      req.user._id,
+      rating,
+    );
 
     res.status(200).json({
+      userRating,
+      aggregateRating,
+      ratingCount,
       success: true,
       message: "Recipe rated successfully",
     });
@@ -241,15 +248,13 @@ export async function rateRecipe(req, res) {
 // Create a route for removing a rating from a specified recipe
 export async function removeRatingFromRecipe(req, res) {
   try {
-    const recipe = await removeRatingFromSpecificRecipe(
-      req.recipe,
-      req.user._id,
-    );
-
-    const returnRecipe = await populateRecipe(recipe._id, req.user._id);
+    const [userRating, aggregateRating, ratingCount] =
+      await removeRatingFromSpecificRecipe(req.recipe, req.user._id);
 
     res.status(200).json({
-      recipe: returnRecipe,
+      userRating,
+      aggregateRating,
+      ratingCount,
       success: true,
       message: "Rating removed successfully",
     });

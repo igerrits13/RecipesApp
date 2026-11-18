@@ -111,11 +111,25 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
   rateRecipe: async (recipeSlug, rating) => {
     set({ rateRecipeError: null, isLoadingRating: true });
     try {
-      await axios.post(`/api/v1/recipes/${recipeSlug}/rating`, { rating });
-      set({
+      const response = await axios.post(
+        `/api/v1/recipes/${recipeSlug}/rating`,
+        { rating },
+      );
+      set((state) => ({
+        recipe: state.recipe
+          ? {
+              ...state.recipe,
+              aggregateRating: response.data.aggregateRating,
+              ratingCount: response.data.ratingCount,
+              userInteractions: {
+                ...state.recipe.userInteractions,
+                userRating: response.data.userRating,
+              },
+            }
+          : null,
         rateRecipeError: null,
         isLoadingRating: false,
-      });
+      }));
     } catch (error) {
       if (axios.isAxiosError(error)) {
         set({
@@ -137,11 +151,24 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
   removeRatingFromRecipe: async (recipeSlug) => {
     set({ rateRecipeError: null, isLoadingRating: true });
     try {
-      await axios.delete(`/api/v1/recipes/${recipeSlug}/rating`);
-      set({
+      const response = await axios.delete(
+        `/api/v1/recipes/${recipeSlug}/rating`,
+      );
+      set((state) => ({
+        recipe: state.recipe
+          ? {
+              ...state.recipe,
+              aggregateRating: response.data.aggregateRating,
+              ratingCount: response.data.ratingCount,
+              userInteractions: {
+                ...state.recipe.userInteractions,
+                userRating: null,
+              },
+            }
+          : null,
         rateRecipeError: null,
         isLoadingRating: false,
-      });
+      }));
     } catch (error) {
       if (axios.isAxiosError(error)) {
         set({
@@ -168,7 +195,13 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
       });
       set((state) => ({
         recipe: state.recipe
-          ? { ...state.recipe, userNote: response.data.note }
+          ? {
+              ...state.recipe,
+              userInteractions: {
+                ...state.recipe.userInteractions,
+                userNote: response.data.note,
+              },
+            }
           : null,
         noteError: null,
         isLoadingNote: false,
@@ -196,7 +229,13 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
       const response = await axios.put(`/api/v1/notes/${noteId}`, { content });
       set((state) => ({
         recipe: state.recipe
-          ? { ...state.recipe, userNote: response.data.note }
+          ? {
+              ...state.recipe,
+              userInteractions: {
+                ...state.recipe.userInteractions,
+                userNote: response.data.note,
+              },
+            }
           : null,
         noteError: null,
         isLoadingNote: false,
@@ -223,7 +262,15 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
     try {
       await axios.delete(`/api/v1/notes/${noteId}`);
       set((state) => ({
-        recipe: state.recipe ? { ...state.recipe, userNote: undefined } : null,
+        recipe: state.recipe
+          ? {
+              ...state.recipe,
+              userInteractions: {
+                ...state.recipe.userInteractions,
+                userNote: null,
+              },
+            }
+          : null,
         noteError: null,
         isLoadingNote: false,
       }));
