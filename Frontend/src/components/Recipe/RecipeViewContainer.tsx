@@ -7,13 +7,14 @@ import RecipeDescription from "./RecipeDescription";
 import RecipeIngredients from "./RecipeIngredients";
 import RecipeSteps from "./RecipeSteps";
 import RecipeChefNotes from "./RecipeChefNotes";
+import RecipeLinkedRecipes from "./RecipeLinkedRecipes";
 
 export default function RecipeViewContainer() {
   // Allow navigation
   const navigate = useNavigate();
 
   // Access the get recipe function from the recipe store
-  const { getRecipe, isLoading, getRecipeError } = useRecipeStore();
+  const { getRecipe, isLoadingRecipe, getRecipeError } = useRecipeStore();
   const { recipeSlug } = useParams();
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function RecipeViewContainer() {
     }
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoadingRecipe) return <></>;
 
   // If there is an error, navigate to the 404 page
   if (getRecipeError) {
@@ -60,7 +61,7 @@ export default function RecipeViewContainer() {
       </div>
       <div className="flex flex-col pt-8 gap-8">
         <RecipeChefNotes />
-        {/* <CreateRecipeLinkedRecipes /> */}
+        <RecipeLinkedRecipes />
       </div>
     </div>
   );
