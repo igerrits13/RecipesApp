@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import BannedWord from "../../models/BannedWord.model.js";
+import BannedWord from "../../models/bannedWord.model.js";
 import Report from "../../models/report.model.js";
 import Holiday from "../../models/holiday.model.js";
 import Season from "../../models/season.model.js";

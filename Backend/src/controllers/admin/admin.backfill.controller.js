@@ -1,4 +1,4 @@
-import BannedWord from "../../models/BannedWord.model.js";
+import BannedWord from "../../models/bannedWord.model.js";
 import Comment from "../../models/comment.model.js";
 import CommentVote from "../../models/commentVote.model.js";
 import Event from "../../models/report.model.js";
