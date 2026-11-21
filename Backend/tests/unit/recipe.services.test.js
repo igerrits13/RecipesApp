@@ -49,7 +49,6 @@ const {
   createTestCommentVote,
   createTestComment,
   createTestChildComments,
-  createTestMeasurement,
   createTestNote,
   fullTestRecipeDataCompleteNonJSON,
 } = await import("../../src/utils/testFunctions.js");
@@ -3532,7 +3531,7 @@ describe("rateSpecificRecipe", () => {
     });
 
     await expect(rateSpecificRecipe(recipe, otherUser._id, 0)).rejects.toThrow(
-      "Rating must be a number between 1 and 5",
+      "Rating must be a number between 0.5 and 5",
     );
   });
 
@@ -3549,7 +3548,7 @@ describe("rateSpecificRecipe", () => {
     });
 
     await expect(rateSpecificRecipe(recipe, otherUser._id, 6)).rejects.toThrow(
-      "Rating must be a number between 1 and 5",
+      "Rating must be a number between 0.5 and 5",
     );
   });
 });

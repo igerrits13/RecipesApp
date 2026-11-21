@@ -61,6 +61,7 @@ const {
   createTestCommentVote,
   createTestBannedWord,
   createTestNote,
+  addRecipeToFavorites,
 } = await import("../../src/utils/testFunctions.js");
 import Meal from "../../src/models/meal.model.js";
 import Cuisine from "../../src/models/cuisine.model.js";
@@ -259,6 +260,32 @@ describe("GET /api/v1/recipes", () => {
     expect(
       response.body.recipeList[1].userInteractions.userRating.authorId,
     ).toBe(testUser1._id.toString());
+    expect(response.body.recipeList[1].userInteractions.isFavorited).toBe(
+      false,
+    );
+  });
+
+  it("should return a favorited recipe if the user has favorited it", async () => {
+    const testRecipe = await createTestRecipe(otherUser._id, {
+      title: `Test Recipe ${testRecipeSlugIndex}`,
+      slug: `test-recipe-${testRecipeSlugIndex++}`,
+      ingredientSections: [
+        {
+          sectionTitle: "Test Section",
+          ingredients: [{ ingredient: testIngredient._id }],
+        },
+      ],
+    });
+
+    await addRecipeToFavorites(testUser1, testRecipe);
+
+    const response = await loginAgent1.get("/api/v1/recipes");
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.recipeList).toBeDefined();
+    expect(response.body.recipeList.length).toBe(1);
+    expect(response.body.recipeList[0].userInteractions.isFavorited).toBe(true);
   });
 
   it("should not return an image of a recipe where the image has not been approved", async () => {
@@ -1565,6 +1592,9 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
     expect(response.body.recipe.author.profileImage).toBe(
       testUser1.profileImage,
     );
+    expect(response.body.recipe.userInteractions.userRating).toBe(null);
+    expect(response.body.recipe.userInteractions.userNote).toBe(null);
+    expect(response.body.recipe.userInteractions.isFavorited).toBe(false);
   });
 
   it("should return the current user's rating and personal note if the user has them", async () => {
@@ -1587,6 +1617,8 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
       content: "Test note",
     });
 
+    await addRecipeToFavorites(testUser1, testRecipe);
+
     const response = await loginAgent1.get(
       `/api/v1/recipes/${testRecipe.slug}`,
     );
@@ -1598,6 +1630,7 @@ describe("GET /api/v1/recipes/:recipeSlug", () => {
     expect(response.body.recipe.userInteractions.userNote.content).toBe(
       "Test note",
     );
+    expect(response.body.recipe.userInteractions.isFavorited).toBe(true);
   });
 
   it("should not return an image of a recipe where the image has not been approved", async () => {

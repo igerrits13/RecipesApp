@@ -9,10 +9,12 @@ interface RecipeState {
   isLoadingRecipe: boolean;
   isLoadingRating: boolean;
   isLoadingNote: boolean;
+  isLoadingFavorite: boolean;
   getRecipeError: string | null;
   createRecipeError: string | null;
   rateRecipeError: string | null;
   noteError: string | null;
+  favoriteRecipeError: string | null;
 }
 
 // Types of recipe actions
@@ -24,8 +26,11 @@ interface RecipeActions {
   createNote: (recipeId: string, content: string) => Promise<void>;
   updateNote: (content: string, noteId?: string) => Promise<void>;
   deleteNote: (noteId?: string) => Promise<void>;
+  addFavoriteRecipe: (recipeId: string) => Promise<void>;
+  removeFavoriteRecipe: (recipeId: string) => Promise<void>;
   clearCreateRecipeError: () => void;
   clearRateRecipeError: () => void;
+  clearGetRecipeError: () => void;
 }
 
 // Combine recipe state and actions
@@ -38,10 +43,12 @@ const initialRecipeState: RecipeState = {
   isLoadingRecipe: false,
   isLoadingRating: false,
   isLoadingNote: false,
+  isLoadingFavorite: false,
   getRecipeError: null,
   createRecipeError: null,
   rateRecipeError: null,
   noteError: null,
+  favoriteRecipeError: null,
 };
 
 // Create the recipe store
@@ -289,6 +296,79 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
       throw error;
     }
   },
+
+  // Add the recipe to the current user's favorites
+  addFavoriteRecipe: async (recipeId) => {
+    set({ favoriteRecipeError: null, isLoadingFavorite: true });
+    try {
+      await axios.post(`/api/v1/users/me/favorites/${recipeId}`);
+      set((state) => ({
+        recipe: state.recipe
+          ? {
+              ...state.recipe,
+              userInteractions: {
+                ...state.recipe.userInteractions,
+                isFavorited: true,
+              },
+            }
+          : null,
+        favoriteRecipeError: null,
+        isLoadingFavorite: false,
+      }));
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          favoriteRecipeError:
+            error.response?.data?.message || "Failed to favorite recipe",
+          isLoadingFavorite: false,
+        });
+      } else {
+        set({
+          favoriteRecipeError: "Unable to favorite recipe. Please try again",
+          isLoadingFavorite: false,
+        });
+      }
+      throw error;
+    }
+  },
+
+  // Remove the recipe from the current user's favorites
+  removeFavoriteRecipe: async (recipeId) => {
+    set({ favoriteRecipeError: null, isLoadingFavorite: true });
+    try {
+      await axios.delete(`/api/v1/users/me/favorites/${recipeId}`);
+      set((state) => ({
+        recipe: state.recipe
+          ? {
+              ...state.recipe,
+              userInteractions: {
+                ...state.recipe.userInteractions,
+                isFavorited: false,
+              },
+            }
+          : null,
+        favoriteRecipeError: null,
+        isLoadingFavorite: false,
+      }));
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          favoriteRecipeError:
+            error.response?.data?.message || "Failed to unfavorite recipe",
+          isLoadingFavorite: false,
+        });
+      } else {
+        set({
+          favoriteRecipeError: "Unable to unfavorite recipe. Please try again",
+          isLoadingFavorite: false,
+        });
+      }
+      throw error;
+    }
+  },
+
+  // Clear the get recipe error
+  clearGetRecipeError: () => set({ getRecipeError: null }),
 
   // Clear the create recipe error
   clearCreateRecipeError: () => set({ createRecipeError: null }),

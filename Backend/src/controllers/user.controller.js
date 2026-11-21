@@ -341,16 +341,9 @@ export async function addUserFavoriteRecipe(req, res) {
     const user = req.user;
     const { recipeId } = req.params;
 
-    const updatedUser = await addRecipeToCurrentUserCategory(
-      user,
-      recipeId,
-      "favoriteRecipes",
-    );
-
-    const favoriteRecipes = await mapRecipeData(updatedUser.favoriteRecipes);
+    await addRecipeToCurrentUserCategory(user, recipeId, "favoriteRecipes");
 
     res.status(200).json({
-      favoriteRecipes,
       success: true,
       message: "Recipe added to favorite recipes successfully",
     });
@@ -368,16 +361,13 @@ export async function removeUserFavoriteRecipe(req, res) {
     const user = req.user;
     const { recipeId } = req.params;
 
-    const updatedUser = await removeRecipeFromCurrentUserCategory(
+    await removeRecipeFromCurrentUserCategory(
       user,
       recipeId,
       "favoriteRecipes",
     );
 
-    const recipeList = await mapRecipeData(updatedUser.favoriteRecipes);
-
     res.status(200).json({
-      favoriteRecipes: recipeList,
       success: true,
       message: "Recipe removed from favorite recipes successfully",
     });

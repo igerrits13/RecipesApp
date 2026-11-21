@@ -1,6 +1,7 @@
 import Recipe from "../models/recipe.model.js";
 import Rating from "../models/rating.model.js";
 import Note from "../models/note.model.js";
+import User from "../models/user.model.js";
 
 // Build recipe filters based on query parameters
 export function buildRecipeFilters(queryParams) {
@@ -35,7 +36,7 @@ export async function fetchRecipes({ userId, query, page, limit, offset }) {
   // Map the recipes to the desired format
   const recipeList = populateRecipePreview(recipes);
 
-  // Add the current users rating if a user exists
+  // Add the current users rating and favorites if a user exists
   if (userId) {
     const userRatings = await Rating.find({
       authorId: userId,
@@ -45,6 +46,18 @@ export async function fetchRecipes({ userId, query, page, limit, offset }) {
     recipeList.forEach((recipe) => {
       recipe.userInteractions.userRating = userRatings.find(
         (rating) => rating.recipeId.toString() === recipe._id.toString(),
+      );
+    });
+
+    const userFavorites = await User.findById(userId)
+      .select("favoriteRecipes")
+      .lean();
+
+    recipeList.forEach((recipe) => {
+      recipe.userInteractions.isFavorited = Boolean(
+        userFavorites.favoriteRecipes.find(
+          (favorite) => favorite.toString() === recipe._id.toString(),
+        ),
       );
     });
   }
@@ -180,22 +193,30 @@ export async function populateRecipe(recipeId, userId) {
   };
 
   // Add the current user's rating and personal note if a user exists and has added either
+  let userRating;
+  let userNote;
+  let userFavorited;
   if (userId) {
-    const userRating = await Rating.findOne({
+    userRating = await Rating.findOne({
       authorId: userId,
       recipeId: recipe._id,
     }).lean();
 
-    const userNote = await Note.findOne({
+    userNote = await Note.findOne({
       authorId: userId,
       recipeId: recipe._id,
     }).lean();
 
-    returnRecipe.userInteractions = {
-      userRating: userRating || null,
-      userNote: userNote || null,
-    };
+    userFavorited = await User.findOne({
+      _id: userId,
+      favoriteRecipes: recipe._id,
+    });
   }
+  returnRecipe.userInteractions = {
+    userRating: userRating || null,
+    userNote: userNote || null,
+    isFavorited: userFavorited ? true : false,
+  };
 
   return returnRecipe;
 }

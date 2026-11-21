@@ -124,7 +124,6 @@ export async function getRecipe(req, res) {
 export async function updateRecipe(req, res) {
   try {
     const validatedRecipe = await validateRecipeData(req.body);
-
     // Confirm the request body has valid fields and update the recipe in the database
     const recipe = await validateAndUpdateRecipe({
       updatedRecipeData: validatedRecipe,

@@ -1083,15 +1083,11 @@ export async function validateAndUpdateRecipe({
         })
       : oldRecipe.seasons;
 
-  // Upload the new image to cloudinary if one was provided
   if (imagePath) {
-    try {
-      ({ imageURL, publicId } = imagePath
-        ? await uploadPhoto(imagePath)
-        : null);
-    } catch (uploadError) {
-      throw uploadError;
-    }
+    const uploadedImage = await uploadPhoto(imagePath);
+
+    imageURL = uploadedImage?.imageURL ?? null;
+    publicId = uploadedImage?.publicId ?? null;
   }
 
   // If no new image was provided, remove the old one if it exists
@@ -1308,9 +1304,9 @@ export async function rateSpecificRecipe(recipe, userId, rating) {
     throw err;
   }
 
-  // Ensure the rating is a number between 1 and 5
-  if (typeof rating !== "number" || rating < 1 || rating > 5) {
-    const err = new Error("Rating must be a number between 1 and 5");
+  // Ensure the rating is a number between 0.5 and 5
+  if (typeof rating !== "number" || rating < 0.5 || rating > 5) {
+    const err = new Error("Rating must be a number between 0.5 and 5");
     err.statusCode = 400;
     throw err;
   }

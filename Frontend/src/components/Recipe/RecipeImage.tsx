@@ -2,12 +2,32 @@ import { Heart } from "lucide-react";
 import { useRecipeStore } from "../../store/RecipeStore";
 import defaultRecipeImage from "../../../public/images/defaultRecipeImage.jpg";
 import { useAuthStore } from "../../store/AuthStore";
+import ValidationError from "../ValidationError";
 
 // RecipeImage component displays the current image of the recipe
 export default function RecipeImage() {
   // Recipe and user store
-  const { recipe } = useRecipeStore();
+  const {
+    recipe,
+    addFavoriteRecipe,
+    removeFavoriteRecipe,
+    isLoadingFavorite,
+    favoriteRecipeError,
+  } = useRecipeStore();
   const { user } = useAuthStore();
+
+  if (!recipe) return <></>;
+
+  // Helper function update user's favorites
+  const handleOnFavorite = () => {
+    if (!recipe) return;
+
+    if (recipe.userInteractions.isFavorited) {
+      removeFavoriteRecipe(recipe._id).catch(() => {});
+    } else {
+      addFavoriteRecipe(recipe._id).catch(() => {});
+    }
+  };
 
   return (
     <div className="flex flex-col gap-1 w-full sm:col-start-2 items-center">
@@ -27,16 +47,16 @@ export default function RecipeImage() {
               className="block max-w-full max-h-[60vh] w-auto h-auto px-2 object-contain"
             />
           )}
-          {/* TODO: Allow users to favorite recipes */}
           {/* Favorite button */}
           <button
             type="button"
-            className="absolute bottom-2 right-4 lg:right-6 bg-antique-parchment-500 rounded-full p-1 hover:bg-antique-parchment-300 cursor-pointer text-rosewood-500 hover:text-rosewood-400"
-            // onClick={() => {
-            //   setValue("image", null, { shouldValidate: true });
-            // }}
+            className={`absolute bottom-2 right-4 lg:right-6 rounded-full p-1 hover:bg-antique-parchment-300  hover:text-rosewood-400 ${isLoadingFavorite ? "bg-antique-parchment-300 text-rosewood-400" : "bg-antique-parchment-500 text-rosewood-500 cursor-pointer"}`}
+            onClick={() => handleOnFavorite()}
+            disabled={isLoadingFavorite}
           >
-            <Heart className="size-8" />
+            <Heart
+              className={`size-8 ${recipe.userInteractions.isFavorited ? "fill-rosewood-500" : ""}`}
+            />
           </button>
         </div>
       </div>
@@ -49,6 +69,7 @@ export default function RecipeImage() {
           </div>
         </div>
       )}
+      {favoriteRecipeError && <ValidationError message={favoriteRecipeError} />}
     </div>
   );
 }

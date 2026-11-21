@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, jest } from "@jest/globals";
+import { beforeEach, describe, expect, it } from "@jest/globals";
 import request from "supertest";
 import jwt from "jsonwebtoken";
 
@@ -63,14 +63,13 @@ describe("POST /api/v1/auth/register", () => {
     expect(res.body.user).not.toHaveProperty("deletedAt");
   });
 
-  // Test passes, disabled due to rate limiting constraints
-  // it("should not register with missing fields", async () => {
-  //   const res = await request(app).post("/api/v1/auth/register").send({});
+  it("should not register with missing fields", async () => {
+    const res = await request(app).post("/api/v1/auth/register").send({});
 
-  //   expect(res.statusCode).toEqual(400);
-  //   expect(res.body.success).toBe(false);
-  //   expect(res.body.message).toBe("All fields required");
-  // });
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("All fields required");
+  });
 });
 
 // Test cases: checkBannedWord //
@@ -132,68 +131,6 @@ describe("checkBannedWord middleware on register route", () => {
     });
 
     expect(report).toBeNull();
-  });
-});
-
-// Test cases: registerLimiter //
-describe("registerLimiter middleware on register route", () => {
-  it("should block registration after 3 attempts from the same IP", async () => {
-    for (let i = 0; i < 3; i++) {
-      await request(app)
-        .post("/api/v1/auth/register")
-        .send({
-          username: `testuser${i}`,
-          displayName: `TestUser${i}`,
-          email: `testuser${i}@example.com`,
-          password: "TestPassword123!",
-        });
-    }
-
-    const res = await request(app).post("/api/v1/auth/register").send({
-      username: "testuser4",
-      displayName: "TestUser4",
-      email: "testuser4@example.com",
-      password: "TestPassword123!",
-    });
-
-    expect(res.statusCode).toEqual(429);
-    expect(res.body.message).toBe(
-      "Too many registration attempts. Please try again later",
-    );
-  });
-
-  it("should allow registration after rate limit window has passed", async () => {
-    const now = Date.now();
-    jest.spyOn(Date, "now").mockImplementation(() => now);
-
-    for (let i = 0; i < 3; i++) {
-      await request(app)
-        .post("/api/v1/auth/register")
-        .send({
-          username: `testuser${i}`,
-          displayName: `TestUser${i}`,
-          email: `testuser${i}@example.com`,
-          password: "TestPassword123!",
-        });
-    }
-
-    // Move time forward 16 minutes
-    Date.now.mockImplementation(() => now + 16 * 60 * 1000);
-
-    const res = await request(app).post("/api/v1/auth/register").send({
-      username: "testuser4",
-      displayName: "TestUser4",
-      email: "testuser4@example.com",
-      password: "TestPassword123!",
-    });
-
-    expect(res.statusCode).toEqual(201);
-    expect(res.body.success).toBe(true);
-    expect(res.body.message).toBe("Account registered successfully");
-    expect(res.body.user.username).toEqual("testuser4");
-    expect(res.body.user.email).toEqual("testuser4@example.com");
-    expect(res.headers["set-cookie"]).toBeDefined();
-    expect(res.headers["set-cookie"][0]).toMatch(/token=/);
   });
 });
 
@@ -266,61 +203,6 @@ describe("POST /api/v1/auth/login", () => {
     expect(res.statusCode).toEqual(401);
     expect(res.body.success).toBe(false);
     expect(res.body.message).toBe("Invalid login information");
-  });
-});
-
-// Test cases: loginLimiter //
-describe("loginLimiter middleware on login route", () => {
-  it("should block login after 5 failed attempts from the same IP", async () => {
-    await createTestUser(testUserData);
-
-    for (let i = 0; i < 5; i++) {
-      await request(app).post("/api/v1/auth/login").send({
-        login: testUserData.email,
-        password: "WrongPassword123",
-      });
-    }
-
-    const res = await request(app).post("/api/v1/auth/login").send({
-      login: testUserData.email,
-      password: "WrongPassword123",
-    });
-
-    expect(res.statusCode).toEqual(429);
-    expect(res.body.message).toBe(
-      "Too many login attempts. Please try again later",
-    );
-  });
-
-  it("should allow login after rate limit window has passed", async () => {
-    await createTestUser(testUserData);
-
-    const now = Date.now();
-    jest.spyOn(Date, "now").mockImplementation(() => now);
-
-    for (let i = 0; i < 5; i++) {
-      await request(app).post("/api/v1/auth/login").send({
-        login: testUserData.email,
-        password: "WrongPassword123",
-      });
-    }
-
-    // Move time forward 16 minutes
-    Date.now.mockImplementation(() => now + 16 * 60 * 1000);
-
-    const res = await request(app).post("/api/v1/auth/login").send({
-      login: testUserData.email,
-      password: unhashedPassword,
-    });
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.message).toBe("Login successful");
-    expect(res.body.user.username).toEqual(testUserData.username.toLowerCase());
-    expect(res.body.user.email).toEqual(testUserData.email);
-    expect(res.headers["set-cookie"]).toBeDefined();
-    expect(res.headers["set-cookie"][0]).toMatch(/token=/);
-    Date.now.mockRestore();
   });
 });
 

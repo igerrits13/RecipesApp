@@ -40,7 +40,7 @@ export default function RecipeRating({ interactive }: RecipeRatingProps) {
   };
 
   // Handle rating changes for keyboard
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     let nextRating = hoverRating ?? displayRating;
 
     switch (e.key) {
@@ -81,7 +81,7 @@ export default function RecipeRating({ interactive }: RecipeRatingProps) {
             const fillAmount = Math.min(Math.max(displayRating - i, 0), 1);
 
             return (
-              <div
+              <button
                 key={i}
                 className={`relative ${interactive ? "cursor-pointer" : ""}`}
                 role="slider"
@@ -92,6 +92,7 @@ export default function RecipeRating({ interactive }: RecipeRatingProps) {
                 aria-valuetext={`${hoverRating ?? displayRating} out of 5`}
                 tabIndex={0}
                 onKeyDown={handleKeyDown}
+                disabled={isLoadingRating || !interactive}
                 onMouseMove={
                   interactive
                     ? (e) => {
@@ -121,7 +122,7 @@ export default function RecipeRating({ interactive }: RecipeRatingProps) {
                     className={`size-4 lg:size-6 text-rosewood-500 max-w-none ${interactive && userRating && hoverRating === null ? "fill-rosewood-500" : ""}`}
                   />
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -129,7 +130,6 @@ export default function RecipeRating({ interactive }: RecipeRatingProps) {
           {recipe.aggregateRating} ({recipe.ratingCount})
         </div>
       </div>
-      {isLoadingRating && <div>Saving new rating...</div>}
       {rateRecipeError && <ValidationError message={rateRecipeError} />}
     </div>
   );

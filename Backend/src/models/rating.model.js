@@ -7,7 +7,7 @@ const ratingSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Recipe",
     },
-    rating: { type: Number, required: true, min: 1, max: 5 },
+    rating: { type: Number, required: true, min: 0.5, max: 5 },
   },
   { timestamps: true },
 );

@@ -613,11 +613,11 @@ describe("POST /api/v1/users/me/favorites/:recipeId", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("success", true);
-    expect(response.body.favoriteRecipes).toBeInstanceOf(Array);
-    expect(response.body.favoriteRecipes[0]._id).toBe(
+
+    const updatedUser = await User.findById(newUser._id);
+    expect(updatedUser.favoriteRecipes.map((id) => id.toString())).toContain(
       testRecipe._id.toString(),
     );
-    expect(response.body.favoriteRecipes.length).toBe(1);
   });
 
   it("should do nothing if the recipe is already in the user's favorite recipes", async () => {
@@ -637,46 +637,6 @@ describe("POST /api/v1/users/me/favorites/:recipeId", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("success", true);
-    expect(response.body.favoriteRecipes).toBeInstanceOf(Array);
-    expect(response.body.favoriteRecipes[0]._id).toBe(
-      testRecipe._id.toString(),
-    );
-    expect(response.body.favoriteRecipes.length).toBe(1);
-  });
-
-  it("should return all favorite recipes after adding a new one", async () => {
-    const newUser = await createSecondaryTestUser({
-      username: "testuser",
-      displayName: "TestUser",
-      email: `${crypto.randomUUID()}@example.com`,
-      password: "Password123",
-      favoriteRecipes: [testRecipe._id],
-    });
-
-    const anotherRecipe = await createTestRecipe(testUser1._id, {
-      title: "Another Test Recipe",
-      ingredientSections: [
-        {
-          sectionTitle: "Test Section",
-          ingredients: [{ ingredient: testIngredient._id }],
-        },
-      ],
-      slug: `another-test-${++testRecipeSlugIndex}`,
-    });
-
-    const loginAgent2 = await getAuthenticatedAgent(newUser);
-
-    const response = await loginAgent2.post(
-      `/api/v1/users/me/favorites/${anotherRecipe._id}`,
-    );
-
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty("success", true);
-    expect(response.body.favoriteRecipes).toBeInstanceOf(Array);
-    expect(response.body.favoriteRecipes.length).toBe(2);
-    const recipeIds = response.body.favoriteRecipes.map((recipe) => recipe._id);
-    expect(recipeIds).toContain(testRecipe._id.toString());
-    expect(recipeIds).toContain(anotherRecipe._id.toString());
   });
 
   it("should return 400 if the recipe ID is invalid", async () => {
@@ -734,8 +694,9 @@ describe("DELETE /api/v1/users/me/favorites/:recipeId", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("success", true);
-    expect(response.body.favoriteRecipes).toBeInstanceOf(Array);
-    expect(response.body.favoriteRecipes.length).toBe(0);
+
+    const updatedUser = await User.findById(newUser._id);
+    expect(updatedUser.favoriteRecipes).not.toContain(testRecipe._id);
   });
 
   it("should do nothing if the recipe is not in the user's favorite recipes", async () => {
@@ -754,8 +715,6 @@ describe("DELETE /api/v1/users/me/favorites/:recipeId", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("success", true);
-    expect(response.body.favoriteRecipes).toBeInstanceOf(Array);
-    expect(response.body.favoriteRecipes.length).toBe(0);
   });
 
   it("should return 400 if the recipe ID is invalid", async () => {
@@ -769,9 +728,7 @@ describe("DELETE /api/v1/users/me/favorites/:recipeId", () => {
   });
 
   it("should return 401 if not authenticated", async () => {
-    const response = await request(app).delete(
-      `/api/v1/users/me/favorites/${testRecipe._id}`,
-    );
+    await request(app).delete(`/api/v1/users/me/favorites/${testRecipe._id}`);
   });
 
   it("should do nothing if the recipe does not exist", async () => {
@@ -783,8 +740,6 @@ describe("DELETE /api/v1/users/me/favorites/:recipeId", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("success", true);
-    expect(response.body.favoriteRecipes).toBeInstanceOf(Array);
-    expect(response.body.favoriteRecipes.length).toBe(0);
   });
 });
 

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --runInBand --detectOpenHandles",
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --runInBand --detectOpenHandles --testPathIgnorePatterns=tests/integration/rate-limit.routes.test.js",
+    "test:rate-limit": "cross-env NODE_ENV=test ENABLE_RATE_LIMIT=true node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand tests/integration/rate-limit.routes.test.js",
     "test:watch": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --runInBand --detectOpenHandles --watchAll",
     "dev": "nodemon src/server.js"
   },
