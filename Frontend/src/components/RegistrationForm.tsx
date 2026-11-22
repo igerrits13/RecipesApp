@@ -56,7 +56,7 @@ export default function RegistrationForm() {
       className="flex flex-col gap-2 sm:gap-4 items-center z-10 w-3/4 sm:w-1/2 lg:w-1/3 2xl:w-1/4 font-body rounded-4xl p-6 bg-antique-parchment-500"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="mb-4 font-subtitle font-bold text-center text-ink-black-500 text-xl md:text-2xl">
+      <div className="mb-4 font-subtitle font-bold text-center text-xl md:text-2xl">
         Join the Family!
       </div>
       <div className="flex w-full rounded-full bg-sage-olive-500 py-1 px-3">

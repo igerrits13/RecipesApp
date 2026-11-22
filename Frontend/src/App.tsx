@@ -28,7 +28,7 @@ function App() {
   if (isCheckingAuth) return <Loading />;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen text-ink-black-500">
       <Routes>
         <Route path="/" element={<HomeView />} />
         <Route path="/recipe/:recipeSlug" element={<RecipeView />} />

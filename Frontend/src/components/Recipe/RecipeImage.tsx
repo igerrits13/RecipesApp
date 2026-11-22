@@ -1,6 +1,6 @@
 import { Heart } from "lucide-react";
 import { useRecipeStore } from "../../store/RecipeStore";
-import defaultRecipeImage from "../../../public/images/defaultRecipeImage.jpg";
+import defaultRecipeImage from "../../images/defaultRecipeImage.jpg";
 import { useAuthStore } from "../../store/AuthStore";
 import ValidationError from "../ValidationError";
 

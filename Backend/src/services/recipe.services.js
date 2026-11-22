@@ -1392,7 +1392,11 @@ export async function getAllRecipeComments({
     parentCommentId: null,
     isDeleted: false,
   })
-    .populate("authorId", "displayName profileImage isBanned isDeleted")
+    .select("-recipeId -__v")
+    .populate(
+      "authorId",
+      "-_id displayName slug profileImage isBanned isDeleted",
+    )
     .sort({ createdAt: -1 });
 
   // Filter out any comments where the user is banned
@@ -1412,7 +1416,11 @@ export async function getAllRecipeComments({
     parentCommentId: { $in: parentComments.map((comment) => comment._id) },
     isDeleted: false,
   })
-    .populate("authorId", "displayName profileImage isBanned isDeleted")
+    .select("-recipeId -__v")
+    .populate(
+      "authorId",
+      "-_id displayName slug profileImage isBanned isDeleted",
+    )
     .sort({ createdAt: -1 });
 
   // Categorize the parent comments and their replies into a nested structure

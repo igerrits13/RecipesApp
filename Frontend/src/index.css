@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant hover (&:hover);
+
 /* Define font faces */
 @font-face {
   font-family: "Merriweather";

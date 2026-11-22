@@ -5,6 +5,7 @@ import type { Cuisine } from "./Cuisine";
 import type { Meal } from "./Meal";
 import type { Holiday } from "./Holiday";
 import type { Season } from "./Season";
+import type { Comment } from "./Comment";
 
 // Interface for recipe
 export interface Recipe {
@@ -39,6 +40,12 @@ export interface Recipe {
   deletedAt: Date;
   isPublished: boolean;
   isApproved: boolean;
+  comments: {
+    comments: Comment[];
+    currentPage: number;
+    totalComments: number;
+    totalPages: number;
+  };
   userInteractions: {
     userNote: UserNote | null;
     userRating: UserRating | null;

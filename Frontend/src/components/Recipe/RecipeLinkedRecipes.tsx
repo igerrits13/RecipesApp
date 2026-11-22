@@ -1,5 +1,6 @@
 import RecipeCardTemplate from "../RecipeCardTemplate";
 
+// RecipeLinkedRecipes component that displayuses linked recipes
 export default function RecipeLinkedRecipes() {
   return (
     <div className="flex flex-col gap-6 px-4">

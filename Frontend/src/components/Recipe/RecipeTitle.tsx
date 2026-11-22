@@ -24,7 +24,7 @@ export default function RecipeTitle() {
 
   // Recipe title component that displays the title and heading information of the recipe
   return (
-    <div className="text-ink-black-500 sm:col-start-2 px-4 py-2 flex flex-col place-items-center">
+    <div className="sm:col-start-2 px-4 py-2 flex flex-col place-items-center">
       {/* Recipe title */}
       <div className="flex justify-between w-full">
         <div className="grow w-full font-title focus:outline-none autofill-light text-2xl md:text-3xl lg:text-4xl">
@@ -42,7 +42,7 @@ export default function RecipeTitle() {
                   href={recipe.source.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sage-olive-500 underline hover:text-sage-olive-300 hover:cursor-pointer ps-1"
+                  className="text-sage-olive-500 underline hover:text-sage-olive-300 ps-1"
                 >
                   {recipe.source.name}
                 </a>
@@ -75,7 +75,7 @@ export default function RecipeTitle() {
                 to={`/recipe/${recipe.slug}/edit`}
                 className="relative inline-block group"
               >
-                <SquarePen className="size-4 lg:size-6 text-rosewood-500 hover:text-rosewood-300 hover:cursor-pointer" />
+                <SquarePen className="size-4 lg:size-6 text-rosewood-500 hover:text-rosewood-300" />
                 <div className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   Edit this recipe
                   <div className="absolute top-full left-1/2 -mt-1 h-2 w-2 -translate-x-1/2 rotate-45 bg-gray-900"></div>
@@ -105,7 +105,7 @@ export default function RecipeTitle() {
           ) : (
             <Link
               to={`/other-profile/${recipe.author.slug}`}
-              className="text-sage-olive-500 underline hover:text-sage-olive-300 hover:cursor-pointer"
+              className="text-sage-olive-500 underline hover:text-sage-olive-300"
             >
               {recipe.author.displayName}
             </Link>

@@ -10,11 +10,13 @@ interface RecipeState {
   isLoadingRating: boolean;
   isLoadingNote: boolean;
   isLoadingFavorite: boolean;
+  isLoadingComments: boolean;
   getRecipeError: string | null;
   createRecipeError: string | null;
   rateRecipeError: string | null;
   noteError: string | null;
   favoriteRecipeError: string | null;
+  commentsError: string | null;
 }
 
 // Types of recipe actions
@@ -28,9 +30,13 @@ interface RecipeActions {
   deleteNote: (noteId?: string) => Promise<void>;
   addFavoriteRecipe: (recipeId: string) => Promise<void>;
   removeFavoriteRecipe: (recipeId: string) => Promise<void>;
+  getRecipeComments: (recipeSlug: string) => Promise<void>;
+  clearGetRecipeError: () => void;
   clearCreateRecipeError: () => void;
   clearRateRecipeError: () => void;
-  clearGetRecipeError: () => void;
+  clearNoteError: () => void;
+  clearFavoriteRecipeError: () => void;
+  clearCommentsError: () => void;
 }
 
 // Combine recipe state and actions
@@ -44,11 +50,13 @@ const initialRecipeState: RecipeState = {
   isLoadingRating: false,
   isLoadingNote: false,
   isLoadingFavorite: false,
+  isLoadingComments: false,
   getRecipeError: null,
   createRecipeError: null,
   rateRecipeError: null,
   noteError: null,
   favoriteRecipeError: null,
+  commentsError: null,
 };
 
 // Create the recipe store
@@ -367,6 +375,43 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
     }
   },
 
+  // Get all comments for a recipe
+  getRecipeComments: async (recipeSlug) => {
+    set({ commentsError: null, isLoadingComments: true });
+    try {
+      const response = await axios.get(
+        `/api/v1/recipes/${recipeSlug}/comments`,
+      );
+      set((state) => ({
+        recipe: state.recipe
+          ? {
+              ...state.recipe,
+              comments: response.data.comments,
+              commentCount: response.data.commentCount,
+              totalComments: response.data.totalComments,
+              totalPages: response.data.totalPages,
+            }
+          : null,
+        commentsError: null,
+        isLoadingComments: false,
+      }));
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          commentsError:
+            error.response?.data?.message || "Failed to get comments",
+          isLoadingComments: false,
+        });
+      } else {
+        set({
+          commentsError: "Unable to get comments. Please try again",
+          isLoadingComments: false,
+        });
+      }
+      throw error;
+    }
+  },
+
   // Clear the get recipe error
   clearGetRecipeError: () => set({ getRecipeError: null }),
 
@@ -375,4 +420,13 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
 
   // Clear the rate recipe error
   clearRateRecipeError: () => set({ rateRecipeError: null }),
+
+  // Clear the favorite recipe error
+  clearFavoriteRecipeError: () => set({ favoriteRecipeError: null }),
+
+  // Clear the note error
+  clearNoteError: () => set({ noteError: null }),
+
+  // Clear the comments error
+  clearCommentsError: () => set({ commentsError: null }),
 }));

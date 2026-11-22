@@ -37,7 +37,7 @@ export default function RecipeChefNotes() {
   };
 
   return (
-    <div className="flex flex-col w-full h-full text-ink-black-500 overflow-hidden md:overflow-visible">
+    <div className="flex flex-col w-full h-full overflow-hidden md:overflow-visible">
       Notes from the Kitchen:
       <span className="w-full my-4 px-4">{recipe?.notes}</span>
       {/* Sticky note for personal notes not seen by other users */}

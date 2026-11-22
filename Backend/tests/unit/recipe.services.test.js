@@ -78,6 +78,7 @@ beforeAll(async () => {
   testUser = await createTestUser();
   otherUser = await createSecondaryTestUser({
     username: "otheruser",
+    slug: "otheruser",
     displayName: "OtherUser",
     email: `${crypto.randomUUID()}@example.com`,
     password: "Password123",
@@ -3686,6 +3687,9 @@ describe("getAllRecipeComments", () => {
     result.comments.forEach((comment) => {
       expect(comment).toHaveProperty("_id");
       expect(comment).toHaveProperty("authorId");
+      expect(comment.authorId).toHaveProperty("displayName");
+      expect(comment.authorId).toHaveProperty("slug");
+      expect(comment.authorId).toHaveProperty("profileImage");
       expect(comment).toHaveProperty("content");
       expect(comment).toHaveProperty("createdAt");
       expect(comment).toHaveProperty("updatedAt");
@@ -3867,9 +3871,7 @@ describe("getAllRecipeComments", () => {
     });
 
     expect(result.comments).toHaveLength(1);
-    expect(result.comments[0].authorId._id.toString()).toBe(
-      otherUser._id.toString(),
-    );
+    expect(result.comments[0].authorId.slug).toBe(otherUser.slug);
   });
 
   test("should skip the correct number of comments based on the page and limit parameters even with banned user comments", async () => {
@@ -3934,7 +3936,6 @@ describe("validateAndAddComment", () => {
     });
 
     expect(result).toHaveProperty("_id");
-    expect(result.authorId._id.toString()).toBe(testUser._id.toString());
     expect(result.recipeId.toString()).toBe(recipe._id.toString());
     expect(result.content).toBe(commentContent);
     expect(result.parentCommentId).toBeNull();

@@ -40,7 +40,7 @@ export default function UserDropdown() {
       <MenuItems
         transition
         anchor="bottom end"
-        className="z-20 w-52 origin-top-right rounded-xl border border-ink-black-300 bg-antique-parchment-500 py-2 px-1 text-base text-ink-black-500 transition duration-100 ease-out [--anchor-gap:--spacing(1)] focus:outline-none data-closed:scale-95 data-closed:opacity-0"
+        className="z-20 w-52 origin-top-right rounded-xl border border-ink-black-300 bg-antique-parchment-500 py-2 px-1 text-base transition duration-100 ease-out [--anchor-gap:--spacing(1)] focus:outline-none data-closed:scale-95 data-closed:opacity-0"
       >
         {user ? (
           <>

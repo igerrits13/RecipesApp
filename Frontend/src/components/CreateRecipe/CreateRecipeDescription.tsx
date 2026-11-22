@@ -13,7 +13,7 @@ export default function CreateRecipeDescription() {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex grow flex-col py-6 items-center gap-2 h-full bg-antique-parchment-500 text-ink-black-500 text-nowrap">
+      <div className="flex grow flex-col py-6 items-center gap-2 h-full bg-antique-parchment-500 text-nowrap">
         {/* Prep/Cook time */}
         <div className="flex px-2">
           <div className="text-olive-500"> * </div>

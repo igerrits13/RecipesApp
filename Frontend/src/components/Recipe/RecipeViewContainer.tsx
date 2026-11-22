@@ -8,6 +8,7 @@ import RecipeIngredients from "./RecipeIngredients";
 import RecipeSteps from "./RecipeSteps";
 import RecipeChefNotes from "./RecipeChefNotes";
 import RecipeLinkedRecipes from "./RecipeLinkedRecipes";
+import RecipeComments from "./RecipeComments";
 
 export default function RecipeViewContainer() {
   // Allow navigation
@@ -62,6 +63,7 @@ export default function RecipeViewContainer() {
       <div className="flex flex-col pt-8 gap-8">
         <RecipeChefNotes />
         <RecipeLinkedRecipes />
+        <RecipeComments />
       </div>
     </div>
   );
