@@ -3907,8 +3907,8 @@ describe("getAllRecipeComments", () => {
     });
 
     expect(result.comments).toHaveLength(2);
-    expect(result.comments[0].authorId.displayName).toBe(`bannedTest5`);
-    expect(result.comments[1].authorId.displayName).toBe(`bannedTest3`);
+    expect(result.comments[0].authorId.displayName).toBe(`bannedTest9`);
+    expect(result.comments[1].authorId.displayName).toBe(`bannedTest7`);
   });
 });
 
