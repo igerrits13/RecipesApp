@@ -30,7 +30,7 @@ interface RecipeActions {
   deleteNote: (noteId?: string) => Promise<void>;
   addFavoriteRecipe: (recipeId: string) => Promise<void>;
   removeFavoriteRecipe: (recipeId: string) => Promise<void>;
-  getRecipeComments: (recipeSlug: string) => Promise<void>;
+  getRecipeComments: (recipeSlug: string, page?: number) => Promise<void>;
   clearGetRecipeError: () => void;
   clearCreateRecipeError: () => void;
   clearRateRecipeError: () => void;
@@ -376,20 +376,26 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
   },
 
   // Get all comments for a recipe
-  getRecipeComments: async (recipeSlug) => {
+  getRecipeComments: async (recipeSlug, page = 1) => {
     set({ commentsError: null, isLoadingComments: true });
     try {
       const response = await axios.get(
-        `/api/v1/recipes/${recipeSlug}/comments`,
+        `/api/v1/recipes/${recipeSlug}/comments?page=${page}`,
       );
       set((state) => ({
         recipe: state.recipe
           ? {
               ...state.recipe,
-              comments: response.data.comments,
-              commentCount: response.data.commentCount,
-              totalComments: response.data.totalComments,
-              totalPages: response.data.totalPages,
+              comments: {
+                ...response.data.comments,
+                comments:
+                  page === 1
+                    ? response.data.comments.comments
+                    : [
+                        ...(state.recipe.comments?.comments || []),
+                        ...response.data.comments.comments,
+                      ],
+              },
             }
           : null,
         commentsError: null,

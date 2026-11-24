@@ -2,11 +2,18 @@ import { Link } from "react-router-dom";
 import type { Comment } from "../../types/Comment";
 import { useAuthStore } from "../../store/AuthStore";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
+import type { JSX } from "react/jsx-runtime";
 
 type RecipeCommentReplyProps = {
   comment: Comment;
   parentComment: Comment;
-  formatDate: (dateInput: Date | string) => string;
+  formatDate: (
+    dateInput: Date | string,
+    use12Hour?: boolean,
+    separator?: string,
+    timeZone?: string,
+    className?: string,
+  ) => JSX.Element | null;
 };
 
 // RecipeCommentReply component displays replies to a comment

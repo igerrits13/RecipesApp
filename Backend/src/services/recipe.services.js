@@ -1405,10 +1405,7 @@ export async function getAllRecipeComments({
   );
 
   // Apply pagination to the filtered parent comments and get the count of total comments after filtering
-  const parentComments = filteredParentComments.slice(
-    (page - 1) * limit + offset,
-    (page - 1) * limit + limit + offset,
-  );
+  const parentComments = filteredParentComments.slice(offset, limit + offset);
   const totalComments = filteredParentComments.length;
 
   // Get all replies to the parent comments, sorted by most recent first

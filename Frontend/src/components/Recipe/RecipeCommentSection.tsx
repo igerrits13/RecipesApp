@@ -3,6 +3,7 @@ import { ThumbsDown, ThumbsUp } from "lucide-react";
 import type { Comment } from "../../types/Comment";
 import { useAuthStore } from "../../store/AuthStore";
 import RecipeCommentReply from "./RecipeCommentReply";
+import type { JSX } from "react/jsx-runtime";
 
 interface RecipeCommentSectionProps {
   comment: Comment;
@@ -27,22 +28,43 @@ export default function RecipeCommentSection({
   const commentVotes = comment.aggregateVote;
 
   // Helper function for formatting the date
-  const formatDate = (dateInput: Date | string): string => {
-    const date =
-      typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  const formatDate = (
+    dateInput: Date | string,
+    use12Hour: boolean = false,
+    separator: string = " at ",
+    timeZone: string = "UTC",
+    className: string = "",
+  ): JSX.Element | null => {
+    const parsedDate =
+      dateInput instanceof Date ? dateInput : new Date(dateInput);
 
-    if (Number.isNaN(date.getTime())) {
-      return "";
+    // Check if the date is valid
+    if (Number.isNaN(parsedDate.getTime())) {
+      return null;
     }
 
-    // en-GB outputs "22 June 2026"; replace inserts the comma after the month
-    return new Intl.DateTimeFormat("en-GB", {
+    // Format the date
+    const datePart = new Intl.DateTimeFormat("en-GB", {
       day: "numeric",
       month: "long",
       year: "numeric",
+      timeZone,
     })
-      .format(date)
+      .format(parsedDate)
       .replace(/ (\d{4})$/, ", $1");
+
+    const timePart = new Intl.DateTimeFormat(use12Hour ? "en-US" : "en-GB", {
+      hour: use12Hour ? "numeric" : "2-digit",
+      minute: "2-digit",
+      hour12: use12Hour,
+      timeZone,
+    }).format(parsedDate);
+
+    return (
+      <time dateTime={parsedDate.toISOString()} className={className}>
+        {`${datePart}${separator}${timePart}`}
+      </time>
+    );
   };
 
   return (

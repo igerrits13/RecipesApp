@@ -5,7 +5,7 @@ import RecipeCommentSection from "./RecipeCommentSection";
 // RecipeComments component is a wrapper for displaying all comments
 export default function RecipeComments() {
   // Recipe store
-  const { recipe, getRecipeComments } = useRecipeStore();
+  const { recipe, getRecipeComments, isLoadingComments } = useRecipeStore();
 
   const recipeSlug = recipe?.slug;
 
@@ -31,18 +31,27 @@ export default function RecipeComments() {
                 key={comment._id}
                 comment={comment}
                 index={index}
-                maxIndex={recipe.comments.totalComments - 1}
+                maxIndex={(recipe.comments?.comments.length ?? 0) - 1}
               />
             ))}
           </div>
           <hr className="w-full mb-6 border-2 border-rosewood-500" />
-          <button
-            className={`my-4 text-center w-fit place-self-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300`}
-            type="submit"
-            disabled={true}
-          >
-            Load more
-          </button>
+          {recipe.comments.currentPage < recipe.comments.totalPages && (
+            <button
+              className={`my-4 text-center w-fit place-self-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300`}
+              type="button"
+              disabled={isLoadingComments}
+              onClick={() => {
+                if (recipeSlug)
+                  getRecipeComments(
+                    recipeSlug,
+                    (recipe.comments?.currentPage ?? 1) + 1,
+                  );
+              }}
+            >
+              Load more
+            </button>
+          )}
         </>
       )}
     </div>

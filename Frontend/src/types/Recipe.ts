@@ -40,7 +40,7 @@ export interface Recipe {
   deletedAt: Date;
   isPublished: boolean;
   isApproved: boolean;
-  comments: {
+  comments?: {
     comments: Comment[];
     currentPage: number;
     totalComments: number;
