@@ -117,6 +117,7 @@ export async function getCurrentUserComments(user, page, limit, offset) {
     currentPage: page,
     totalComments: totalComments,
     totalPages: Math.ceil(totalComments / limit),
+    limit,
   };
 }
 

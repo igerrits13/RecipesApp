@@ -20,6 +20,7 @@ interface RecipeState {
   favoriteRecipeError: string | null;
   commentsError: string | null;
   createCommentError: string | null;
+  updateCommentError: string | null;
 }
 
 // Types of recipe actions
@@ -42,6 +43,8 @@ interface RecipeActions {
     recipeSlug: string,
     comment: CreateCommentData,
   ) => Promise<void>;
+  deleteRecipeComment: (commentId: string) => Promise<void>;
+  updateRecipeComment: (commentId: string, content: string) => Promise<void>;
   clearGetRecipeError: () => void;
   clearCreateRecipeError: () => void;
   clearRateRecipeError: () => void;
@@ -71,6 +74,7 @@ const initialRecipeState: RecipeState = {
   favoriteRecipeError: null,
   commentsError: null,
   createCommentError: null,
+  updateCommentError: null,
 };
 
 // Create the recipe store
@@ -512,6 +516,113 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
           isSavingComment: false,
         });
       }
+
+      throw error;
+    }
+  },
+
+  // Delete a comment by its id
+  deleteRecipeComment: async (commentId) => {
+    set({ updateCommentError: null, isSavingComment: true });
+
+    try {
+      await axios.delete(`/api/v1/comments/${commentId}`);
+
+      set((state) => {
+        if (!state.recipe?.comments) return {};
+
+        const comments = state.recipe.comments.comments;
+
+        const isParentComment = comments.some(
+          (comment) => comment._id === commentId,
+        );
+
+        return {
+          recipe: {
+            ...state.recipe,
+            comments: {
+              ...state.recipe.comments,
+              comments: comments
+                .filter((comment) => comment._id !== commentId)
+                .map((comment) => ({
+                  ...comment,
+                  replies: (comment.replies ?? []).filter(
+                    (reply) => reply._id !== commentId,
+                  ),
+                })),
+              totalComments: Math.max(
+                0,
+                state.recipe.comments.totalComments - (isParentComment ? 1 : 0),
+              ),
+              totalPages: Math.ceil(
+                (state.recipe.comments.totalComments -
+                  (isParentComment ? 1 : 0)) /
+                  state.recipe.comments.limit,
+              ),
+            },
+          },
+        };
+      });
+      set({
+        updateCommentError: null,
+        isSavingComment: false,
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          updateCommentError:
+            error.response?.data?.message || "Failed to delete comment",
+          isSavingComment: false,
+        });
+      } else {
+        set({
+          updateCommentError: "Unable to delete comment. Please try again",
+          isSavingComment: false,
+        });
+      }
+
+      throw error;
+    }
+  },
+
+  // Update a comment by its id
+  updateRecipeComment: async (commentId, content) => {
+    set({ updateCommentError: null, isSavingComment: true });
+
+    try {
+      const response = await axios.put(`/api/v1/comments/${commentId}`, {
+        content,
+      });
+
+      const updatedComment = response.data.comment;
+
+      set((state) => {
+        if (!state.recipe?.comments) return {};
+
+        return {
+          recipe: {
+            ...state.recipe,
+            comments: {
+              ...state.recipe.comments,
+              comments: state.recipe.comments.comments.map((comment) => ({
+                ...(comment._id === commentId ? updatedComment : comment),
+                replies: (comment.replies ?? []).map((reply) =>
+                  reply._id === commentId ? updatedComment : reply,
+                ),
+              })),
+            },
+          },
+          updateCommentError: null,
+          isSavingComment: false,
+        };
+      });
+    } catch (error) {
+      set({
+        updateCommentError: axios.isAxiosError(error)
+          ? error.response?.data?.message || "Failed to update comment"
+          : "Unable to update comment. Please try again",
+        isSavingComment: false,
+      });
 
       throw error;
     }

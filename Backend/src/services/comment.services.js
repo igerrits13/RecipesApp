@@ -130,6 +130,7 @@ export async function getAllUserComments(authorId, page, limit, offset) {
     currentPage: page,
     totalComments,
     totalPages: Math.ceil(totalComments / limit),
+    limit,
   };
 }
 
@@ -151,7 +152,9 @@ export async function updateSpecificCommentById(commentId, authorId, content) {
     _id: commentId,
     authorId,
     isDeleted: false,
-  }).populate("authorId", "displayName profileImage");
+  })
+    .populate("authorId", "displayName profileImage")
+    .select("-recipeId -__v");
 
   if (!comment) {
     const err = new Error("Comment not found");

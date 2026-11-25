@@ -160,6 +160,10 @@ describe("GET /api/v1/users/me/comments", () => {
     expect(response.body).toHaveProperty("comments");
     expect(Array.isArray(response.body.comments.comments)).toBe(true);
     expect(response.body.comments.comments.length).toBe(0);
+    expect(response.body.comments.totalComments).toBe(0);
+    expect(response.body.comments.currentPage).toBe(1);
+    expect(response.body.comments.totalPages).toBe(0);
+    expect(response.body.comments.limit).toBe(10);
   });
 
   it("should return a full list of the user's comments if there are any", async () => {

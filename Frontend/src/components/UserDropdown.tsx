@@ -3,6 +3,7 @@ import ValidationError from "./ValidationError";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
+// UserDropdown component for the secondary navigation bar allowing users to login, register, create a recipe, etc.
 export default function UserDropdown() {
   // Get the user from global state
   const { user, logout, logoutError } = useAuthStore();
@@ -71,7 +72,6 @@ export default function UserDropdown() {
             {logoutError && <ValidationError message={logoutError} />}
           </>
         ) : (
-          // <div className="my-1 h-px bg-ink-black-300" />
           <>
             <MenuItem>
               <Link

@@ -4128,6 +4128,11 @@ describe("GET /api/v1/recipes/:recipeSlug/comments", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.comments).toBeDefined();
+    expect(response.body.comments.comments).toBeDefined();
+    expect(response.body.comments.currentPage).toBe(1);
+    expect(response.body.comments.totalComments).toBe(1);
+    expect(response.body.comments.totalPages).toBe(1);
+    expect(response.body.comments.limit).toBe(10);
     expect(Array.isArray(response.body.comments.comments)).toBe(true);
   });
 

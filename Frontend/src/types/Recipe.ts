@@ -45,6 +45,7 @@ export interface Recipe {
     currentPage: number;
     totalComments: number;
     totalPages: number;
+    limit: number;
   };
   userInteractions: {
     userNote: UserNote | null;

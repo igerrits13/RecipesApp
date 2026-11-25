@@ -70,6 +70,9 @@ describe("GET /api/comments/", () => {
     expect(res.body.success).toBe(true);
     expect(res.body.comments.comments).toBeInstanceOf(Array);
     expect(res.body.comments.totalComments).toBe(0);
+    expect(res.body.comments.currentPage).toBe(1);
+    expect(res.body.comments.totalPages).toBe(0);
+    expect(res.body.comments.limit).toBe(10);
   });
 
   it("should fetch all comments for the authenticated user with multiple comments", async () => {

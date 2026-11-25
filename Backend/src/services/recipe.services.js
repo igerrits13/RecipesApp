@@ -1436,6 +1436,7 @@ export async function getAllRecipeComments({
     currentPage: page,
     totalComments,
     totalPages: Math.ceil(totalComments / limit),
+    limit,
   };
 }
 
