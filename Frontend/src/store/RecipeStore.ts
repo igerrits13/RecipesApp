@@ -38,6 +38,10 @@ interface RecipeActions {
     recipeSlug: string,
     comment: CreateCommentData,
   ) => Promise<void>;
+  createReplyComment: (
+    recipeSlug: string,
+    comment: CreateCommentData,
+  ) => Promise<void>;
   clearGetRecipeError: () => void;
   clearCreateRecipeError: () => void;
   clearRateRecipeError: () => void;
@@ -433,10 +437,7 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
     set({ createCommentError: null, isSavingComment: true });
 
     try {
-      const response = await axios.post(
-        `/api/v1/recipes/${recipeSlug}/comments`,
-        comment,
-      );
+      await axios.post(`/api/v1/recipes/${recipeSlug}/comments`, comment);
 
       // Refresh page 1 so the new comment appears at the top
       await get().getRecipeComments(recipeSlug, 1);
@@ -445,8 +446,59 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
         createCommentError: null,
         isSavingComment: false,
       });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          createCommentError:
+            error.response?.data?.message || "Failed to create comment",
+          isSavingComment: false,
+        });
+      } else {
+        set({
+          createCommentError: "Unable to create comment. Please try again",
+          isSavingComment: false,
+        });
+      }
 
-      return response.data.comment;
+      throw error;
+    }
+  },
+
+  // Reply to the parent comment
+  createReplyComment: async (recipeSlug, reply) => {
+    set({ createCommentError: null, isSavingComment: true });
+
+    try {
+      const response = await axios.post(
+        `/api/v1/recipes/${recipeSlug}/comments`,
+        reply,
+      );
+
+      set((state) => ({
+        recipe: state.recipe
+          ? {
+              ...state.recipe,
+              comments: state.recipe.comments
+                ? {
+                    ...state.recipe.comments,
+                    comments: state.recipe.comments.comments.map((comment) =>
+                      comment._id === reply.parentCommentId
+                        ? {
+                            ...comment,
+                            replies: [
+                              response.data.comment,
+                              ...comment.replies,
+                            ],
+                          }
+                        : comment,
+                    ),
+                  }
+                : undefined,
+            }
+          : null,
+        createCommentError: null,
+        isSavingComment: false,
+      }));
     } catch (error) {
       if (axios.isAxiosError(error)) {
         set({

@@ -4,6 +4,8 @@ import type { Comment } from "../../types/Comment";
 import { useAuthStore } from "../../store/AuthStore";
 import RecipeCommentReply from "./RecipeCommentReply";
 import type { JSX } from "react/jsx-runtime";
+import { useState } from "react";
+import RecipeCreateComment from "./RecipeCreateComment";
 
 interface RecipeCommentSectionProps {
   comment: Comment;
@@ -19,6 +21,9 @@ export default function RecipeCommentSection({
 }: RecipeCommentSectionProps) {
   // User store
   const { user } = useAuthStore();
+
+  // State to keep track of if the user is replying to the comment
+  const [isReplying, setIsReplying] = useState(false);
 
   // Check if the user is the author of the comment
   const isAuthor = user?.slug === comment.authorId.slug;
@@ -116,10 +121,21 @@ export default function RecipeCommentSection({
             </>
           )}
         </div>
-        <div className="text-sage-olive-500 underline hover:text-sage-olive-300 hover:cursor-pointer ps-1 w-fit">
-          Reply
-        </div>
+        {user && !isReplying && (
+          <div
+            className="text-sage-olive-500 underline hover:text-sage-olive-300 hover:cursor-pointer ps-1 w-fit"
+            onClick={() => setIsReplying(true)}
+          >
+            Reply
+          </div>
+        )}
       </div>
+      {user && isReplying && (
+        <RecipeCreateComment
+          setIsWritingComment={setIsReplying}
+          parentCommentId={comment._id}
+        />
+      )}
       <div className="ms-12 px-2 border-l-3 border-rosewood-500">
         {comment.replies.map((reply) => (
           <RecipeCommentReply

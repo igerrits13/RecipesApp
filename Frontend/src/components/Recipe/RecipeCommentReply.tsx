@@ -63,9 +63,9 @@ export default function RecipeCommentReply({
           {commentVotes}
         </div>
       </div>
-      <div className="flex gap-2 items-center">
+      <div className="items-center">
         <Link
-          className="text-sage-olive-500 underline hover:text-sage-olive-300 hover:cursor-pointer ps-1 w-fit"
+          className="text-sage-olive-500 underline hover:text-sage-olive-300 hover:cursor-pointer ps-1 pe-2 w-fit"
           to={`/profile/${parentComment.authorId.slug}`}
         >
           @{parentComment.authorId.displayName}

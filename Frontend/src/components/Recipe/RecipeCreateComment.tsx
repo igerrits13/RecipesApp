@@ -6,15 +6,22 @@ import { useRecipeStore } from "../../store/RecipeStore";
 
 interface RecipeCreateCommentProps {
   setIsWritingComment: React.Dispatch<React.SetStateAction<boolean>>;
+  parentCommentId?: string;
 }
 
 // RecipeCreateComment component allows the user to add a comment to a recipe
 export default function RecipeCreateComment({
   setIsWritingComment,
+  parentCommentId,
 }: RecipeCreateCommentProps) {
   // Recipe and User store
-  const { recipe, createComment, isSavingComment, createCommentError } =
-    useRecipeStore();
+  const {
+    recipe,
+    createComment,
+    createReplyComment,
+    isSavingComment,
+    createCommentError,
+  } = useRecipeStore();
   const { user } = useAuthStore();
 
   // State to keep track of the comment and error
@@ -29,21 +36,31 @@ export default function RecipeCreateComment({
   const handleCreateComment = async () => {
     const result = commentSchema.safeParse({ content: commentContent });
 
+    // Return if the comment is blank
+    if (!commentContent) {
+      return setCommentContentError("Comment is required");
+    }
+
     if (!result.success) {
       setIsWritingComment(false);
       return setCommentContentError(result.error.issues[0]?.message);
+    } else if (!parentCommentId) {
+      await createComment(recipe.slug, {
+        content: commentContent,
+        parentCommentId: null,
+      });
+    } else {
+      await createReplyComment(recipe.slug, {
+        content: commentContent,
+        parentCommentId,
+      });
     }
-
-    await createComment(recipe.slug, {
-      content: commentContent,
-      parentCommentId: null,
-    });
 
     setIsWritingComment(false);
   };
 
   return (
-    <div className="flex flex-col gap-2 py-4">
+    <div className="flex flex-col gap-2 py-4 w-full">
       <textarea
         className="w-full rounded-md border-2 border-rosewood-500 p-2"
         placeholder="Add a comment..."
