@@ -13,6 +13,12 @@ export interface Comment {
   userVote: string | null;
 }
 
+// Interface for creating a comment
+export interface CreateCommentData {
+  content: string;
+  parentCommentId: string | null;
+}
+
 interface Author {
   slug: string;
   displayName: string;

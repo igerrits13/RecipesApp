@@ -1,11 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRecipeStore } from "../../store/RecipeStore";
 import RecipeCommentSection from "./RecipeCommentSection";
+import { useAuthStore } from "../../store/AuthStore";
+import RecipeCreateComment from "./RecipeCreateComment";
 
 // RecipeComments component is a wrapper for displaying all comments
 export default function RecipeComments() {
-  // Recipe store
+  // User and Recipe store
+  const { user } = useAuthStore();
   const { recipe, getRecipeComments, isLoadingComments } = useRecipeStore();
+
+  // State to keep track of if the user is creating a comment
+  const [isWritingComment, setIsWritingComment] = useState(false);
 
   const recipeSlug = recipe?.slug;
 
@@ -20,6 +26,19 @@ export default function RecipeComments() {
   return (
     <div className="flex flex-col px-4">
       Notes from the community ({recipe.comments.totalComments}):
+      {/* Post a new comment */}
+      {user &&
+        (isWritingComment ? (
+          <RecipeCreateComment setIsWritingComment={setIsWritingComment} />
+        ) : (
+          <button
+            className="w-fit mt-4 place-self-center rounded-full bg-rosewood-500 text-white py-1 px-3 sm:py-2 sm:px-5 cursor-pointer hover:bg-rosewood-300"
+            type="button"
+            onClick={() => setIsWritingComment(true)}
+          >
+            Post a new comment
+          </button>
+        ))}
       {/* <RecipeCommentSection /> */}
       {recipe?.comments.totalComments > 0 && (
         <>

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { create } from "zustand";
 import type { Recipe } from "../types/Recipe";
+import type { CreateCommentData } from "../types/Comment";
 
 // Types for creating recipes
 interface RecipeState {
@@ -11,12 +12,14 @@ interface RecipeState {
   isLoadingNote: boolean;
   isLoadingFavorite: boolean;
   isLoadingComments: boolean;
+  isSavingComment: boolean;
   getRecipeError: string | null;
   createRecipeError: string | null;
   rateRecipeError: string | null;
   noteError: string | null;
   favoriteRecipeError: string | null;
   commentsError: string | null;
+  createCommentError: string | null;
 }
 
 // Types of recipe actions
@@ -31,12 +34,17 @@ interface RecipeActions {
   addFavoriteRecipe: (recipeId: string) => Promise<void>;
   removeFavoriteRecipe: (recipeId: string) => Promise<void>;
   getRecipeComments: (recipeSlug: string, page?: number) => Promise<void>;
+  createComment: (
+    recipeSlug: string,
+    comment: CreateCommentData,
+  ) => Promise<void>;
   clearGetRecipeError: () => void;
   clearCreateRecipeError: () => void;
   clearRateRecipeError: () => void;
   clearNoteError: () => void;
   clearFavoriteRecipeError: () => void;
   clearCommentsError: () => void;
+  clearCreateCommentError: () => void;
 }
 
 // Combine recipe state and actions
@@ -51,16 +59,18 @@ const initialRecipeState: RecipeState = {
   isLoadingNote: false,
   isLoadingFavorite: false,
   isLoadingComments: false,
+  isSavingComment: false,
   getRecipeError: null,
   createRecipeError: null,
   rateRecipeError: null,
   noteError: null,
   favoriteRecipeError: null,
   commentsError: null,
+  createCommentError: null,
 };
 
 // Create the recipe store
-export const useRecipeStore = create<RecipeStore>((set) => ({
+export const useRecipeStore = create<RecipeStore>((set, get) => ({
   // Initial state
   ...initialRecipeState,
 
@@ -418,6 +428,43 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
     }
   },
 
+  // Create a new comment for a recipe
+  createComment: async (recipeSlug, comment) => {
+    set({ createCommentError: null, isSavingComment: true });
+
+    try {
+      const response = await axios.post(
+        `/api/v1/recipes/${recipeSlug}/comments`,
+        comment,
+      );
+
+      // Refresh page 1 so the new comment appears at the top
+      await get().getRecipeComments(recipeSlug, 1);
+
+      set({
+        createCommentError: null,
+        isSavingComment: false,
+      });
+
+      return response.data.comment;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        set({
+          createCommentError:
+            error.response?.data?.message || "Failed to create comment",
+          isSavingComment: false,
+        });
+      } else {
+        set({
+          createCommentError: "Unable to create comment. Please try again",
+          isSavingComment: false,
+        });
+      }
+
+      throw error;
+    }
+  },
+
   // Clear the get recipe error
   clearGetRecipeError: () => set({ getRecipeError: null }),
 
@@ -435,4 +482,7 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
 
   // Clear the comments error
   clearCommentsError: () => set({ commentsError: null }),
+
+  // Clear the create comment error
+  clearCreateCommentError: () => set({ createCommentError: null }),
 }));
